@@ -1,0 +1,11 @@
+.env
+.venv/
+vendor/
+data/
+runs/*
+!runs/.gitkeep
+logs/*
+!logs/.gitkeep
+evaluation/*
+!evaluation/.gitkeep
+__pycache__/

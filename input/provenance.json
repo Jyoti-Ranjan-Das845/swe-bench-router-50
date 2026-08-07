@@ -1,0 +1,13 @@
+{
+  "source_parquet": "data/SWE-bench_Lite/data/test-00000-of-00001.parquet",
+  "source_parquet_sha256": "f46f2e3f003f2552932393da4b223e1e0456a2c71eba8b73ae58f29646c1278b",
+  "selected_ids_sha256": "10e7f19f4459f114ca498295806c3451fc932ccca48368f5ab9e10f0f4e21afd",
+  "selected_instance_count": 50,
+  "split": "test",
+  "mini_swe_agent_commit": "a83fcae82d2a08f0ee0c688f9d137b3566c097f8",
+  "model_order": [
+    "z-ai/glm-5.2",
+    "deepseek/deepseek-v4-flash",
+    "anthropic/claude-opus-5"
+  ]
+}

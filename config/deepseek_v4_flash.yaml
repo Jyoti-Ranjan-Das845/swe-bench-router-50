@@ -1,0 +1,4 @@
+model:
+  model_name: "deepseek/deepseek-v4-flash"
+environment:
+  pull_timeout: 900

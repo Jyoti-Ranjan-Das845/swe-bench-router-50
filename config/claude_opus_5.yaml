@@ -1,0 +1,4 @@
+model:
+  model_name: "anthropic/claude-opus-5"
+environment:
+  pull_timeout: 900

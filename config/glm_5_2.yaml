@@ -1,0 +1,4 @@
+model:
+  model_name: "z-ai/glm-5.2"
+environment:
+  pull_timeout: 900
