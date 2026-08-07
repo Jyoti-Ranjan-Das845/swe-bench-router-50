@@ -1,7 +1,12 @@
 .env
 .venv/
 vendor/
-data/
+data/*
+!data/SWE-bench_Lite/
+data/SWE-bench_Lite/*
+!data/SWE-bench_Lite/data/
+data/SWE-bench_Lite/data/*
+!data/SWE-bench_Lite/data/test-00000-of-00001.parquet
 runs/*
 !runs/.gitkeep
 logs/*

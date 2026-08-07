@@ -19,6 +19,9 @@ uv pip install --python "${root}/.venv/bin/python" -e "${mini_dir}"
 
 "${root}/.venv/bin/hf" download princeton-nlp/SWE-bench_Lite \
   --repo-type dataset \
+  --include "data/dev-00000-of-00001.parquet" \
+  --include "README.md" \
+  --include ".gitattributes" \
   --local-dir "${root}/data/SWE-bench_Lite"
 
 echo "Setup complete. Add OPENROUTER_API_KEY to ${root}/.env, then run scripts/preflight.sh."

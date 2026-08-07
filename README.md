@@ -53,7 +53,9 @@ cp .env.example .env
 ```
 
 `setup.sh` clones mini-SWE-agent at the exact recorded commit, creates a
-local virtual environment, and downloads the SWE-bench Lite dataset locally.
+local virtual environment, and downloads the Lite development split locally.
+The exact pinned Lite **test** Parquet used by this experiment is committed in
+this repository at `data/SWE-bench_Lite/data/test-00000-of-00001.parquet`.
 It makes no model request.
 
 ## Run
