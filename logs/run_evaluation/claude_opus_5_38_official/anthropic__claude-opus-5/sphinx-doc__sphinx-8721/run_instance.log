@@ -1,0 +1,73 @@
+2026-08-07 23:54:06,671 - INFO - Creating container for sphinx-doc__sphinx-8721...
+2026-08-07 23:54:06,693 - INFO - Container for sphinx-doc__sphinx-8721 created: e281e5ef9843109fdeac3ae3ca4591863cee1e7831f37ed61fdbd7335e703eb8
+2026-08-07 23:54:06,759 - INFO - Container for sphinx-doc__sphinx-8721 started: e281e5ef9843109fdeac3ae3ca4591863cee1e7831f37ed61fdbd7335e703eb8
+2026-08-07 23:54:06,759 - INFO - Intermediate patch for sphinx-doc__sphinx-8721 written to logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/sphinx-doc__sphinx-8721/patch.diff, now applying to container...
+2026-08-07 23:54:06,885 - INFO - >>>>> Applied Patch:
+Checking patch CHANGES...
+Checking patch sphinx/ext/viewcode.py...
+Applied patch CHANGES cleanly.
+Applied patch sphinx/ext/viewcode.py cleanly.
+
+2026-08-07 23:54:07,078 - INFO - Git diff before:
+diff --git a/CHANGES b/CHANGES
+index bc9dfa335..e0b2bd522 100644
+--- a/CHANGES
++++ b/CHANGES
+@@ -72,6 +72,7 @@ Bugs fixed
+ * #8683: :confval:`html_last_updated_fmt` generates wrong time zone for %Z
+ * #1112: ``download`` role creates duplicated copies when relative path is
+   specified
++* #8706: viewcode: module pages are generated for epub on incremental build
+ 
+ Testing
+ --------
+diff --git a/sphinx/ext/viewcode.py b/sphinx/ext/viewcode.py
+index a7d52a91c..c2bcee4f5 100644
+--- a/sphinx/ext/viewcode.py
++++ b/sphinx/ext/viewcode.py
+@@ -182,6 +182,10 @@ def collect_pages(app: Sphinx) -> Generator[Tuple[str, Dict[str, Any], str], Non
+     env = app.builder.env
+     if not hasattr(env, '_viewcode_modules'):
+         return
++    if app.builder.name == "singlehtml":
++        return
++    if app.builder.name.startswith("epub") and not env.config.viewcode_enable_epub:
++        return
+     highlighter = app.builder.highlighter  # type: ignore
+     urito = app.builder.get_relative_uri
+2026-08-07 23:54:07,078 - INFO - Eval script for sphinx-doc__sphinx-8721 written to logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/sphinx-doc__sphinx-8721/eval.sh; copying to container...
+2026-08-07 23:54:11,877 - INFO - Test runtime: 4.75 seconds
+2026-08-07 23:54:11,879 - INFO - Test output for sphinx-doc__sphinx-8721 written to logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/sphinx-doc__sphinx-8721/test_output.txt
+2026-08-07 23:54:11,956 - INFO - Git diff after:
+diff --git a/CHANGES b/CHANGES
+index bc9dfa335..e0b2bd522 100644
+--- a/CHANGES
++++ b/CHANGES
+@@ -72,6 +72,7 @@ Bugs fixed
+ * #8683: :confval:`html_last_updated_fmt` generates wrong time zone for %Z
+ * #1112: ``download`` role creates duplicated copies when relative path is
+   specified
++* #8706: viewcode: module pages are generated for epub on incremental build
+ 
+ Testing
+ --------
+diff --git a/sphinx/ext/viewcode.py b/sphinx/ext/viewcode.py
+index a7d52a91c..c2bcee4f5 100644
+--- a/sphinx/ext/viewcode.py
++++ b/sphinx/ext/viewcode.py
+@@ -182,6 +182,10 @@ def collect_pages(app: Sphinx) -> Generator[Tuple[str, Dict[str, Any], str], Non
+     env = app.builder.env
+     if not hasattr(env, '_viewcode_modules'):
+         return
++    if app.builder.name == "singlehtml":
++        return
++    if app.builder.name.startswith("epub") and not env.config.viewcode_enable_epub:
++        return
+     highlighter = app.builder.highlighter  # type: ignore
+     urito = app.builder.get_relative_uri
+2026-08-07 23:54:11,956 - INFO - Grading answer for sphinx-doc__sphinx-8721...
+2026-08-07 23:54:11,958 - INFO - report: {'sphinx-doc__sphinx-8721': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['tests/test_ext_viewcode.py::test_viewcode_epub_default'], 'failure': []}, 'PASS_TO_PASS': {'success': ['tests/test_ext_viewcode.py::test_viewcode_epub_enabled', 'tests/test_ext_viewcode.py::test_linkcode', 'tests/test_ext_viewcode.py::test_local_source_files'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sphinx-doc__sphinx-8721: resolved: True
+2026-08-07 23:54:11,958 - INFO - Attempting to stop container sweb.eval.sphinx-doc__sphinx-8721.claude_opus_5_38_official...
+2026-08-07 23:54:27,064 - INFO - Attempting to remove container sweb.eval.sphinx-doc__sphinx-8721.claude_opus_5_38_official...
+2026-08-07 23:54:27,079 - INFO - Container sweb.eval.sphinx-doc__sphinx-8721.claude_opus_5_38_official removed.

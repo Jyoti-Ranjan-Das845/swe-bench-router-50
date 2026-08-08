@@ -1,0 +1,1074 @@
+{
+  "info": {
+    "model_stats": {
+      "instance_cost": 0.17275025,
+      "api_calls": 9
+    },
+    "config": {
+      "agent": {
+        "system_template": "You are a helpful assistant that can interact with a computer shell to solve programming tasks.\n",
+        "instance_template": "<pr_description>\nConsider the following PR description:\n{{task}}\n</pr_description>\n\n<instructions>\n# Task Instructions\n\n## Overview\n\nYou're a software engineer interacting continuously with a computer by submitting commands.\nYou'll be helping implement necessary changes to meet requirements in the PR description.\nYour task is specifically to make changes to non-test files in the current directory in order to fix the issue described in the PR description in a way that is general and consistent with the codebase.\n<IMPORTANT>This is an interactive process where you will think and issue AT LEAST ONE command, see the result, then think and issue your next command(s).</important>\n\nFor each response:\n\n1. Include a THOUGHT section explaining your reasoning and what you're trying to accomplish\n2. Provide one or more bash tool calls to execute\n\n## Important Boundaries\n\n- MODIFY: Regular source code files in /testbed (this is the working directory for all your subsequent commands)\n- DO NOT MODIFY: Tests, configuration files (pyproject.toml, setup.cfg, etc.)\n\n## Recommended Workflow\n\n1. Analyze the codebase by finding and reading relevant files\n2. Create a script to reproduce the issue\n3. Edit the source code to resolve the issue\n4. Verify your fix works by running your script again\n5. Test edge cases to ensure your fix is robust\n\n## Command Execution Rules\n\nYou are operating in an environment where\n\n1. You issue at least one command\n2. The system executes the command(s) in a subshell\n3. You see the result(s)\n4. You write your next command(s)\n\nEach response should include:\n\n1. **Reasoning text** where you explain your analysis and plan\n2. At least one tool call with your command\n\n**CRITICAL REQUIREMENTS:**\n\n- Your response SHOULD include reasoning text explaining what you're doing\n- Your response MUST include AT LEAST ONE bash tool call. You can make MULTIPLE tool calls in a single response when the commands are independent (e.g., searching multiple files, reading different parts of the codebase).\n- Directory or environment variable changes are not persistent. Every action is executed in a new subshell.\n- However, you can prefix any action with `MY_ENV_VAR=MY_VALUE cd /path/to/working/dir && ...` or write/load environment variables from files\n\nExample of a CORRECT response:\n<example_response>\nI need to understand the Builder-related code. Let me find relevant files and check the project structure.\n\n[Makes multiple bash tool calls: {\"command\": \"ls -la\"}, {\"command\": \"find src -name '*.java' | grep -i builder\"}, {\"command\": \"cat README.md | head -50\"}]\n</example_response>\n\n## Environment Details\n\n- You have a full Linux shell environment\n- Always use non-interactive flags (-y, -f) for commands\n- Avoid interactive tools like vi, nano, or any that require user input\n- You can use bash commands or invoke any tool that is available in the environment\n- You can also create new tools or scripts to help you with the task\n- If a tool isn't available, you can also install it\n\n## Submission\n\nWhen you've completed your work, you MUST submit your changes as a git patch.\nFollow these steps IN ORDER, with SEPARATE commands:\n\nStep 1: Create the patch file\nRun `git diff -- path/to/file1 path/to/file2 > patch.txt` listing only the source files you modified.\nDo NOT commit your changes.\n\n<IMPORTANT>\nThe patch must only contain changes to the specific source files you modified to fix the issue.\nDo not submit file creations or changes to any of the following files:\n\n- test and reproduction files\n- helper scripts, tests, or tools that you created\n- installation, build, packaging, configuration, or setup scripts unless they are directly part of the issue you were fixing (you can assume that the environment is already set up for your client)\n- binary or compiled files\n</IMPORTANT>\n\nStep 2: Verify your patch\nInspect patch.txt to confirm it only contains your intended changes and headers show `--- a/` and `+++ b/` paths.\n\nStep 3: Submit (EXACT command required)\nYou MUST use this EXACT command to submit:\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\n```\n\nIf the command fails (nonzero exit status), it will not submit.\n\n<CRITICAL>\n- Creating/viewing the patch and submitting it MUST be separate commands (not combined with &&).\n- If you modify patch.txt after verifying, you SHOULD verify again before submitting.\n- You CANNOT continue working (reading, editing, testing) in any way on this task after submitting.\n</CRITICAL>\n</instructions>\n",
+        "step_limit": 250,
+        "cost_limit": 3.0,
+        "wall_time_limit_seconds": 0,
+        "max_consecutive_format_errors": 3,
+        "output_path": null
+      },
+      "agent_type": "minisweagent.run.benchmarks.utils.common.ProgressTrackingAgent",
+      "model": {
+        "model_name": "anthropic/claude-opus-5",
+        "model_kwargs": {
+          "drop_params": true,
+          "parallel_tool_calls": true
+        },
+        "set_cache_control": "default_end",
+        "cost_tracking": "default",
+        "format_error_template": "{% if finish_reason is defined and (finish_reason == \"length\" or (finish_reason == \"tool_calls\" and not has_tool_calls)) -%}\nYour previous response reached the output token limit (finish_reason={{ finish_reason }}) before you produced a tool call, so it was cut off. Respond more concisely and finish with exactly one bash tool call. If you need to think more, do so briefly.\n{%- else -%}\nTool call error:\n\n<error>\n{{error}}\n</error>\n\nHere is general guidance on how to submit correct toolcalls:\n\nEvery response needs to use the 'bash' tool at least once to execute commands.\n\nCall the bash tool with your command as the argument:\n- Tool: bash\n- Arguments: {\"command\": \"your_command_here\"}\n\nIf you have completed your assignment, please consult the first message about how to\nsubmit your solution (you will not be able to continue working on this task after that).\n{%- endif %}\n",
+        "observation_template": "{% if output.exception_info -%}\n<exception>{{output.exception_info}}</exception>\n{% endif -%}\n<returncode>{{output.returncode}}</returncode>\n{% if output.output | length < 10000 -%}\n<output>\n{{ output.output -}}\n</output>\n{%- else -%}\n<warning>\nThe output of your last command was too long.\nPlease try a different command that produces less output.\nIf you're looking at a file you can try use head, tail or sed to view a smaller number of lines selectively.\nIf you're using grep or find and it produced too much output, you can use a more selective search pattern.\nIf you really need to see something from the full command's output, you can redirect output to a file and then search in that file.\n</warning>\n{%- set elided_chars = output.output | length - 10000 -%}\n<output_head>\n{{ output.output[:5000] }}\n</output_head>\n<elided_chars>\n{{ elided_chars }} characters elided\n</elided_chars>\n<output_tail>\n{{ output.output[-5000:] }}\n</output_tail>\n{%- endif -%}\n",
+        "multimodal_regex": ""
+      },
+      "model_type": "minisweagent.models.openrouter_model.OpenRouterModel",
+      "environment": {
+        "image": "docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-23913:latest",
+        "cwd": "/testbed",
+        "env": {
+          "PAGER": "cat",
+          "MANPAGER": "cat",
+          "LESS": "-R",
+          "PIP_PROGRESS_BAR": "off",
+          "TQDM_DISABLE": "1",
+          "BASH_ENV": "/root/.bashrc"
+        },
+        "forward_env": [],
+        "timeout": 60,
+        "executable": "docker",
+        "run_args": [
+          "--rm"
+        ],
+        "container_timeout": "2h",
+        "pull_timeout": 900,
+        "interpreter": [
+          "bash",
+          "-c"
+        ]
+      },
+      "environment_type": "minisweagent.environments.docker.DockerEnvironment"
+    },
+    "mini_version": "2.4.6",
+    "exit_status": "Submitted",
+    "submission": "diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py\nindex 9e5b903d59..20d4a76e0d 100644\n--- a/lib/matplotlib/legend.py\n+++ b/lib/matplotlib/legend.py\n@@ -286,6 +286,9 @@ handler_map : dict or None\n     The custom dictionary mapping instances or types to a legend\n     handler. This *handler_map* updates the default handler map\n     found at `matplotlib.legend.Legend.get_legend_handler_map`.\n+\n+draggable : bool, default: False\n+    Whether the legend can be dragged with the mouse.\n \"\"\")\n \n \n@@ -342,7 +345,8 @@ class Legend(Artist):\n         title_fontproperties=None,  # properties for the legend title\n         alignment=\"center\",       # control the alignment within the legend box\n         *,\n-        ncol=1  # synonym for ncols (backward compatibility)\n+        ncol=1,  # synonym for ncols (backward compatibility)\n+        draggable=False  # whether the legend can be dragged with the mouse\n     ):\n         \"\"\"\n         Parameters\n@@ -537,7 +541,9 @@ class Legend(Artist):\n             title_prop_fp.set_size(title_fontsize)\n \n         self.set_title(title, prop=title_prop_fp)\n+\n         self._draggable = None\n+        self.set_draggable(state=draggable)\n \n         # set the text color\n \n"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant that can interact with a computer shell to solve programming tasks."
+    },
+    {
+      "role": "user",
+      "content": "<pr_description>\nConsider the following PR description:\nlegend draggable as keyword\n<!--To help us understand and resolve your issue, please fill out the form to the best of your ability.-->\r\n<!--You can feel free to delete the sections that do not apply.-->\r\n\r\n### Feature request\r\n\r\n**There is not keyword to make legend draggable at creation**\r\n\r\n<!--A short 1-2 sentences that succinctly describes the bug-->\r\n\r\nIs there a code reason why one can not add a \"draggable=True\" keyword to the __init__ function for Legend?  This would be more handy than having to call it after legend creation.  And, naively, it would seem simple to do.  But maybe there is a reason why it would not work?\n\n</pr_description>\n\n<instructions>\n# Task Instructions\n\n## Overview\n\nYou're a software engineer interacting continuously with a computer by submitting commands.\nYou'll be helping implement necessary changes to meet requirements in the PR description.\nYour task is specifically to make changes to non-test files in the current directory in order to fix the issue described in the PR description in a way that is general and consistent with the codebase.\n<IMPORTANT>This is an interactive process where you will think and issue AT LEAST ONE command, see the result, then think and issue your next command(s).</important>\n\nFor each response:\n\n1. Include a THOUGHT section explaining your reasoning and what you're trying to accomplish\n2. Provide one or more bash tool calls to execute\n\n## Important Boundaries\n\n- MODIFY: Regular source code files in /testbed (this is the working directory for all your subsequent commands)\n- DO NOT MODIFY: Tests, configuration files (pyproject.toml, setup.cfg, etc.)\n\n## Recommended Workflow\n\n1. Analyze the codebase by finding and reading relevant files\n2. Create a script to reproduce the issue\n3. Edit the source code to resolve the issue\n4. Verify your fix works by running your script again\n5. Test edge cases to ensure your fix is robust\n\n## Command Execution Rules\n\nYou are operating in an environment where\n\n1. You issue at least one command\n2. The system executes the command(s) in a subshell\n3. You see the result(s)\n4. You write your next command(s)\n\nEach response should include:\n\n1. **Reasoning text** where you explain your analysis and plan\n2. At least one tool call with your command\n\n**CRITICAL REQUIREMENTS:**\n\n- Your response SHOULD include reasoning text explaining what you're doing\n- Your response MUST include AT LEAST ONE bash tool call. You can make MULTIPLE tool calls in a single response when the commands are independent (e.g., searching multiple files, reading different parts of the codebase).\n- Directory or environment variable changes are not persistent. Every action is executed in a new subshell.\n- However, you can prefix any action with `MY_ENV_VAR=MY_VALUE cd /path/to/working/dir && ...` or write/load environment variables from files\n\nExample of a CORRECT response:\n<example_response>\nI need to understand the Builder-related code. Let me find relevant files and check the project structure.\n\n[Makes multiple bash tool calls: {\"command\": \"ls -la\"}, {\"command\": \"find src -name '*.java' | grep -i builder\"}, {\"command\": \"cat README.md | head -50\"}]\n</example_response>\n\n## Environment Details\n\n- You have a full Linux shell environment\n- Always use non-interactive flags (-y, -f) for commands\n- Avoid interactive tools like vi, nano, or any that require user input\n- You can use bash commands or invoke any tool that is available in the environment\n- You can also create new tools or scripts to help you with the task\n- If a tool isn't available, you can also install it\n\n## Submission\n\nWhen you've completed your work, you MUST submit your changes as a git patch.\nFollow these steps IN ORDER, with SEPARATE commands:\n\nStep 1: Create the patch file\nRun `git diff -- path/to/file1 path/to/file2 > patch.txt` listing only the source files you modified.\nDo NOT commit your changes.\n\n<IMPORTANT>\nThe patch must only contain changes to the specific source files you modified to fix the issue.\nDo not submit file creations or changes to any of the following files:\n\n- test and reproduction files\n- helper scripts, tests, or tools that you created\n- installation, build, packaging, configuration, or setup scripts unless they are directly part of the issue you were fixing (you can assume that the environment is already set up for your client)\n- binary or compiled files\n</IMPORTANT>\n\nStep 2: Verify your patch\nInspect patch.txt to confirm it only contains your intended changes and headers show `--- a/` and `+++ b/` paths.\n\nStep 3: Submit (EXACT command required)\nYou MUST use this EXACT command to submit:\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\n```\n\nIf the command fails (nonzero exit status), it will not submit.\n\n<CRITICAL>\n- Creating/viewing the patch and submitting it MUST be separate commands (not combined with &&).\n- If you modify patch.txt after verifying, you SHOULD verify again before submitting.\n- You CANNOT continue working (reading, editing, testing) in any way on this task after submitting.\n</CRITICAL>\n</instructions>"
+    },
+    {
+      "role": "assistant",
+      "content": "I'll start by exploring the legend code.",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_018GU8q1arZr6x7k9pnSmHgN",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && grep -n \\\"draggable\\\" lib/matplotlib/legend.py | head -50\"}"
+          }
+        },
+        {
+          "type": "function",
+          "index": 1,
+          "id": "toolu_01HZMGvZAzseJcsQWMBSzNJG",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && sed -n 300,450p lib/matplotlib/legend.py\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && grep -n \"draggable\" lib/matplotlib/legend.py | head -50",
+            "tool_call_id": "toolu_018GU8q1arZr6x7k9pnSmHgN"
+          },
+          {
+            "command": "cd /testbed && sed -n 300,450p lib/matplotlib/legend.py",
+            "tool_call_id": "toolu_01HZMGvZAzseJcsQWMBSzNJG"
+          }
+        ],
+        "response": {
+          "id": "gen-1786148069-MNZCZta0xjRUsWJyAfyJ",
+          "object": "chat.completion",
+          "created": 1786148069,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "I'll start by exploring the legend code.",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_018GU8q1arZr6x7k9pnSmHgN",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && grep -n \\\"draggable\\\" lib/matplotlib/legend.py | head -50\"}"
+                    }
+                  },
+                  {
+                    "type": "function",
+                    "index": 1,
+                    "id": "toolu_01HZMGvZAzseJcsQWMBSzNJG",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && sed -n 300,450p lib/matplotlib/legend.py\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 2142,
+            "completion_tokens": 163,
+            "total_tokens": 2305,
+            "cost": 0.01746,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 2140,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.01746,
+              "upstream_inference_prompt_cost": 0.013385,
+              "upstream_inference_completions_cost": 0.004075
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.01746,
+        "timestamp": 1786148072.241835
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n540:        self._draggable = None\n1079:    def set_draggable(self, state, use_blit=False, update='loc'):\n1103:            if self._draggable is None:\n1104:                self._draggable = DraggableLegend(self,\n1108:            if self._draggable is not None:\n1109:                self._draggable.disconnect()\n1110:            self._draggable = None\n1111:        return self._draggable\n1113:    def get_draggable(self):\n1114:        \"\"\"Return ``True`` if the legend is draggable, ``False`` otherwise.\"\"\"\n1115:        return self._draggable is not None\n</output>",
+      "extra": {
+        "raw_output": "540:        self._draggable = None\n1079:    def set_draggable(self, state, use_blit=False, update='loc'):\n1103:            if self._draggable is None:\n1104:                self._draggable = DraggableLegend(self,\n1108:            if self._draggable is not None:\n1109:                self._draggable.disconnect()\n1110:            self._draggable = None\n1111:        return self._draggable\n1113:    def get_draggable(self):\n1114:        \"\"\"Return ``True`` if the legend is draggable, ``False`` otherwise.\"\"\"\n1115:        return self._draggable is not None\n",
+        "returncode": 0,
+        "timestamp": 1786148072.782113,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_018GU8q1arZr6x7k9pnSmHgN",
+      "role": "tool"
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n\n    def __str__(self):\n        return \"Legend\"\n\n    @_api.make_keyword_only(\"3.6\", \"loc\")\n    @_docstring.dedent_interpd\n    def __init__(\n        self, parent, handles, labels,\n        loc=None,\n        numpoints=None,      # number of points in the legend line\n        markerscale=None,    # relative size of legend markers vs. original\n        markerfirst=True,    # left/right ordering of legend marker and label\n        scatterpoints=None,  # number of scatter points\n        scatteryoffsets=None,\n        prop=None,           # properties for the legend texts\n        fontsize=None,       # keyword to set font size directly\n        labelcolor=None,     # keyword to set the text color\n\n        # spacing & pad defined as a fraction of the font-size\n        borderpad=None,      # whitespace inside the legend border\n        labelspacing=None,   # vertical space between the legend entries\n        handlelength=None,   # length of the legend handles\n        handleheight=None,   # height of the legend handles\n        handletextpad=None,  # pad between the legend handle and text\n        borderaxespad=None,  # pad between the axes and legend border\n        columnspacing=None,  # spacing between columns\n\n        ncols=1,     # number of columns\n        mode=None,  # horizontal distribution of columns: None or \"expand\"\n\n        fancybox=None,  # True: fancy box, False: rounded box, None: rcParam\n        shadow=None,\n        title=None,           # legend title\n        title_fontsize=None,  # legend title font size\n        framealpha=None,      # set frame alpha\n        edgecolor=None,       # frame patch edgecolor\n        facecolor=None,       # frame patch facecolor\n\n        bbox_to_anchor=None,  # bbox to which the legend will be anchored\n        bbox_transform=None,  # transform for the bbox\n        frameon=None,         # draw frame\n        handler_map=None,\n        title_fontproperties=None,  # properties for the legend title\n        alignment=\"center\",       # control the alignment within the legend box\n        *,\n        ncol=1  # synonym for ncols (backward compatibility)\n    ):\n        \"\"\"\n        Parameters\n        ----------\n        parent : `~matplotlib.axes.Axes` or `.Figure`\n            The artist that contains the legend.\n\n        handles : list of `.Artist`\n            A list of Artists (lines, patches) to be added to the legend.\n\n        labels : list of str\n            A list of labels to show next to the artists. The length of handles\n            and labels should be the same. If they are not, they are truncated\n            to the smaller of both lengths.\n\n        Other Parameters\n        ----------------\n        %(_legend_kw_doc)s\n\n        Notes\n        -----\n        Users can specify any arbitrary location for the legend using the\n        *bbox_to_anchor* keyword argument. *bbox_to_anchor* can be a\n        `.BboxBase` (or derived there from) or a tuple of 2 or 4 floats.\n        See `set_bbox_to_anchor` for more detail.\n\n        The legend location can be specified by setting *loc* with a tuple of\n        2 floats, which is interpreted as the lower-left corner of the legend\n        in the normalized axes coordinate.\n        \"\"\"\n        # local import only to avoid circularity\n        from matplotlib.axes import Axes\n        from matplotlib.figure import FigureBase\n\n        super().__init__()\n\n        if prop is None:\n            if fontsize is not None:\n                self.prop = FontProperties(size=fontsize)\n            else:\n                self.prop = FontProperties(\n                    size=mpl.rcParams[\"legend.fontsize\"])\n        else:\n            self.prop = FontProperties._from_any(prop)\n            if isinstance(prop, dict) and \"size\" not in prop:\n                self.prop.set_size(mpl.rcParams[\"legend.fontsize\"])\n\n        self._fontsize = self.prop.get_size_in_points()\n\n        self.texts = []\n        self.legendHandles = []\n        self._legend_title_box = None\n\n        #: A dictionary with the extra handler mappings for this Legend\n        #: instance.\n        self._custom_handler_map = handler_map\n\n        def val_or_rc(val, rc_name):\n            return val if val is not None else mpl.rcParams[rc_name]\n\n        self.numpoints = val_or_rc(numpoints, 'legend.numpoints')\n        self.markerscale = val_or_rc(markerscale, 'legend.markerscale')\n        self.scatterpoints = val_or_rc(scatterpoints, 'legend.scatterpoints')\n        self.borderpad = val_or_rc(borderpad, 'legend.borderpad')\n        self.labelspacing = val_or_rc(labelspacing, 'legend.labelspacing')\n        self.handlelength = val_or_rc(handlelength, 'legend.handlelength')\n        self.handleheight = val_or_rc(handleheight, 'legend.handleheight')\n        self.handletextpad = val_or_rc(handletextpad, 'legend.handletextpad')\n        self.borderaxespad = val_or_rc(borderaxespad, 'legend.borderaxespad')\n        self.columnspacing = val_or_rc(columnspacing, 'legend.columnspacing')\n        self.shadow = val_or_rc(shadow, 'legend.shadow')\n        # trim handles and labels if illegal label...\n        _lab, _hand = [], []\n        for label, handle in zip(labels, handles):\n            if isinstance(label, str) and label.startswith('_'):\n                _api.warn_external(f\"The label {label!r} of {handle!r} starts \"\n                                   \"with '_'. It is thus excluded from the \"\n                                   \"legend.\")\n            else:\n                _lab.append(label)\n                _hand.append(handle)\n        labels, handles = _lab, _hand\n\n        handles = list(handles)\n        if len(handles) < 2:\n            ncols = 1\n        self._ncols = ncols if ncols != 1 else ncol\n\n        if self.numpoints <= 0:\n            raise ValueError(\"numpoints must be > 0; it was %d\" % numpoints)\n\n        # introduce y-offset for handles of the scatter plot\n        if scatteryoffsets is None:\n            self._scatteryoffsets = np.array([3. / 8., 4. / 8., 2.5 / 8.])\n        else:\n            self._scatteryoffsets = np.asarray(scatteryoffsets)\n        reps = self.scatterpoints // len(self._scatteryoffsets) + 1\n        self._scatteryoffsets = np.tile(self._scatteryoffsets,\n                                        reps)[:self.scatterpoints]\n\n        # _legend_box is a VPacker instance that contains all\n        # legend items and will be initialized from _init_legend_box()\n        # method.\n        self._legend_box = None\n\n</output>",
+      "extra": {
+        "raw_output": "\n    def __str__(self):\n        return \"Legend\"\n\n    @_api.make_keyword_only(\"3.6\", \"loc\")\n    @_docstring.dedent_interpd\n    def __init__(\n        self, parent, handles, labels,\n        loc=None,\n        numpoints=None,      # number of points in the legend line\n        markerscale=None,    # relative size of legend markers vs. original\n        markerfirst=True,    # left/right ordering of legend marker and label\n        scatterpoints=None,  # number of scatter points\n        scatteryoffsets=None,\n        prop=None,           # properties for the legend texts\n        fontsize=None,       # keyword to set font size directly\n        labelcolor=None,     # keyword to set the text color\n\n        # spacing & pad defined as a fraction of the font-size\n        borderpad=None,      # whitespace inside the legend border\n        labelspacing=None,   # vertical space between the legend entries\n        handlelength=None,   # length of the legend handles\n        handleheight=None,   # height of the legend handles\n        handletextpad=None,  # pad between the legend handle and text\n        borderaxespad=None,  # pad between the axes and legend border\n        columnspacing=None,  # spacing between columns\n\n        ncols=1,     # number of columns\n        mode=None,  # horizontal distribution of columns: None or \"expand\"\n\n        fancybox=None,  # True: fancy box, False: rounded box, None: rcParam\n        shadow=None,\n        title=None,           # legend title\n        title_fontsize=None,  # legend title font size\n        framealpha=None,      # set frame alpha\n        edgecolor=None,       # frame patch edgecolor\n        facecolor=None,       # frame patch facecolor\n\n        bbox_to_anchor=None,  # bbox to which the legend will be anchored\n        bbox_transform=None,  # transform for the bbox\n        frameon=None,         # draw frame\n        handler_map=None,\n        title_fontproperties=None,  # properties for the legend title\n        alignment=\"center\",       # control the alignment within the legend box\n        *,\n        ncol=1  # synonym for ncols (backward compatibility)\n    ):\n        \"\"\"\n        Parameters\n        ----------\n        parent : `~matplotlib.axes.Axes` or `.Figure`\n            The artist that contains the legend.\n\n        handles : list of `.Artist`\n            A list of Artists (lines, patches) to be added to the legend.\n\n        labels : list of str\n            A list of labels to show next to the artists. The length of handles\n            and labels should be the same. If they are not, they are truncated\n            to the smaller of both lengths.\n\n        Other Parameters\n        ----------------\n        %(_legend_kw_doc)s\n\n        Notes\n        -----\n        Users can specify any arbitrary location for the legend using the\n        *bbox_to_anchor* keyword argument. *bbox_to_anchor* can be a\n        `.BboxBase` (or derived there from) or a tuple of 2 or 4 floats.\n        See `set_bbox_to_anchor` for more detail.\n\n        The legend location can be specified by setting *loc* with a tuple of\n        2 floats, which is interpreted as the lower-left corner of the legend\n        in the normalized axes coordinate.\n        \"\"\"\n        # local import only to avoid circularity\n        from matplotlib.axes import Axes\n        from matplotlib.figure import FigureBase\n\n        super().__init__()\n\n        if prop is None:\n            if fontsize is not None:\n                self.prop = FontProperties(size=fontsize)\n            else:\n                self.prop = FontProperties(\n                    size=mpl.rcParams[\"legend.fontsize\"])\n        else:\n            self.prop = FontProperties._from_any(prop)\n            if isinstance(prop, dict) and \"size\" not in prop:\n                self.prop.set_size(mpl.rcParams[\"legend.fontsize\"])\n\n        self._fontsize = self.prop.get_size_in_points()\n\n        self.texts = []\n        self.legendHandles = []\n        self._legend_title_box = None\n\n        #: A dictionary with the extra handler mappings for this Legend\n        #: instance.\n        self._custom_handler_map = handler_map\n\n        def val_or_rc(val, rc_name):\n            return val if val is not None else mpl.rcParams[rc_name]\n\n        self.numpoints = val_or_rc(numpoints, 'legend.numpoints')\n        self.markerscale = val_or_rc(markerscale, 'legend.markerscale')\n        self.scatterpoints = val_or_rc(scatterpoints, 'legend.scatterpoints')\n        self.borderpad = val_or_rc(borderpad, 'legend.borderpad')\n        self.labelspacing = val_or_rc(labelspacing, 'legend.labelspacing')\n        self.handlelength = val_or_rc(handlelength, 'legend.handlelength')\n        self.handleheight = val_or_rc(handleheight, 'legend.handleheight')\n        self.handletextpad = val_or_rc(handletextpad, 'legend.handletextpad')\n        self.borderaxespad = val_or_rc(borderaxespad, 'legend.borderaxespad')\n        self.columnspacing = val_or_rc(columnspacing, 'legend.columnspacing')\n        self.shadow = val_or_rc(shadow, 'legend.shadow')\n        # trim handles and labels if illegal label...\n        _lab, _hand = [], []\n        for label, handle in zip(labels, handles):\n            if isinstance(label, str) and label.startswith('_'):\n                _api.warn_external(f\"The label {label!r} of {handle!r} starts \"\n                                   \"with '_'. It is thus excluded from the \"\n                                   \"legend.\")\n            else:\n                _lab.append(label)\n                _hand.append(handle)\n        labels, handles = _lab, _hand\n\n        handles = list(handles)\n        if len(handles) < 2:\n            ncols = 1\n        self._ncols = ncols if ncols != 1 else ncol\n\n        if self.numpoints <= 0:\n            raise ValueError(\"numpoints must be > 0; it was %d\" % numpoints)\n\n        # introduce y-offset for handles of the scatter plot\n        if scatteryoffsets is None:\n            self._scatteryoffsets = np.array([3. / 8., 4. / 8., 2.5 / 8.])\n        else:\n            self._scatteryoffsets = np.asarray(scatteryoffsets)\n        reps = self.scatterpoints // len(self._scatteryoffsets) + 1\n        self._scatteryoffsets = np.tile(self._scatteryoffsets,\n                                        reps)[:self.scatterpoints]\n\n        # _legend_box is a VPacker instance that contains all\n        # legend items and will be initialized from _init_legend_box()\n        # method.\n        self._legend_box = None\n\n",
+        "returncode": 0,
+        "timestamp": 1786148072.78435,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01HZMGvZAzseJcsQWMBSzNJG",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_0121MprijZb3N7CvX3YkpimD",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && sed -n 450,560p lib/matplotlib/legend.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "index": 1,
+          "id": "toolu_01CJcYGB7h9CxmXn7qHP7Zc8",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && sed -n 150,300p lib/matplotlib/legend.py\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && sed -n 450,560p lib/matplotlib/legend.py",
+            "tool_call_id": "toolu_0121MprijZb3N7CvX3YkpimD"
+          },
+          {
+            "command": "cd /testbed && sed -n 150,300p lib/matplotlib/legend.py",
+            "tool_call_id": "toolu_01CJcYGB7h9CxmXn7qHP7Zc8"
+          }
+        ],
+        "response": {
+          "id": "gen-1786148073-nw8qL6Qyw2k9mrhY2zBd",
+          "object": "chat.completion",
+          "created": 1786148073,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_0121MprijZb3N7CvX3YkpimD",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && sed -n 450,560p lib/matplotlib/legend.py\"}"
+                    }
+                  },
+                  {
+                    "type": "function",
+                    "index": 1,
+                    "id": "toolu_01CJcYGB7h9CxmXn7qHP7Zc8",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && sed -n 150,300p lib/matplotlib/legend.py\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 4862,
+            "completion_tokens": 145,
+            "total_tokens": 5007,
+            "cost": 0.021705,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 2140,
+              "cache_write_tokens": 2720,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.021705,
+              "upstream_inference_prompt_cost": 0.01808,
+              "upstream_inference_completions_cost": 0.003625
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.021705,
+        "timestamp": 1786148080.23023
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n\n        if isinstance(parent, Axes):\n            self.isaxes = True\n            self.axes = parent\n            self.set_figure(parent.figure)\n        elif isinstance(parent, FigureBase):\n            self.isaxes = False\n            self.set_figure(parent)\n        else:\n            raise TypeError(\n                \"Legend needs either Axes or FigureBase as parent\"\n            )\n        self.parent = parent\n\n        self._loc_used_default = loc is None\n        if loc is None:\n            loc = mpl.rcParams[\"legend.loc\"]\n            if not self.isaxes and loc in [0, 'best']:\n                loc = 'upper right'\n        if isinstance(loc, str):\n            loc = _api.check_getitem(self.codes, loc=loc)\n        if not self.isaxes and loc == 0:\n            raise ValueError(\n                \"Automatic legend placement (loc='best') not implemented for \"\n                \"figure legend\")\n\n        self._mode = mode\n        self.set_bbox_to_anchor(bbox_to_anchor, bbox_transform)\n\n        # We use FancyBboxPatch to draw a legend frame. The location\n        # and size of the box will be updated during the drawing time.\n\n        if facecolor is None:\n            facecolor = mpl.rcParams[\"legend.facecolor\"]\n        if facecolor == 'inherit':\n            facecolor = mpl.rcParams[\"axes.facecolor\"]\n\n        if edgecolor is None:\n            edgecolor = mpl.rcParams[\"legend.edgecolor\"]\n        if edgecolor == 'inherit':\n            edgecolor = mpl.rcParams[\"axes.edgecolor\"]\n\n        if fancybox is None:\n            fancybox = mpl.rcParams[\"legend.fancybox\"]\n\n        self.legendPatch = FancyBboxPatch(\n            xy=(0, 0), width=1, height=1,\n            facecolor=facecolor, edgecolor=edgecolor,\n            # If shadow is used, default to alpha=1 (#8943).\n            alpha=(framealpha if framealpha is not None\n                   else 1 if shadow\n                   else mpl.rcParams[\"legend.framealpha\"]),\n            # The width and height of the legendPatch will be set (in draw())\n            # to the length that includes the padding. Thus we set pad=0 here.\n            boxstyle=(\"round,pad=0,rounding_size=0.2\" if fancybox\n                      else \"square,pad=0\"),\n            mutation_scale=self._fontsize,\n            snap=True,\n            visible=(frameon if frameon is not None\n                     else mpl.rcParams[\"legend.frameon\"])\n        )\n        self._set_artist_props(self.legendPatch)\n\n        _api.check_in_list([\"center\", \"left\", \"right\"], alignment=alignment)\n        self._alignment = alignment\n\n        # init with null renderer\n        self._init_legend_box(handles, labels, markerfirst)\n\n        tmp = self._loc_used_default\n        self._set_loc(loc)\n        self._loc_used_default = tmp  # ignore changes done by _set_loc\n\n        # figure out title font properties:\n        if title_fontsize is not None and title_fontproperties is not None:\n            raise ValueError(\n                \"title_fontsize and title_fontproperties can't be specified \"\n                \"at the same time. Only use one of them. \")\n        title_prop_fp = FontProperties._from_any(title_fontproperties)\n        if isinstance(title_fontproperties, dict):\n            if \"size\" not in title_fontproperties:\n                title_fontsize = mpl.rcParams[\"legend.title_fontsize\"]\n                title_prop_fp.set_size(title_fontsize)\n        elif title_fontsize is not None:\n            title_prop_fp.set_size(title_fontsize)\n        elif not isinstance(title_fontproperties, FontProperties):\n            title_fontsize = mpl.rcParams[\"legend.title_fontsize\"]\n            title_prop_fp.set_size(title_fontsize)\n\n        self.set_title(title, prop=title_prop_fp)\n        self._draggable = None\n\n        # set the text color\n\n        color_getters = {  # getter function depends on line or patch\n            'linecolor':       ['get_color',           'get_facecolor'],\n            'markerfacecolor': ['get_markerfacecolor', 'get_facecolor'],\n            'mfc':             ['get_markerfacecolor', 'get_facecolor'],\n            'markeredgecolor': ['get_markeredgecolor', 'get_edgecolor'],\n            'mec':             ['get_markeredgecolor', 'get_edgecolor'],\n        }\n        if labelcolor is None:\n            if mpl.rcParams['legend.labelcolor'] is not None:\n                labelcolor = mpl.rcParams['legend.labelcolor']\n            else:\n                labelcolor = mpl.rcParams['text.color']\n        if isinstance(labelcolor, str) and labelcolor in color_getters:\n            getter_names = color_getters[labelcolor]\n            for handle, text in zip(self.legendHandles, self.texts):\n                for getter_name in getter_names:\n                    try:\n</output>",
+      "extra": {
+        "raw_output": "\n        if isinstance(parent, Axes):\n            self.isaxes = True\n            self.axes = parent\n            self.set_figure(parent.figure)\n        elif isinstance(parent, FigureBase):\n            self.isaxes = False\n            self.set_figure(parent)\n        else:\n            raise TypeError(\n                \"Legend needs either Axes or FigureBase as parent\"\n            )\n        self.parent = parent\n\n        self._loc_used_default = loc is None\n        if loc is None:\n            loc = mpl.rcParams[\"legend.loc\"]\n            if not self.isaxes and loc in [0, 'best']:\n                loc = 'upper right'\n        if isinstance(loc, str):\n            loc = _api.check_getitem(self.codes, loc=loc)\n        if not self.isaxes and loc == 0:\n            raise ValueError(\n                \"Automatic legend placement (loc='best') not implemented for \"\n                \"figure legend\")\n\n        self._mode = mode\n        self.set_bbox_to_anchor(bbox_to_anchor, bbox_transform)\n\n        # We use FancyBboxPatch to draw a legend frame. The location\n        # and size of the box will be updated during the drawing time.\n\n        if facecolor is None:\n            facecolor = mpl.rcParams[\"legend.facecolor\"]\n        if facecolor == 'inherit':\n            facecolor = mpl.rcParams[\"axes.facecolor\"]\n\n        if edgecolor is None:\n            edgecolor = mpl.rcParams[\"legend.edgecolor\"]\n        if edgecolor == 'inherit':\n            edgecolor = mpl.rcParams[\"axes.edgecolor\"]\n\n        if fancybox is None:\n            fancybox = mpl.rcParams[\"legend.fancybox\"]\n\n        self.legendPatch = FancyBboxPatch(\n            xy=(0, 0), width=1, height=1,\n            facecolor=facecolor, edgecolor=edgecolor,\n            # If shadow is used, default to alpha=1 (#8943).\n            alpha=(framealpha if framealpha is not None\n                   else 1 if shadow\n                   else mpl.rcParams[\"legend.framealpha\"]),\n            # The width and height of the legendPatch will be set (in draw())\n            # to the length that includes the padding. Thus we set pad=0 here.\n            boxstyle=(\"round,pad=0,rounding_size=0.2\" if fancybox\n                      else \"square,pad=0\"),\n            mutation_scale=self._fontsize,\n            snap=True,\n            visible=(frameon if frameon is not None\n                     else mpl.rcParams[\"legend.frameon\"])\n        )\n        self._set_artist_props(self.legendPatch)\n\n        _api.check_in_list([\"center\", \"left\", \"right\"], alignment=alignment)\n        self._alignment = alignment\n\n        # init with null renderer\n        self._init_legend_box(handles, labels, markerfirst)\n\n        tmp = self._loc_used_default\n        self._set_loc(loc)\n        self._loc_used_default = tmp  # ignore changes done by _set_loc\n\n        # figure out title font properties:\n        if title_fontsize is not None and title_fontproperties is not None:\n            raise ValueError(\n                \"title_fontsize and title_fontproperties can't be specified \"\n                \"at the same time. Only use one of them. \")\n        title_prop_fp = FontProperties._from_any(title_fontproperties)\n        if isinstance(title_fontproperties, dict):\n            if \"size\" not in title_fontproperties:\n                title_fontsize = mpl.rcParams[\"legend.title_fontsize\"]\n                title_prop_fp.set_size(title_fontsize)\n        elif title_fontsize is not None:\n            title_prop_fp.set_size(title_fontsize)\n        elif not isinstance(title_fontproperties, FontProperties):\n            title_fontsize = mpl.rcParams[\"legend.title_fontsize\"]\n            title_prop_fp.set_size(title_fontsize)\n\n        self.set_title(title, prop=title_prop_fp)\n        self._draggable = None\n\n        # set the text color\n\n        color_getters = {  # getter function depends on line or patch\n            'linecolor':       ['get_color',           'get_facecolor'],\n            'markerfacecolor': ['get_markerfacecolor', 'get_facecolor'],\n            'mfc':             ['get_markerfacecolor', 'get_facecolor'],\n            'markeredgecolor': ['get_markeredgecolor', 'get_edgecolor'],\n            'mec':             ['get_markeredgecolor', 'get_edgecolor'],\n        }\n        if labelcolor is None:\n            if mpl.rcParams['legend.labelcolor'] is not None:\n                labelcolor = mpl.rcParams['legend.labelcolor']\n            else:\n                labelcolor = mpl.rcParams['text.color']\n        if isinstance(labelcolor, str) and labelcolor in color_getters:\n            getter_names = color_getters[labelcolor]\n            for handle, text in zip(self.legendHandles, self.texts):\n                for getter_name in getter_names:\n                    try:\n",
+        "returncode": 0,
+        "timestamp": 1786148080.734059,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_0121MprijZb3N7CvX3YkpimD",
+      "role": "tool"
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n    Axes or Figure coordinates, depending on which ``legend`` is called.\n\n    If a 4-tuple or `.BboxBase` is given, then it specifies the bbox\n    ``(x, y, width, height)`` that the legend is placed in.\n    To put the legend in the best location in the bottom right\n    quadrant of the axes (or figure)::\n\n        loc='best', bbox_to_anchor=(0.5, 0., 0.5, 0.5)\n\n    A 2-tuple ``(x, y)`` places the corner of the legend specified by *loc* at\n    x, y.  For example, to put the legend's upper right-hand corner in the\n    center of the axes (or figure) the following keywords can be used::\n\n        loc='upper right', bbox_to_anchor=(0.5, 0.5)\n\nncols : int, default: 1\n    The number of columns that the legend has.\n\n    For backward compatibility, the spelling *ncol* is also supported\n    but it is discouraged. If both are given, *ncols* takes precedence.\n\nprop : None or `matplotlib.font_manager.FontProperties` or dict\n    The font properties of the legend. If None (default), the current\n    :data:`matplotlib.rcParams` will be used.\n\nfontsize : int or {'xx-small', 'x-small', 'small', 'medium', 'large', \\\n'x-large', 'xx-large'}\n    The font size of the legend. If the value is numeric the size will be the\n    absolute font size in points. String values are relative to the current\n    default font size. This argument is only used if *prop* is not specified.\n\nlabelcolor : str or list, default: :rc:`legend.labelcolor`\n    The color of the text in the legend. Either a valid color string\n    (for example, 'red'), or a list of color strings. The labelcolor can\n    also be made to match the color of the line or marker using 'linecolor',\n    'markerfacecolor' (or 'mfc'), or 'markeredgecolor' (or 'mec').\n\n    Labelcolor can be set globally using :rc:`legend.labelcolor`. If None,\n    use :rc:`text.color`.\n\nnumpoints : int, default: :rc:`legend.numpoints`\n    The number of marker points in the legend when creating a legend\n    entry for a `.Line2D` (line).\n\nscatterpoints : int, default: :rc:`legend.scatterpoints`\n    The number of marker points in the legend when creating\n    a legend entry for a `.PathCollection` (scatter plot).\n\nscatteryoffsets : iterable of floats, default: ``[0.375, 0.5, 0.3125]``\n    The vertical offset (relative to the font size) for the markers\n    created for a scatter plot legend entry. 0.0 is at the base the\n    legend text, and 1.0 is at the top. To draw all markers at the\n    same height, set to ``[0.5]``.\n\nmarkerscale : float, default: :rc:`legend.markerscale`\n    The relative size of legend markers compared with the originally\n    drawn ones.\n\nmarkerfirst : bool, default: True\n    If *True*, legend marker is placed to the left of the legend label.\n    If *False*, legend marker is placed to the right of the legend label.\n\nframeon : bool, default: :rc:`legend.frameon`\n    Whether the legend should be drawn on a patch (frame).\n\nfancybox : bool, default: :rc:`legend.fancybox`\n    Whether round edges should be enabled around the `.FancyBboxPatch` which\n    makes up the legend's background.\n\nshadow : bool, default: :rc:`legend.shadow`\n    Whether to draw a shadow behind the legend.\n\nframealpha : float, default: :rc:`legend.framealpha`\n    The alpha transparency of the legend's background.\n    If *shadow* is activated and *framealpha* is ``None``, the default value is\n    ignored.\n\nfacecolor : \"inherit\" or color, default: :rc:`legend.facecolor`\n    The legend's background color.\n    If ``\"inherit\"``, use :rc:`axes.facecolor`.\n\nedgecolor : \"inherit\" or color, default: :rc:`legend.edgecolor`\n    The legend's background patch edge color.\n    If ``\"inherit\"``, use take :rc:`axes.edgecolor`.\n\nmode : {\"expand\", None}\n    If *mode* is set to ``\"expand\"`` the legend will be horizontally\n    expanded to fill the axes area (or *bbox_to_anchor* if defines\n    the legend's size).\n\nbbox_transform : None or `matplotlib.transforms.Transform`\n    The transform for the bounding box (*bbox_to_anchor*). For a value\n    of ``None`` (default) the Axes'\n    :data:`~matplotlib.axes.Axes.transAxes` transform will be used.\n\ntitle : str or None\n    The legend's title. Default is no title (``None``).\n\ntitle_fontproperties : None or `matplotlib.font_manager.FontProperties` or dict\n    The font properties of the legend's title. If None (default), the\n    *title_fontsize* argument will be used if present; if *title_fontsize* is\n    also None, the current :rc:`legend.title_fontsize` will be used.\n\ntitle_fontsize : int or {'xx-small', 'x-small', 'small', 'medium', 'large', \\\n'x-large', 'xx-large'}, default: :rc:`legend.title_fontsize`\n    The font size of the legend's title.\n    Note: This cannot be combined with *title_fontproperties*. If you want\n    to set the fontsize alongside other font properties, use the *size*\n    parameter in *title_fontproperties*.\n\nalignment : {'center', 'left', 'right'}, default: 'center'\n    The alignment of the legend title and the box of entries. The entries\n    are aligned as a single block, so that markers always lined up.\n\nborderpad : float, default: :rc:`legend.borderpad`\n    The fractional whitespace inside the legend border, in font-size units.\n\nlabelspacing : float, default: :rc:`legend.labelspacing`\n    The vertical space between the legend entries, in font-size units.\n\nhandlelength : float, default: :rc:`legend.handlelength`\n    The length of the legend handles, in font-size units.\n\nhandleheight : float, default: :rc:`legend.handleheight`\n    The height of the legend handles, in font-size units.\n\nhandletextpad : float, default: :rc:`legend.handletextpad`\n    The pad between the legend handle and text, in font-size units.\n\nborderaxespad : float, default: :rc:`legend.borderaxespad`\n    The pad between the axes and legend border, in font-size units.\n\ncolumnspacing : float, default: :rc:`legend.columnspacing`\n    The spacing between columns, in font-size units.\n\nhandler_map : dict or None\n    The custom dictionary mapping instances or types to a legend\n    handler. This *handler_map* updates the default handler map\n    found at `matplotlib.legend.Legend.get_legend_handler_map`.\n\"\"\")\n\n\nclass Legend(Artist):\n    \"\"\"\n    Place a legend on the axes at location loc.\n    \"\"\"\n\n    # 'best' is only implemented for axes legends\n    codes = {'best': 0, **AnchoredOffsetbox.codes}\n    zorder = 5\n\n</output>",
+      "extra": {
+        "raw_output": "    Axes or Figure coordinates, depending on which ``legend`` is called.\n\n    If a 4-tuple or `.BboxBase` is given, then it specifies the bbox\n    ``(x, y, width, height)`` that the legend is placed in.\n    To put the legend in the best location in the bottom right\n    quadrant of the axes (or figure)::\n\n        loc='best', bbox_to_anchor=(0.5, 0., 0.5, 0.5)\n\n    A 2-tuple ``(x, y)`` places the corner of the legend specified by *loc* at\n    x, y.  For example, to put the legend's upper right-hand corner in the\n    center of the axes (or figure) the following keywords can be used::\n\n        loc='upper right', bbox_to_anchor=(0.5, 0.5)\n\nncols : int, default: 1\n    The number of columns that the legend has.\n\n    For backward compatibility, the spelling *ncol* is also supported\n    but it is discouraged. If both are given, *ncols* takes precedence.\n\nprop : None or `matplotlib.font_manager.FontProperties` or dict\n    The font properties of the legend. If None (default), the current\n    :data:`matplotlib.rcParams` will be used.\n\nfontsize : int or {'xx-small', 'x-small', 'small', 'medium', 'large', \\\n'x-large', 'xx-large'}\n    The font size of the legend. If the value is numeric the size will be the\n    absolute font size in points. String values are relative to the current\n    default font size. This argument is only used if *prop* is not specified.\n\nlabelcolor : str or list, default: :rc:`legend.labelcolor`\n    The color of the text in the legend. Either a valid color string\n    (for example, 'red'), or a list of color strings. The labelcolor can\n    also be made to match the color of the line or marker using 'linecolor',\n    'markerfacecolor' (or 'mfc'), or 'markeredgecolor' (or 'mec').\n\n    Labelcolor can be set globally using :rc:`legend.labelcolor`. If None,\n    use :rc:`text.color`.\n\nnumpoints : int, default: :rc:`legend.numpoints`\n    The number of marker points in the legend when creating a legend\n    entry for a `.Line2D` (line).\n\nscatterpoints : int, default: :rc:`legend.scatterpoints`\n    The number of marker points in the legend when creating\n    a legend entry for a `.PathCollection` (scatter plot).\n\nscatteryoffsets : iterable of floats, default: ``[0.375, 0.5, 0.3125]``\n    The vertical offset (relative to the font size) for the markers\n    created for a scatter plot legend entry. 0.0 is at the base the\n    legend text, and 1.0 is at the top. To draw all markers at the\n    same height, set to ``[0.5]``.\n\nmarkerscale : float, default: :rc:`legend.markerscale`\n    The relative size of legend markers compared with the originally\n    drawn ones.\n\nmarkerfirst : bool, default: True\n    If *True*, legend marker is placed to the left of the legend label.\n    If *False*, legend marker is placed to the right of the legend label.\n\nframeon : bool, default: :rc:`legend.frameon`\n    Whether the legend should be drawn on a patch (frame).\n\nfancybox : bool, default: :rc:`legend.fancybox`\n    Whether round edges should be enabled around the `.FancyBboxPatch` which\n    makes up the legend's background.\n\nshadow : bool, default: :rc:`legend.shadow`\n    Whether to draw a shadow behind the legend.\n\nframealpha : float, default: :rc:`legend.framealpha`\n    The alpha transparency of the legend's background.\n    If *shadow* is activated and *framealpha* is ``None``, the default value is\n    ignored.\n\nfacecolor : \"inherit\" or color, default: :rc:`legend.facecolor`\n    The legend's background color.\n    If ``\"inherit\"``, use :rc:`axes.facecolor`.\n\nedgecolor : \"inherit\" or color, default: :rc:`legend.edgecolor`\n    The legend's background patch edge color.\n    If ``\"inherit\"``, use take :rc:`axes.edgecolor`.\n\nmode : {\"expand\", None}\n    If *mode* is set to ``\"expand\"`` the legend will be horizontally\n    expanded to fill the axes area (or *bbox_to_anchor* if defines\n    the legend's size).\n\nbbox_transform : None or `matplotlib.transforms.Transform`\n    The transform for the bounding box (*bbox_to_anchor*). For a value\n    of ``None`` (default) the Axes'\n    :data:`~matplotlib.axes.Axes.transAxes` transform will be used.\n\ntitle : str or None\n    The legend's title. Default is no title (``None``).\n\ntitle_fontproperties : None or `matplotlib.font_manager.FontProperties` or dict\n    The font properties of the legend's title. If None (default), the\n    *title_fontsize* argument will be used if present; if *title_fontsize* is\n    also None, the current :rc:`legend.title_fontsize` will be used.\n\ntitle_fontsize : int or {'xx-small', 'x-small', 'small', 'medium', 'large', \\\n'x-large', 'xx-large'}, default: :rc:`legend.title_fontsize`\n    The font size of the legend's title.\n    Note: This cannot be combined with *title_fontproperties*. If you want\n    to set the fontsize alongside other font properties, use the *size*\n    parameter in *title_fontproperties*.\n\nalignment : {'center', 'left', 'right'}, default: 'center'\n    The alignment of the legend title and the box of entries. The entries\n    are aligned as a single block, so that markers always lined up.\n\nborderpad : float, default: :rc:`legend.borderpad`\n    The fractional whitespace inside the legend border, in font-size units.\n\nlabelspacing : float, default: :rc:`legend.labelspacing`\n    The vertical space between the legend entries, in font-size units.\n\nhandlelength : float, default: :rc:`legend.handlelength`\n    The length of the legend handles, in font-size units.\n\nhandleheight : float, default: :rc:`legend.handleheight`\n    The height of the legend handles, in font-size units.\n\nhandletextpad : float, default: :rc:`legend.handletextpad`\n    The pad between the legend handle and text, in font-size units.\n\nborderaxespad : float, default: :rc:`legend.borderaxespad`\n    The pad between the axes and legend border, in font-size units.\n\ncolumnspacing : float, default: :rc:`legend.columnspacing`\n    The spacing between columns, in font-size units.\n\nhandler_map : dict or None\n    The custom dictionary mapping instances or types to a legend\n    handler. This *handler_map* updates the default handler map\n    found at `matplotlib.legend.Legend.get_legend_handler_map`.\n\"\"\")\n\n\nclass Legend(Artist):\n    \"\"\"\n    Place a legend on the axes at location loc.\n    \"\"\"\n\n    # 'best' is only implemented for axes legends\n    codes = {'best': 0, **AnchoredOffsetbox.codes}\n    zorder = 5\n\n",
+        "returncode": 0,
+        "timestamp": 1786148080.7364,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01CJcYGB7h9CxmXn7qHP7Zc8",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": "Now let me make the changes:",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01J2fcaREQKKvm5v8kU76s1b",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && python - <<'EOF'\\nimport re\\np = 'lib/matplotlib/legend.py'\\ns = open(p).read()\\n\\n# 1. add doc entry\\nold_doc = \\\"\\\"\\\"handler_map : dict or None\\n    The custom dictionary mapping instances or types to a legend\\n    handler. This *handler_map* updates the default handler map\\n    found at `matplotlib.legend.Legend.get_legend_handler_map`.\\n\\\\\\\"\\\\\\\"\\\\\\\")\\\"\\\"\\\"\\nnew_doc = \\\"\\\"\\\"handler_map : dict or None\\n    The custom dictionary mapping instances or types to a legend\\n    handler. This *handler_map* updates the default handler map\\n    found at `matplotlib.legend.Legend.get_legend_handler_map`.\\n\\ndraggable : bool, default: False\\n    Whether the legend can be dragged with the mouse.\\n\\\\\\\"\\\\\\\"\\\\\\\")\\\"\\\"\\\"\\nassert old_doc in s\\ns = s.replace(old_doc, new_doc)\\n\\nold_sig = \\\"\\\"\\\"        alignment=\\\"center\\\",       # control the alignment within the legend box\\n        *,\\n        ncol=1  # synonym for ncols (backward compatibility)\\n    ):\\\"\\\"\\\"\\nnew_sig = \\\"\\\"\\\"        alignment=\\\"center\\\",       # control the alignment within the legend box\\n        *,\\n        ncol=1,  # synonym for ncols (backward compatibility)\\n        draggable=False  # whether the legend can be dragged with the mouse\\n    ):\\\"\\\"\\\"\\nassert old_sig in s\\ns = s.replace(old_sig, new_sig)\\n\\nold = \\\"\\\"\\\"        self.set_title(title, prop=title_prop_fp)\\n        self._draggable = None\\n\\\"\\\"\\\"\\nnew = \\\"\\\"\\\"        self.set_title(title, prop=title_prop_fp)\\n\\n        self._draggable = None\\n        self.set_draggable(state=draggable)\\n\\\"\\\"\\\"\\nassert old in s\\ns = s.replace(old, new)\\nopen(p,'w').write(s)\\nEOF\\ngrep -n \\\"draggable\\\" lib/matplotlib/legend.py\"}"
+          }
+        }
+      ],
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "signature": "CAIStAMKhwEIEBgCKkBVRCJ6rt0QM3DZoiBKmnTboXeOFiKZZXEXW+8s/gRVxoAayshLw2Y2OmCVW194z+G1pCIM5jRmZpe1rKNE2LW8Mg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDFHp/ke6AN9L0+6F+hoMoEleCxo66jWnvztLIjDxQn80MMw3dEmC1+Qzx1/kv54bY63Yn1SycOS1aFhthr+bAY+p39Yi4Kpqlv249tMq2QF1YavpUAsEmaHpXN2oFM+sKkaPAw02Yui6s9fU164s+bvTYjj/UvssnwAeZTH3O2CyPxIa8rqPDzJQwZYfFOI53g7geYYBid0oFVnjiBkO2tkXEr7qdomR1kohScb3aWs6C6PzucTqohYUulwCCbsp2enIG5oi3mzBba9ceHiH/+kHUoGhq92A+Ol8uEr7L7ur0dl7pD2kwUW8XDzU7a3pv2wv+KwZ0dWgnrg+9CWoIEYJglFTkiMUMN866vwO/5V/yciPTCm5BmszUmmUfYo/4sPMcnkedRXjGAE=",
+          "format": "anthropic-claude-v1",
+          "index": 0
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && python - <<'EOF'\nimport re\np = 'lib/matplotlib/legend.py'\ns = open(p).read()\n\n# 1. add doc entry\nold_doc = \"\"\"handler_map : dict or None\n    The custom dictionary mapping instances or types to a legend\n    handler. This *handler_map* updates the default handler map\n    found at `matplotlib.legend.Legend.get_legend_handler_map`.\n\\\"\\\"\\\")\"\"\"\nnew_doc = \"\"\"handler_map : dict or None\n    The custom dictionary mapping instances or types to a legend\n    handler. This *handler_map* updates the default handler map\n    found at `matplotlib.legend.Legend.get_legend_handler_map`.\n\ndraggable : bool, default: False\n    Whether the legend can be dragged with the mouse.\n\\\"\\\"\\\")\"\"\"\nassert old_doc in s\ns = s.replace(old_doc, new_doc)\n\nold_sig = \"\"\"        alignment=\"center\",       # control the alignment within the legend box\n        *,\n        ncol=1  # synonym for ncols (backward compatibility)\n    ):\"\"\"\nnew_sig = \"\"\"        alignment=\"center\",       # control the alignment within the legend box\n        *,\n        ncol=1,  # synonym for ncols (backward compatibility)\n        draggable=False  # whether the legend can be dragged with the mouse\n    ):\"\"\"\nassert old_sig in s\ns = s.replace(old_sig, new_sig)\n\nold = \"\"\"        self.set_title(title, prop=title_prop_fp)\n        self._draggable = None\n\"\"\"\nnew = \"\"\"        self.set_title(title, prop=title_prop_fp)\n\n        self._draggable = None\n        self.set_draggable(state=draggable)\n\"\"\"\nassert old in s\ns = s.replace(old, new)\nopen(p,'w').write(s)\nEOF\ngrep -n \"draggable\" lib/matplotlib/legend.py",
+            "tool_call_id": "toolu_01J2fcaREQKKvm5v8kU76s1b"
+          }
+        ],
+        "response": {
+          "id": "gen-1786148080-Vr60D4mmAojsZojSzrb3",
+          "object": "chat.completion",
+          "created": 1786148080,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "Now let me make the changes:",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01J2fcaREQKKvm5v8kU76s1b",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && python - <<'EOF'\\nimport re\\np = 'lib/matplotlib/legend.py'\\ns = open(p).read()\\n\\n# 1. add doc entry\\nold_doc = \\\"\\\"\\\"handler_map : dict or None\\n    The custom dictionary mapping instances or types to a legend\\n    handler. This *handler_map* updates the default handler map\\n    found at `matplotlib.legend.Legend.get_legend_handler_map`.\\n\\\\\\\"\\\\\\\"\\\\\\\")\\\"\\\"\\\"\\nnew_doc = \\\"\\\"\\\"handler_map : dict or None\\n    The custom dictionary mapping instances or types to a legend\\n    handler. This *handler_map* updates the default handler map\\n    found at `matplotlib.legend.Legend.get_legend_handler_map`.\\n\\ndraggable : bool, default: False\\n    Whether the legend can be dragged with the mouse.\\n\\\\\\\"\\\\\\\"\\\\\\\")\\\"\\\"\\\"\\nassert old_doc in s\\ns = s.replace(old_doc, new_doc)\\n\\nold_sig = \\\"\\\"\\\"        alignment=\\\"center\\\",       # control the alignment within the legend box\\n        *,\\n        ncol=1  # synonym for ncols (backward compatibility)\\n    ):\\\"\\\"\\\"\\nnew_sig = \\\"\\\"\\\"        alignment=\\\"center\\\",       # control the alignment within the legend box\\n        *,\\n        ncol=1,  # synonym for ncols (backward compatibility)\\n        draggable=False  # whether the legend can be dragged with the mouse\\n    ):\\\"\\\"\\\"\\nassert old_sig in s\\ns = s.replace(old_sig, new_sig)\\n\\nold = \\\"\\\"\\\"        self.set_title(title, prop=title_prop_fp)\\n        self._draggable = None\\n\\\"\\\"\\\"\\nnew = \\\"\\\"\\\"        self.set_title(title, prop=title_prop_fp)\\n\\n        self._draggable = None\\n        self.set_draggable(state=draggable)\\n\\\"\\\"\\\"\\nassert old in s\\ns = s.replace(old, new)\\nopen(p,'w').write(s)\\nEOF\\ngrep -n \\\"draggable\\\" lib/matplotlib/legend.py\"}"
+                    }
+                  }
+                ],
+                "reasoning_details": [
+                  {
+                    "type": "reasoning.text",
+                    "signature": "CAIStAMKhwEIEBgCKkBVRCJ6rt0QM3DZoiBKmnTboXeOFiKZZXEXW+8s/gRVxoAayshLw2Y2OmCVW194z+G1pCIM5jRmZpe1rKNE2LW8Mg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDFHp/ke6AN9L0+6F+hoMoEleCxo66jWnvztLIjDxQn80MMw3dEmC1+Qzx1/kv54bY63Yn1SycOS1aFhthr+bAY+p39Yi4Kpqlv249tMq2QF1YavpUAsEmaHpXN2oFM+sKkaPAw02Yui6s9fU164s+bvTYjj/UvssnwAeZTH3O2CyPxIa8rqPDzJQwZYfFOI53g7geYYBid0oFVnjiBkO2tkXEr7qdomR1kohScb3aWs6C6PzucTqohYUulwCCbsp2enIG5oi3mzBba9ceHiH/+kHUoGhq92A+Ol8uEr7L7ur0dl7pD2kwUW8XDzU7a3pv2wv+KwZ0dWgnrg+9CWoIEYJglFTkiMUMN866vwO/5V/yciPTCm5BmszUmmUfYo/4sPMcnkedRXjGAE=",
+                    "format": "anthropic-claude-v1",
+                    "index": 0
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 9192,
+            "completion_tokens": 746,
+            "total_tokens": 9938,
+            "cost": 0.0481525,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 4860,
+              "cache_write_tokens": 4330,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0481525,
+              "upstream_inference_prompt_cost": 0.0295025,
+              "upstream_inference_completions_cost": 0.01865
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.0481525,
+        "timestamp": 1786148090.267374
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n290:draggable : bool, default: False\n349:        draggable=False  # whether the legend can be dragged with the mouse\n545:        self._draggable = None\n546:        self.set_draggable(state=draggable)\n1085:    def set_draggable(self, state, use_blit=False, update='loc'):\n1109:            if self._draggable is None:\n1110:                self._draggable = DraggableLegend(self,\n1114:            if self._draggable is not None:\n1115:                self._draggable.disconnect()\n1116:            self._draggable = None\n1117:        return self._draggable\n1119:    def get_draggable(self):\n1120:        \"\"\"Return ``True`` if the legend is draggable, ``False`` otherwise.\"\"\"\n1121:        return self._draggable is not None\n</output>",
+      "extra": {
+        "raw_output": "290:draggable : bool, default: False\n349:        draggable=False  # whether the legend can be dragged with the mouse\n545:        self._draggable = None\n546:        self.set_draggable(state=draggable)\n1085:    def set_draggable(self, state, use_blit=False, update='loc'):\n1109:            if self._draggable is None:\n1110:                self._draggable = DraggableLegend(self,\n1114:            if self._draggable is not None:\n1115:                self._draggable.disconnect()\n1116:            self._draggable = None\n1117:        return self._draggable\n1119:    def get_draggable(self):\n1120:        \"\"\"Return ``True`` if the legend is draggable, ``False`` otherwise.\"\"\"\n1121:        return self._draggable is not None\n",
+        "returncode": 0,
+        "timestamp": 1786148090.643651,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01J2fcaREQKKvm5v8kU76s1b",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": "I need to verify that `legend()` in axes/_axes.py properly forwards kwargs through to the underlying implementation, and check if `_legend_kw_doc` is being used consistently across pyplot and figure documentation. I should also look for places where kwargs might be filtered, like in `Axes.legend`",
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01Qaw32mvTMsNu9CypzJkhUo",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && python -c \\\"\\nimport matplotlib\\nmatplotlib.use('Agg')\\nimport matplotlib.pyplot as plt\\nfig, ax = plt.subplots()\\nax.plot([1,2,3], label='x')\\nl = ax.legend(draggable=True)\\nprint(l.get_draggable())\\nl2 = fig.legend(draggable=False)\\nprint(l2.get_draggable())\\nl3 = ax.legend()\\nprint(l3.get_draggable())\\n\\\"\"}"
+          }
+        },
+        {
+          "type": "function",
+          "index": 1,
+          "id": "toolu_01JsfXKver23mQpFfxMsBybz",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && sed -n 1080,1122p lib/matplotlib/legend.py && grep -rn \\\"_legend_kw_doc\\\" lib/matplotlib/*.py lib/matplotlib/axes/*.py\"}"
+          }
+        }
+      ],
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "text": "I need to verify that `legend()` in axes/_axes.py properly forwards kwargs through to the underlying implementation, and check if `_legend_kw_doc` is being used consistently across pyplot and figure documentation. I should also look for places where kwargs might be filtered, like in `Axes.legend`",
+          "format": "anthropic-claude-v1",
+          "index": 0,
+          "signature": "CAISxwYKhwEIEBgCKkDuls4xq0fYRm++q5Lz05n1zil5nGfATsHGdUH2ZNeR5jHj5GTwuMkQhAfzkvpKgX71ZA54lg/Kae9n9PT0JWtxMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDFd6WKpDU/0UYt+xtRoM8P6c7gDZcxFLELbvIjDfS8aW6s/uMp5BEOdIGKYKmU/9Z2yAVx7ZSikzznbIx+amaC4YjlPKuMhBITi2qSIq7ATnbO+2Aq6FZXBvHwosv3c7PotVqzHGopPA/C/fyUP0lUGGAgT8nIiXyXgf7LprOC4QDQjukMAZPu5MmcXMDFtE6DYoaYugtQzJCqvTWKJ02aG/kDcka3TrSQkYjucDQ/Yj9MrAofbJHd78LxFZR93iBp70KIf2/oAttWMcX2wAnppMqOdJMQSqhd4Qqx8FfhLyNENhpzb1HkLkP+huOBbL3YMW4rww36g/AtFvFitIql8j6pCxe81SitAD/lPgWD87UD5fuYK1ubz8K+5I4IUQ2QWwEP+OOx4JQZHrZzPUi9Zh1rqQ+TcCFMru/WfIdWF0cv79OMTGRtSS8fkf/YPHonqpVCUNxMxF/d/dy/YrZ1t/nmGf2yueXrRqhKS2xx36mFjAlTExrk3Q3+J1M9HZLMT9ef0LKxux6ipmsd8siLmo9ZE098iAg4JJ1ziaPQSEHCb7izM8Mt7T+j/febNvc9tzcIBu8aYlDtpkVp2CY+Dl9ad6+7DesF7d+u0TFL9VAWz1btYkBCNYxYOI2x3DfAzDVkMmxXsdmcMU2Lj9T18H0uoaVOGM7FIzgy9xUNJ6e2UpOuS+KvTf9zb9F9vNrk7CVT4eGeHGfcYH34luc9D92dG9q9Y3i2Krk+14VV+Yxwo25DcpkELvuFg2n6K8s46TzjVVbkCCzRq+E8+lWIsPYcY8XwNx/414VU+gIuRbYMoCwenODa6nxMD2oWuwEvtLmrN89L8qfH6kgslotnJRj9U0vgK19MK1HSzrsi9ERonZXveMIqnp75MjP/PzvmiH9AC43jb3Uod0/jj/7nWybUaQyDZo9HDtxRgB"
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && python -c \"\nimport matplotlib\nmatplotlib.use('Agg')\nimport matplotlib.pyplot as plt\nfig, ax = plt.subplots()\nax.plot([1,2,3], label='x')\nl = ax.legend(draggable=True)\nprint(l.get_draggable())\nl2 = fig.legend(draggable=False)\nprint(l2.get_draggable())\nl3 = ax.legend()\nprint(l3.get_draggable())\n\"",
+            "tool_call_id": "toolu_01Qaw32mvTMsNu9CypzJkhUo"
+          },
+          {
+            "command": "cd /testbed && sed -n 1080,1122p lib/matplotlib/legend.py && grep -rn \"_legend_kw_doc\" lib/matplotlib/*.py lib/matplotlib/axes/*.py",
+            "tool_call_id": "toolu_01JsfXKver23mQpFfxMsBybz"
+          }
+        ],
+        "response": {
+          "id": "gen-1786148090-w1MVApt4JtFaHq205TDB",
+          "object": "chat.completion",
+          "created": 1786148090,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": "I need to verify that `legend()` in axes/_axes.py properly forwards kwargs through to the underlying implementation, and check if `_legend_kw_doc` is being used consistently across pyplot and figure documentation. I should also look for places where kwargs might be filtered, like in `Axes.legend`",
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01Qaw32mvTMsNu9CypzJkhUo",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && python -c \\\"\\nimport matplotlib\\nmatplotlib.use('Agg')\\nimport matplotlib.pyplot as plt\\nfig, ax = plt.subplots()\\nax.plot([1,2,3], label='x')\\nl = ax.legend(draggable=True)\\nprint(l.get_draggable())\\nl2 = fig.legend(draggable=False)\\nprint(l2.get_draggable())\\nl3 = ax.legend()\\nprint(l3.get_draggable())\\n\\\"\"}"
+                    }
+                  },
+                  {
+                    "type": "function",
+                    "index": 1,
+                    "id": "toolu_01JsfXKver23mQpFfxMsBybz",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && sed -n 1080,1122p lib/matplotlib/legend.py && grep -rn \\\"_legend_kw_doc\\\" lib/matplotlib/*.py lib/matplotlib/axes/*.py\"}"
+                    }
+                  }
+                ],
+                "reasoning_details": [
+                  {
+                    "type": "reasoning.text",
+                    "text": "I need to verify that `legend()` in axes/_axes.py properly forwards kwargs through to the underlying implementation, and check if `_legend_kw_doc` is being used consistently across pyplot and figure documentation. I should also look for places where kwargs might be filtered, like in `Axes.legend`",
+                    "format": "anthropic-claude-v1",
+                    "index": 0,
+                    "signature": "CAISxwYKhwEIEBgCKkDuls4xq0fYRm++q5Lz05n1zil5nGfATsHGdUH2ZNeR5jHj5GTwuMkQhAfzkvpKgX71ZA54lg/Kae9n9PT0JWtxMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDFd6WKpDU/0UYt+xtRoM8P6c7gDZcxFLELbvIjDfS8aW6s/uMp5BEOdIGKYKmU/9Z2yAVx7ZSikzznbIx+amaC4YjlPKuMhBITi2qSIq7ATnbO+2Aq6FZXBvHwosv3c7PotVqzHGopPA/C/fyUP0lUGGAgT8nIiXyXgf7LprOC4QDQjukMAZPu5MmcXMDFtE6DYoaYugtQzJCqvTWKJ02aG/kDcka3TrSQkYjucDQ/Yj9MrAofbJHd78LxFZR93iBp70KIf2/oAttWMcX2wAnppMqOdJMQSqhd4Qqx8FfhLyNENhpzb1HkLkP+huOBbL3YMW4rww36g/AtFvFitIql8j6pCxe81SitAD/lPgWD87UD5fuYK1ubz8K+5I4IUQ2QWwEP+OOx4JQZHrZzPUi9Zh1rqQ+TcCFMru/WfIdWF0cv79OMTGRtSS8fkf/YPHonqpVCUNxMxF/d/dy/YrZ1t/nmGf2yueXrRqhKS2xx36mFjAlTExrk3Q3+J1M9HZLMT9ef0LKxux6ipmsd8siLmo9ZE098iAg4JJ1ziaPQSEHCb7izM8Mt7T+j/febNvc9tzcIBu8aYlDtpkVp2CY+Dl9ad6+7DesF7d+u0TFL9VAWz1btYkBCNYxYOI2x3DfAzDVkMmxXsdmcMU2Lj9T18H0uoaVOGM7FIzgy9xUNJ6e2UpOuS+KvTf9zb9F9vNrk7CVT4eGeHGfcYH34luc9D92dG9q9Y3i2Krk+14VV+Yxwo25DcpkELvuFg2n6K8s46TzjVVbkCCzRq+E8+lWIsPYcY8XwNx/414VU+gIuRbYMoCwenODa6nxMD2oWuwEvtLmrN89L8qfH6kgslotnJRj9U0vgK19MK1HSzrsi9ERonZXveMIqnp75MjP/PzvmiH9AC43jb3Uod0/jj/7nWybUaQyDZo9HDtxRgB"
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 10209,
+            "completion_tokens": 567,
+            "total_tokens": 10776,
+            "cost": 0.02513625,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 9190,
+              "cache_write_tokens": 1017,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.02513625,
+              "upstream_inference_prompt_cost": 0.01096125,
+              "upstream_inference_completions_cost": 0.014175
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 75,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.02513625,
+        "timestamp": 1786148099.5864692
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\nTrue\nFalse\nFalse\n</output>",
+      "extra": {
+        "raw_output": "True\nFalse\nFalse\n",
+        "returncode": 0,
+        "timestamp": 1786148102.230608,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01Qaw32mvTMsNu9CypzJkhUo",
+      "role": "tool"
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n        inside, info = self._default_contains(event)\n        if inside is not None:\n            return inside, info\n        return self.legendPatch.contains(event)\n\n    def set_draggable(self, state, use_blit=False, update='loc'):\n        \"\"\"\n        Enable or disable mouse dragging support of the legend.\n\n        Parameters\n        ----------\n        state : bool\n            Whether mouse dragging is enabled.\n        use_blit : bool, optional\n            Use blitting for faster image composition. For details see\n            :ref:`func-animation`.\n        update : {'loc', 'bbox'}, optional\n            The legend parameter to be changed when dragged:\n\n            - 'loc': update the *loc* parameter of the legend\n            - 'bbox': update the *bbox_to_anchor* parameter of the legend\n\n        Returns\n        -------\n        `.DraggableLegend` or *None*\n            If *state* is ``True`` this returns the `.DraggableLegend` helper\n            instance. Otherwise this returns *None*.\n        \"\"\"\n        if state:\n            if self._draggable is None:\n                self._draggable = DraggableLegend(self,\n                                                  use_blit,\n                                                  update=update)\n        else:\n            if self._draggable is not None:\n                self._draggable.disconnect()\n            self._draggable = None\n        return self._draggable\n\n    def get_draggable(self):\n        \"\"\"Return ``True`` if the legend is draggable, ``False`` otherwise.\"\"\"\n        return self._draggable is not None\n\nlib/matplotlib/figure.py:1090:        %(_legend_kw_doc)s\nlib/matplotlib/legend.py:97:_docstring.interpd.update(_legend_kw_doc=\"\"\"\nlib/matplotlib/legend.py:367:        %(_legend_kw_doc)s\nlib/matplotlib/axes/_axes.py:286:        %(_legend_kw_doc)s\n</output>",
+      "extra": {
+        "raw_output": "        inside, info = self._default_contains(event)\n        if inside is not None:\n            return inside, info\n        return self.legendPatch.contains(event)\n\n    def set_draggable(self, state, use_blit=False, update='loc'):\n        \"\"\"\n        Enable or disable mouse dragging support of the legend.\n\n        Parameters\n        ----------\n        state : bool\n            Whether mouse dragging is enabled.\n        use_blit : bool, optional\n            Use blitting for faster image composition. For details see\n            :ref:`func-animation`.\n        update : {'loc', 'bbox'}, optional\n            The legend parameter to be changed when dragged:\n\n            - 'loc': update the *loc* parameter of the legend\n            - 'bbox': update the *bbox_to_anchor* parameter of the legend\n\n        Returns\n        -------\n        `.DraggableLegend` or *None*\n            If *state* is ``True`` this returns the `.DraggableLegend` helper\n            instance. Otherwise this returns *None*.\n        \"\"\"\n        if state:\n            if self._draggable is None:\n                self._draggable = DraggableLegend(self,\n                                                  use_blit,\n                                                  update=update)\n        else:\n            if self._draggable is not None:\n                self._draggable.disconnect()\n            self._draggable = None\n        return self._draggable\n\n    def get_draggable(self):\n        \"\"\"Return ``True`` if the legend is draggable, ``False`` otherwise.\"\"\"\n        return self._draggable is not None\n\nlib/matplotlib/figure.py:1090:        %(_legend_kw_doc)s\nlib/matplotlib/legend.py:97:_docstring.interpd.update(_legend_kw_doc=\"\"\"\nlib/matplotlib/legend.py:367:        %(_legend_kw_doc)s\nlib/matplotlib/axes/_axes.py:286:        %(_legend_kw_doc)s\n",
+        "returncode": 0,
+        "timestamp": 1786148102.232766,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01JsfXKver23mQpFfxMsBybz",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01WnTRyHW3gmG9tHY13ArUaA",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && ls doc/users/next_whats_new | head\"}"
+          }
+        }
+      ],
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "signature": "CAIS8wIKhwEIEBgCKkAl8CS6fBComkTbYVRVDJzaevYy1jquNkZedXMeguYoxhoSGglT2+rFCKVA7Y2FThF8ojDwGoDVPLGOX3Bz4+ZhMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDPBtJ94hLv11uuVh/hoMQcdQzkePtDkg7SjhIjAqhHYCJAOi0oERHzGh0qM2jb9Exeb1T358gh5wV1IHYbTzepMvSD50eM7u/Id3FJ8qmAFtPSjEtG5U6Tu2vutWRmg3AB2n4sKyyVrsCJqeD91QVFsl50M8pVm5ExTp6mT1UebIjV55SqbUaUY6nEIatNh7P5qCqvdhOtb04+tvyd77WAiEP+wAfkItO46A/kqYGv4NDdZmgxseUh9fo/Mdnh7be+uFEzaTMBWgmuC03hpHcHTzZ+CZtk4FLhlz7xKuzljoFphxkIra6xgB",
+          "format": "anthropic-claude-v1",
+          "index": 0
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && ls doc/users/next_whats_new | head",
+            "tool_call_id": "toolu_01WnTRyHW3gmG9tHY13ArUaA"
+          }
+        ],
+        "response": {
+          "id": "gen-1786148102-UdMMugAHDZ4HQIsO0u4p",
+          "object": "chat.completion",
+          "created": 1786148102,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01WnTRyHW3gmG9tHY13ArUaA",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && ls doc/users/next_whats_new | head\"}"
+                    }
+                  }
+                ],
+                "reasoning_details": [
+                  {
+                    "type": "reasoning.text",
+                    "signature": "CAIS8wIKhwEIEBgCKkAl8CS6fBComkTbYVRVDJzaevYy1jquNkZedXMeguYoxhoSGglT2+rFCKVA7Y2FThF8ojDwGoDVPLGOX3Bz4+ZhMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDPBtJ94hLv11uuVh/hoMQcdQzkePtDkg7SjhIjAqhHYCJAOi0oERHzGh0qM2jb9Exeb1T358gh5wV1IHYbTzepMvSD50eM7u/Id3FJ8qmAFtPSjEtG5U6Tu2vutWRmg3AB2n4sKyyVrsCJqeD91QVFsl50M8pVm5ExTp6mT1UebIjV55SqbUaUY6nEIatNh7P5qCqvdhOtb04+tvyd77WAiEP+wAfkItO46A/kqYGv4NDdZmgxseUh9fo/Mdnh7be+uFEzaTMBWgmuC03hpHcHTzZ+CZtk4FLhlz7xKuzljoFphxkIra6xgB",
+                    "format": "anthropic-claude-v1",
+                    "index": 0
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 11489,
+            "completion_tokens": 119,
+            "total_tokens": 11608,
+            "cost": 0.0160885,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 10207,
+              "cache_write_tokens": 1280,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0160885,
+              "upstream_inference_prompt_cost": 0.0131135,
+              "upstream_inference_completions_cost": 0.002975
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.0160885,
+        "timestamp": 1786148110.135668
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n3d_plot_aspects.rst\n3d_plot_aspects_adjustable_keyword.rst\n3d_plot_focal_length.rst\n3d_plot_roll_angle.rst\nREADME.rst\nasinh_scale.rst\nbar_label_formatting.rst\nbar_plot_labels.rst\ncolor_support_for_math_to_image.rst\ncustom_cap_widths.rst\n</output>",
+      "extra": {
+        "raw_output": "3d_plot_aspects.rst\n3d_plot_aspects_adjustable_keyword.rst\n3d_plot_focal_length.rst\n3d_plot_roll_angle.rst\nREADME.rst\nasinh_scale.rst\nbar_label_formatting.rst\nbar_plot_labels.rst\ncolor_support_for_math_to_image.rst\ncustom_cap_widths.rst\n",
+        "returncode": 0,
+        "timestamp": 1786148110.4315379,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01WnTRyHW3gmG9tHY13ArUaA",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_0199J7Bm5qVuq4mcfMwNyJKP",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && cat > doc/users/next_whats_new/draggable_legend_keyword.rst <<'EOF'\\nLegend can be made draggable at creation\\n----------------------------------------\\n\\nLegends can now be made draggable directly when they are created by passing\\n``draggable=True``::\\n\\n    ax.legend(draggable=True)\\n\\nPreviously it was necessary to call `.Legend.set_draggable` on the returned\\nlegend instance.\\nEOF\\npython -m pytest lib/matplotlib/tests/test_legend.py -q 2>&1 | tail -3\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && cat > doc/users/next_whats_new/draggable_legend_keyword.rst <<'EOF'\nLegend can be made draggable at creation\n----------------------------------------\n\nLegends can now be made draggable directly when they are created by passing\n``draggable=True``::\n\n    ax.legend(draggable=True)\n\nPreviously it was necessary to call `.Legend.set_draggable` on the returned\nlegend instance.\nEOF\npython -m pytest lib/matplotlib/tests/test_legend.py -q 2>&1 | tail -3",
+            "tool_call_id": "toolu_0199J7Bm5qVuq4mcfMwNyJKP"
+          }
+        ],
+        "response": {
+          "id": "gen-1786148110-C5R9kNeV3Fw9dfgAnZGY",
+          "object": "chat.completion",
+          "created": 1786148110,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_0199J7Bm5qVuq4mcfMwNyJKP",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && cat > doc/users/next_whats_new/draggable_legend_keyword.rst <<'EOF'\\nLegend can be made draggable at creation\\n----------------------------------------\\n\\nLegends can now be made draggable directly when they are created by passing\\n``draggable=True``::\\n\\n    ax.legend(draggable=True)\\n\\nPreviously it was necessary to call `.Legend.set_draggable` on the returned\\nlegend instance.\\nEOF\\npython -m pytest lib/matplotlib/tests/test_legend.py -q 2>&1 | tail -3\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 11762,
+            "completion_tokens": 226,
+            "total_tokens": 11988,
+            "cost": 0.01310975,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 11487,
+              "cache_write_tokens": 273,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.01310975,
+              "upstream_inference_prompt_cost": 0.00745975,
+              "upstream_inference_completions_cost": 0.00565
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.01310975,
+        "timestamp": 1786148114.306614
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n...s..s..s..s.......s..s..s..s..s....................................... [ 64%]\n.......................................s                                 [100%]\n102 passed, 10 skipped in 13.06s\n</output>",
+      "extra": {
+        "raw_output": "...s..s..s..s.......s..s..s..s..s....................................... [ 64%]\n.......................................s                                 [100%]\n102 passed, 10 skipped in 13.06s\n",
+        "returncode": 0,
+        "timestamp": 1786148128.200938,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_0199J7Bm5qVuq4mcfMwNyJKP",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": "All tests pass. Let me create the patch.",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01Nx7Z4iJQmXxCQ1TQ42X3fJ",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && git diff -- lib/matplotlib/legend.py > patch.txt && git status --short\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && git diff -- lib/matplotlib/legend.py > patch.txt && git status --short",
+            "tool_call_id": "toolu_01Nx7Z4iJQmXxCQ1TQ42X3fJ"
+          }
+        ],
+        "response": {
+          "id": "gen-1786148128-kSAYiXzC9tE8WfSF00Jt",
+          "object": "chat.completion",
+          "created": 1786148128,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "All tests pass. Let me create the patch.",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01Nx7Z4iJQmXxCQ1TQ42X3fJ",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && git diff -- lib/matplotlib/legend.py > patch.txt && git status --short\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 12073,
+            "completion_tokens": 96,
+            "total_tokens": 12169,
+            "cost": 0.01023375,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 11760,
+              "cache_write_tokens": 311,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.01023375,
+              "upstream_inference_prompt_cost": 0.00783375,
+              "upstream_inference_completions_cost": 0.0024
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.01023375,
+        "timestamp": 1786148131.419053
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n M lib/matplotlib/legend.py\n?? doc/users/next_whats_new/draggable_legend_keyword.rst\n?? patch.txt\n</output>",
+      "extra": {
+        "raw_output": " M lib/matplotlib/legend.py\n?? doc/users/next_whats_new/draggable_legend_keyword.rst\n?? patch.txt\n",
+        "returncode": 0,
+        "timestamp": 1786148131.760318,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01Nx7Z4iJQmXxCQ1TQ42X3fJ",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01F2ocx9SJudmfYDU8YnfYrQ",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && cat patch.txt\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && cat patch.txt",
+            "tool_call_id": "toolu_01F2ocx9SJudmfYDU8YnfYrQ"
+          }
+        ],
+        "response": {
+          "id": "gen-1786148131-QKn5CC1643bnHKclIFoE",
+          "object": "chat.completion",
+          "created": 1786148131,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01F2ocx9SJudmfYDU8YnfYrQ",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && cat patch.txt\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 12245,
+            "completion_tokens": 59,
+            "total_tokens": 12304,
+            "cost": 0.0085955,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 12071,
+              "cache_write_tokens": 172,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0085955,
+              "upstream_inference_prompt_cost": 0.0071205,
+              "upstream_inference_completions_cost": 0.001475
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.0085955,
+        "timestamp": 1786148134.2985868
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\ndiff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py\nindex 9e5b903d59..20d4a76e0d 100644\n--- a/lib/matplotlib/legend.py\n+++ b/lib/matplotlib/legend.py\n@@ -286,6 +286,9 @@ handler_map : dict or None\n     The custom dictionary mapping instances or types to a legend\n     handler. This *handler_map* updates the default handler map\n     found at `matplotlib.legend.Legend.get_legend_handler_map`.\n+\n+draggable : bool, default: False\n+    Whether the legend can be dragged with the mouse.\n \"\"\")\n \n \n@@ -342,7 +345,8 @@ class Legend(Artist):\n         title_fontproperties=None,  # properties for the legend title\n         alignment=\"center\",       # control the alignment within the legend box\n         *,\n-        ncol=1  # synonym for ncols (backward compatibility)\n+        ncol=1,  # synonym for ncols (backward compatibility)\n+        draggable=False  # whether the legend can be dragged with the mouse\n     ):\n         \"\"\"\n         Parameters\n@@ -537,7 +541,9 @@ class Legend(Artist):\n             title_prop_fp.set_size(title_fontsize)\n \n         self.set_title(title, prop=title_prop_fp)\n+\n         self._draggable = None\n+        self.set_draggable(state=draggable)\n \n         # set the text color\n \n</output>",
+      "extra": {
+        "raw_output": "diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py\nindex 9e5b903d59..20d4a76e0d 100644\n--- a/lib/matplotlib/legend.py\n+++ b/lib/matplotlib/legend.py\n@@ -286,6 +286,9 @@ handler_map : dict or None\n     The custom dictionary mapping instances or types to a legend\n     handler. This *handler_map* updates the default handler map\n     found at `matplotlib.legend.Legend.get_legend_handler_map`.\n+\n+draggable : bool, default: False\n+    Whether the legend can be dragged with the mouse.\n \"\"\")\n \n \n@@ -342,7 +345,8 @@ class Legend(Artist):\n         title_fontproperties=None,  # properties for the legend title\n         alignment=\"center\",       # control the alignment within the legend box\n         *,\n-        ncol=1  # synonym for ncols (backward compatibility)\n+        ncol=1,  # synonym for ncols (backward compatibility)\n+        draggable=False  # whether the legend can be dragged with the mouse\n     ):\n         \"\"\"\n         Parameters\n@@ -537,7 +541,9 @@ class Legend(Artist):\n             title_prop_fp.set_size(title_fontsize)\n \n         self.set_title(title, prop=title_prop_fp)\n+\n         self._draggable = None\n+        self.set_draggable(state=draggable)\n \n         # set the text color\n \n",
+        "returncode": 0,
+        "timestamp": 1786148134.567484,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01F2ocx9SJudmfYDU8YnfYrQ",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": "The patch contains only my intended source change.",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01GfX9rkLaND5jorqSucYjMb",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt",
+            "tool_call_id": "toolu_01GfX9rkLaND5jorqSucYjMb"
+          }
+        ],
+        "response": {
+          "id": "gen-1786148134-vzE4kxxMyVPyBffjjstx",
+          "object": "chat.completion",
+          "created": 1786148134,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "The patch contains only my intended source change.",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01GfX9rkLaND5jorqSucYjMb",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 12827,
+            "completion_tokens": 100,
+            "total_tokens": 12927,
+            "cost": 0.012269,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 12243,
+              "cache_write_tokens": 582,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.012269,
+              "upstream_inference_prompt_cost": 0.009769,
+              "upstream_inference_completions_cost": 0.0025
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.012269,
+        "timestamp": 1786148137.2137249
+      }
+    },
+    {
+      "role": "exit",
+      "content": "diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py\nindex 9e5b903d59..20d4a76e0d 100644\n--- a/lib/matplotlib/legend.py\n+++ b/lib/matplotlib/legend.py\n@@ -286,6 +286,9 @@ handler_map : dict or None\n     The custom dictionary mapping instances or types to a legend\n     handler. This *handler_map* updates the default handler map\n     found at `matplotlib.legend.Legend.get_legend_handler_map`.\n+\n+draggable : bool, default: False\n+    Whether the legend can be dragged with the mouse.\n \"\"\")\n \n \n@@ -342,7 +345,8 @@ class Legend(Artist):\n         title_fontproperties=None,  # properties for the legend title\n         alignment=\"center\",       # control the alignment within the legend box\n         *,\n-        ncol=1  # synonym for ncols (backward compatibility)\n+        ncol=1,  # synonym for ncols (backward compatibility)\n+        draggable=False  # whether the legend can be dragged with the mouse\n     ):\n         \"\"\"\n         Parameters\n@@ -537,7 +541,9 @@ class Legend(Artist):\n             title_prop_fp.set_size(title_fontsize)\n \n         self.set_title(title, prop=title_prop_fp)\n+\n         self._draggable = None\n+        self.set_draggable(state=draggable)\n \n         # set the text color\n \n",
+      "extra": {
+        "exit_status": "Submitted",
+        "submission": "diff --git a/lib/matplotlib/legend.py b/lib/matplotlib/legend.py\nindex 9e5b903d59..20d4a76e0d 100644\n--- a/lib/matplotlib/legend.py\n+++ b/lib/matplotlib/legend.py\n@@ -286,6 +286,9 @@ handler_map : dict or None\n     The custom dictionary mapping instances or types to a legend\n     handler. This *handler_map* updates the default handler map\n     found at `matplotlib.legend.Legend.get_legend_handler_map`.\n+\n+draggable : bool, default: False\n+    Whether the legend can be dragged with the mouse.\n \"\"\")\n \n \n@@ -342,7 +345,8 @@ class Legend(Artist):\n         title_fontproperties=None,  # properties for the legend title\n         alignment=\"center\",       # control the alignment within the legend box\n         *,\n-        ncol=1  # synonym for ncols (backward compatibility)\n+        ncol=1,  # synonym for ncols (backward compatibility)\n+        draggable=False  # whether the legend can be dragged with the mouse\n     ):\n         \"\"\"\n         Parameters\n@@ -537,7 +541,9 @@ class Legend(Artist):\n             title_prop_fp.set_size(title_fontsize)\n \n         self.set_title(title, prop=title_prop_fp)\n+\n         self._draggable = None\n+        self.set_draggable(state=draggable)\n \n         # set the text color\n \n"
+      }
+    }
+  ],
+  "trajectory_format": "mini-swe-agent-1.1",
+  "instance_id": "matplotlib__matplotlib-23913"
+}

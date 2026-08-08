@@ -1,0 +1,23 @@
+instances_by_exit_status:
+    OpenRouterAuthenticationError:
+    - pytest-dev__pytest-5103
+    - pytest-dev__pytest-7490
+    - pytest-dev__pytest-8365
+    - scikit-learn__scikit-learn-10949
+    - scikit-learn__scikit-learn-13241
+    - scikit-learn__scikit-learn-25638
+    - sphinx-doc__sphinx-10451
+    - sphinx-doc__sphinx-7686
+    - sphinx-doc__sphinx-8721
+    - sympy__sympy-12171
+    - sympy__sympy-13480
+    - sympy__sympy-13895
+    - sympy__sympy-14024
+    - sympy__sympy-14317
+    - sympy__sympy-15345
+    - sympy__sympy-16792
+    - sympy__sympy-20049
+    - sympy__sympy-21379
+    - sympy__sympy-21614
+    - sympy__sympy-22005
+    - sympy__sympy-24152

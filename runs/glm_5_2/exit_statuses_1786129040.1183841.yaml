@@ -1,0 +1,30 @@
+instances_by_exit_status:
+    RuntimeError:
+    - sympy__sympy-15345
+    Submitted:
+    - django__django-16820
+    - matplotlib__matplotlib-22711
+    - matplotlib__matplotlib-23913
+    - matplotlib__matplotlib-23987
+    - matplotlib__matplotlib-24970
+    - mwaskom__seaborn-2848
+    - pallets__flask-5063
+    - psf__requests-2674
+    - pydata__xarray-3364
+    - pylint-dev__pylint-7228
+    - pytest-dev__pytest-5103
+    - pytest-dev__pytest-7490
+    - pytest-dev__pytest-8365
+    - scikit-learn__scikit-learn-10949
+    - scikit-learn__scikit-learn-13241
+    - scikit-learn__scikit-learn-13496
+    - scikit-learn__scikit-learn-25638
+    - sphinx-doc__sphinx-10451
+    - sphinx-doc__sphinx-7686
+    - sphinx-doc__sphinx-8721
+    - sympy__sympy-12171
+    - sympy__sympy-13480
+    - sympy__sympy-13895
+    - sympy__sympy-14024
+    - sympy__sympy-14317
+    - sympy__sympy-16792

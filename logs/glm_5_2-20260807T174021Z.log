@@ -1,0 +1,169 @@
+This is mini-swe-agent version 2.4.6.
+Check the v2 migration guide at https://klieret.short.gy/mini-v2-migration
+Loading global config from '/Users/dzen/Library/Application 
+Support/mini-swe-agent/.env'
+minisweagent: INFO: Results will be saved to                                    
+/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2                
+Logging to '/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/minisweagent.log'
+minisweagent: INFO: Loading dataset                                             
+/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/data/SWE-bench_Lite, split  
+test...                                                                         
+Generating dev split:   0%|          | 0/23 [00:00<?, ? examples/s]Generating dev split: 100%|██████████| 23/23 [00:00<00:00, 7407.02 examples/s]
+Generating test split:   0%|          | 0/300 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 300/300 [00:00<00:00, 81190.55 examples/s]
+minisweagent: INFO: Instance filter: 300 -> 50 instances                        
+minisweagent: INFO: Running on 50 instances...                                  
+minisweagent: INFO: Building agent config from specs:                           
+['/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/
+minisweagent/config/benchmarks/swebench.yaml',                                  
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/config/glm_5_2.yaml']      
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-f161660f -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.astropy_1776_astropy-6938:latest sleep 2h   
+minisweagent.environment: INFO: Started container minisweagent-f161660f with ID 
+7ae6889a6e49a0f43247fab340379c3233498cef9ccabdc581c10c34e8b13493                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/astropy__astro
+py-6938/astropy__astropy-6938.traj.json'                                        
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-8fd949fa -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-11019:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-8fd949fa with ID 
+c3cabea81eb1fb717e7c2e43438bf0bd7139ea0f2dac33f06a9a9d5f7e4106b9                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-11019/django__django-11019.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-8aaed7e3 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-11179:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-8aaed7e3 with ID 
+12da5ade762c01c10930881e06ffe777ef35a7460ac6b48d94fb38008ff477d8                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-11179/django__django-11179.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-d7401873 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-11848:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-d7401873 with ID 
+48a8bf4de8b41f00a40bea1c7c6201e0f06c9d418101cc417cdf12690a518fca                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-11848/django__django-11848.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-4785f2b6 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-12589:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-4785f2b6 with ID 
+efc3386332b6c752656d8a7e075c02b53c621af0695a7bdb5580472170a81ca0                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-12589/django__django-12589.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-82ae82e7 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-12708:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-82ae82e7 with ID 
+5e94d551b16cdb3ed60e162dc327ead86d6f024cee5afa3cb01d10df98e3a0fa                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-12708/django__django-12708.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-55e19702 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-13265:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-55e19702 with ID 
+3536ade31a6142d54975ba58cd1fe040c17ee3864b8e800f1b9f33376efa7445                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-13265/django__django-13265.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-afba75f9 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-13551:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-afba75f9 with ID 
+747b3b20f73d7f4ee05c7d8f5cf4d255b7e0c0be8a54015f2c8cfc55128dce9d                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-13551/django__django-13551.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-32331330 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-13757:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-32331330 with ID 
+cb724753f0813b0fadccf618c99981b59f66d8160d10e9073ed82eec8a4a2d52                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-13757/django__django-13757.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-cce584ab -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-13933:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-cce584ab with ID 
+8dab469330e8e62c7972a2c4bfee60d7ae3ae8c8aa8822b1335c87ab987eae57                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-13933/django__django-13933.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-9fcf49a6 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-14155:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-9fcf49a6 with ID 
+a0eaf18d5662fa0ec62a7ce3ec670d59bda43a1f873bf23d1b09b1cb39730a9d                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-14155/django__django-14155.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-9403d1a2 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-14667:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-9403d1a2 with ID 
+639fd6768638b9702c1900468de5418d8436a6605e621789e19ec5e9a3144767                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-14667/django__django-14667.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-f383af83 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-14752:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-f383af83 with ID 
+76ae42af287fdd0456734c8178b907509fc2ff94242e28287acc63b9ff475b94                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-14752/django__django-14752.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-e9692674 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-16041:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-e9692674 with ID 
+e44a9b920ae8eb7e2cd09a176c63d613741d7e98c4dc7e6ea703da7fd18c9f20                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-16041/django__django-16041.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-b1650300 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-16046:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-b1650300 with ID 
+d295a2e3d09ce917250068af8bc1a0e7640ea181ccdbac1d136cbdbfec6454bf                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-16046/django__django-16046.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-81020627 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-16400:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-81020627 with ID 
+c394a3b82bbdce27e1558bb7b2e5e707e708d38ab18ca7393da6d09aed0f7d68                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-16400/django__django-16400.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-3addbd3d -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-16408:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-3addbd3d with ID 
+02f6f1bc676326f754f2a90cbfa17e53e62826d7e806499a755c41c96321bcdc                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-16408/django__django-16408.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-14935f59 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-16527:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-14935f59 with ID 
+0753c5ac1dbaa8eb35cf6e678d5c94bfcb9935b84fd61f484f66730a04c4479a                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-16527/django__django-16527.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-65a4ff7f -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-16820:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-65a4ff7f with ID 
+a3837416ba4e077879f57453182c363152e87f7fc267d27996501e6edff40b78                
+/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

@@ -1,0 +1,205 @@
+2026-08-07 23:51:12,452 - INFO - Creating container for pytest-dev__pytest-5103...
+2026-08-07 23:51:12,473 - INFO - Container for pytest-dev__pytest-5103 created: 5f2d409b71caa4552db1c0ac614defb6f52d1d8238ca5805c937b405f359c608
+2026-08-07 23:51:12,547 - INFO - Container for pytest-dev__pytest-5103 started: 5f2d409b71caa4552db1c0ac614defb6f52d1d8238ca5805c937b405f359c608
+2026-08-07 23:51:12,547 - INFO - Intermediate patch for pytest-dev__pytest-5103 written to logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/pytest-dev__pytest-5103/patch.diff, now applying to container...
+2026-08-07 23:51:12,674 - INFO - >>>>> Applied Patch:
+Checking patch src/_pytest/assertion/rewrite.py...
+Applied patch src/_pytest/assertion/rewrite.py cleanly.
+
+2026-08-07 23:51:12,801 - INFO - Git diff before:
+diff --git a/src/_pytest/assertion/rewrite.py b/src/_pytest/assertion/rewrite.py
+index 2903b8995..e959bbd4d 100644
+--- a/src/_pytest/assertion/rewrite.py
++++ b/src/_pytest/assertion/rewrite.py
+@@ -4,6 +4,7 @@ from __future__ import division
+ from __future__ import print_function
+ 
+ import ast
++import copy
+ import errno
+ import imp
+ import itertools
+@@ -838,6 +839,10 @@ class AssertionRewriter(ast.NodeVisitor):
+         self.variable_counter = itertools.count()
+         self.stack = []
+         self.on_failure = []
++        # Keep the custom message and the top level expression around, so
++        # that calls to all() can be unrolled (see .visit_Call).
++        self.assert_msg = assert_.msg
++        self.assert_test = assert_.test
+         self.push_format_context()
+         # Rewrite assert into a bunch of statements.
+         top_condition, explanation = self.visit(assert_.test)
+@@ -968,6 +973,8 @@ warn_explicit(
+         """
+         visit `ast.Call` nodes on Python3.5 and after
+         """
++        if self._is_unrollable_all_call(call):
++            return self._visit_all(call)
+         new_func, func_expl = self.visit(call.func)
+         arg_expls = []
+         new_args = []
+@@ -991,6 +998,51 @@ warn_explicit(
+         outer_expl = "%s\n{%s = %s\n}" % (res_expl, res_expl, expl)
+         return res, outer_expl
+ 
++    def _is_unrollable_all_call(self, call):
++        """Check if a call to the builtin ``all`` function can be unrolled
++        into a for loop containing a plain assert statement, which produces
++        much more informative failure reports (see #5062).
++        """
++        if not (isinstance(call.func, ast.Name) and call.func.id == "all"):
++            return False
++        # unrolling is only valid if the call is the whole expression being
++        # asserted, otherwise the semantics of the assertion would change
++        if call is not getattr(self, "assert_test", None):
++            return False
++        if len(call.args) != 1 or call.keywords:
++            return False
++        iterable = call.args[0]
++        if not isinstance(iterable, (ast.GeneratorExp, ast.ListComp)):
++            return False
++        # only simple comprehensions with a single, unconditional and
++        # synchronous "for" can be unrolled safely
++        if len(iterable.generators) != 1:
++            return False
++        comprehension = iterable.generators[0]
++        if comprehension.ifs or getattr(comprehension, "is_async", 0):
++            return False
++        return True
++
++    def _visit_all(self, call):
++        """Special rewrite for the builtin all function, see #5062"""
++        gen_exp = call.args[0]
++        # the custom message of the original assertion, if any, is reused for
++        # each one of the unrolled assertions
++        msg = copy.deepcopy(getattr(self, "assert_msg", None))
++        assertion_module = ast.Module(
++            body=[ast.Assert(test=gen_exp.elt, msg=msg, lineno=1, col_offset=1)]
++        )
++        AssertionRewriter(module_path=None, config=None).run(assertion_module)
++        for_loop = ast.For(
++            iter=gen_exp.generators[0].iter,
++            target=gen_exp.generators[0].target,
++            body=assertion_module.body,
++            orelse=[],
++        )
++        self.statements.append(for_loop)
++        # Return a dummy expression, all the asserts are in the for loop
++        return _NameConstant(True), ""
++
+     def visit_Starred(self, starred):
+         # From Python 3.5, a Starred node can appear in a function call
+         res, expl = self.visit(starred.value)
+@@ -1001,6 +1053,8 @@ warn_explicit(
+         """
+         visit `ast.Call nodes on 3.4 and below`
+         """
++        if self._is_unrollable_all_call(call):
++            return self._visit_all(call)
+         new_func, func_expl = self.visit(call.func)
+         arg_expls = []
+         new_args = []
+2026-08-07 23:51:12,801 - INFO - Eval script for pytest-dev__pytest-5103 written to logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/pytest-dev__pytest-5103/eval.sh; copying to container...
+2026-08-07 23:51:21,978 - INFO - Test runtime: 9.14 seconds
+2026-08-07 23:51:21,978 - INFO - Test output for pytest-dev__pytest-5103 written to logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/pytest-dev__pytest-5103/test_output.txt
+2026-08-07 23:51:22,065 - INFO - Git diff after:
+diff --git a/src/_pytest/assertion/rewrite.py b/src/_pytest/assertion/rewrite.py
+index 2903b8995..e959bbd4d 100644
+--- a/src/_pytest/assertion/rewrite.py
++++ b/src/_pytest/assertion/rewrite.py
+@@ -4,6 +4,7 @@ from __future__ import division
+ from __future__ import print_function
+ 
+ import ast
++import copy
+ import errno
+ import imp
+ import itertools
+@@ -838,6 +839,10 @@ class AssertionRewriter(ast.NodeVisitor):
+         self.variable_counter = itertools.count()
+         self.stack = []
+         self.on_failure = []
++        # Keep the custom message and the top level expression around, so
++        # that calls to all() can be unrolled (see .visit_Call).
++        self.assert_msg = assert_.msg
++        self.assert_test = assert_.test
+         self.push_format_context()
+         # Rewrite assert into a bunch of statements.
+         top_condition, explanation = self.visit(assert_.test)
+@@ -968,6 +973,8 @@ warn_explicit(
+         """
+         visit `ast.Call` nodes on Python3.5 and after
+         """
++        if self._is_unrollable_all_call(call):
++            return self._visit_all(call)
+         new_func, func_expl = self.visit(call.func)
+         arg_expls = []
+         new_args = []
+@@ -991,6 +998,51 @@ warn_explicit(
+         outer_expl = "%s\n{%s = %s\n}" % (res_expl, res_expl, expl)
+         return res, outer_expl
+ 
++    def _is_unrollable_all_call(self, call):
++        """Check if a call to the builtin ``all`` function can be unrolled
++        into a for loop containing a plain assert statement, which produces
++        much more informative failure reports (see #5062).
++        """
++        if not (isinstance(call.func, ast.Name) and call.func.id == "all"):
++            return False
++        # unrolling is only valid if the call is the whole expression being
++        # asserted, otherwise the semantics of the assertion would change
++        if call is not getattr(self, "assert_test", None):
++            return False
++        if len(call.args) != 1 or call.keywords:
++            return False
++        iterable = call.args[0]
++        if not isinstance(iterable, (ast.GeneratorExp, ast.ListComp)):
++            return False
++        # only simple comprehensions with a single, unconditional and
++        # synchronous "for" can be unrolled safely
++        if len(iterable.generators) != 1:
++            return False
++        comprehension = iterable.generators[0]
++        if comprehension.ifs or getattr(comprehension, "is_async", 0):
++            return False
++        return True
++
++    def _visit_all(self, call):
++        """Special rewrite for the builtin all function, see #5062"""
++        gen_exp = call.args[0]
++        # the custom message of the original assertion, if any, is reused for
++        # each one of the unrolled assertions
++        msg = copy.deepcopy(getattr(self, "assert_msg", None))
++        assertion_module = ast.Module(
++            body=[ast.Assert(test=gen_exp.elt, msg=msg, lineno=1, col_offset=1)]
++        )
++        AssertionRewriter(module_path=None, config=None).run(assertion_module)
++        for_loop = ast.For(
++            iter=gen_exp.generators[0].iter,
++            target=gen_exp.generators[0].target,
++            body=assertion_module.body,
++            orelse=[],
++        )
++        self.statements.append(for_loop)
++        # Return a dummy expression, all the asserts are in the for loop
++        return _NameConstant(True), ""
++
+     def visit_Starred(self, starred):
+         # From Python 3.5, a Starred node can appear in a function call
+         res, expl = self.visit(starred.value)
+@@ -1001,6 +1053,8 @@ warn_explicit(
+         """
+         visit `ast.Call nodes on 3.4 and below`
+         """
++        if self._is_unrollable_all_call(call):
++            return self._visit_all(call)
+         new_func, func_expl = self.visit(call.func)
+         arg_expls = []
+         new_args = []
+2026-08-07 23:51:22,065 - INFO - Grading answer for pytest-dev__pytest-5103...
+2026-08-07 23:51:22,066 - INFO - report: {'pytest-dev__pytest-5103': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['testing/test_assertrewrite.py::TestAssertionRewrite::test_unroll_expression'], 'failure': []}, 'PASS_TO_PASS': {'success': ['testing/test_assertrewrite.py::TestAssertionRewrite::test_place_initial_imports', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_dont_rewrite', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_name', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_dont_rewrite_if_hasattr_fails', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_assert_already_has_message', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_boolop', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_short_circuit_evaluation', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_unary_op', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_binary_op', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_boolop_percent', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_call', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_attribute', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_comparisons', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_len', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_custom_reprcompare', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_assert_raising_nonzero_in_comparison', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_formatchar', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_custom_repr', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_custom_repr_non_ascii', 'testing/test_assertrewrite.py::TestAssertionRewriteHookDetails::test_read_pyc', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_dont_rewrite_plugin', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_assertion_message', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_assertion_message_multiline', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_assertion_message_tuple', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_assertion_message_expr', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_assertion_message_escape', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_assertion_messages_bytes', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_at_operator_issue1290', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_starred_with_side_effect', 'testing/test_assertrewrite.py::TestAssertionRewrite::test_for_loop', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_pycache_is_a_file', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_pycache_is_readonly', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_zipfile', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_readonly', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_dont_write_bytecode', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_orphaned_pyc_file', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_pyc_vs_pyo', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_package', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_translate_newlines', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_package_without__init__py', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_rewrite_warning', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_rewrite_module_imported_from_conftest', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_remember_rewritten_modules', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_rewrite_warning_using_pytest_plugins', 'testing/test_assertrewrite.py::TestRewriteOnImport::test_rewrite_warning_using_pytest_plugins_env_var', 'testing/test_assertrewrite.py::TestAssertionRewriteHookDetails::test_loader_is_package_false_for_module', 'testing/test_assertrewrite.py::TestAssertionRewriteHookDetails::test_loader_is_package_true_for_package', 'testing/test_assertrewrite.py::TestAssertionRewriteHookDetails::test_sys_meta_path_munged', 'testing/test_assertrewrite.py::TestAssertionRewriteHookDetails::test_write_pyc', 'testing/test_assertrewrite.py::TestAssertionRewriteHookDetails::test_resources_provider_for_loader', 'testing/test_assertrewrite.py::TestAssertionRewriteHookDetails::test_reload_is_same', 'testing/test_assertrewrite.py::TestAssertionRewriteHookDetails::test_reload_reloads', 'testing/test_assertrewrite.py::TestAssertionRewriteHookDetails::test_get_data_support', 'testing/test_assertrewrite.py::test_issue731', 'testing/test_assertrewrite.py::TestIssue925::test_simple_case', 'testing/test_assertrewrite.py::TestIssue925::test_long_case', 'testing/test_assertrewrite.py::TestIssue925::test_many_brackets', 'testing/test_assertrewrite.py::TestIssue2121::test_rewrite_python_files_contain_subdirs', 'testing/test_assertrewrite.py::test_source_mtime_long_long[-1]', 'testing/test_assertrewrite.py::test_source_mtime_long_long[1]', 'testing/test_assertrewrite.py::test_rewrite_infinite_recursion', 'testing/test_assertrewrite.py::TestEarlyRewriteBailout::test_basic', 'testing/test_assertrewrite.py::TestEarlyRewriteBailout::test_pattern_contains_subdirectories', 'testing/test_assertrewrite.py::TestEarlyRewriteBailout::test_cwd_changed'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for pytest-dev__pytest-5103: resolved: True
+2026-08-07 23:51:22,066 - INFO - Attempting to stop container sweb.eval.pytest-dev__pytest-5103.claude_opus_5_38_official...
+2026-08-07 23:51:37,157 - INFO - Attempting to remove container sweb.eval.pytest-dev__pytest-5103.claude_opus_5_38_official...
+2026-08-07 23:51:37,176 - INFO - Container sweb.eval.pytest-dev__pytest-5103.claude_opus_5_38_official removed.

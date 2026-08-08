@@ -1,0 +1,867 @@
+{
+  "info": {
+    "model_stats": {
+      "instance_cost": 0.134766,
+      "api_calls": 7
+    },
+    "config": {
+      "agent": {
+        "system_template": "You are a helpful assistant that can interact with a computer shell to solve programming tasks.\n",
+        "instance_template": "<pr_description>\nConsider the following PR description:\n{{task}}\n</pr_description>\n\n<instructions>\n# Task Instructions\n\n## Overview\n\nYou're a software engineer interacting continuously with a computer by submitting commands.\nYou'll be helping implement necessary changes to meet requirements in the PR description.\nYour task is specifically to make changes to non-test files in the current directory in order to fix the issue described in the PR description in a way that is general and consistent with the codebase.\n<IMPORTANT>This is an interactive process where you will think and issue AT LEAST ONE command, see the result, then think and issue your next command(s).</important>\n\nFor each response:\n\n1. Include a THOUGHT section explaining your reasoning and what you're trying to accomplish\n2. Provide one or more bash tool calls to execute\n\n## Important Boundaries\n\n- MODIFY: Regular source code files in /testbed (this is the working directory for all your subsequent commands)\n- DO NOT MODIFY: Tests, configuration files (pyproject.toml, setup.cfg, etc.)\n\n## Recommended Workflow\n\n1. Analyze the codebase by finding and reading relevant files\n2. Create a script to reproduce the issue\n3. Edit the source code to resolve the issue\n4. Verify your fix works by running your script again\n5. Test edge cases to ensure your fix is robust\n\n## Command Execution Rules\n\nYou are operating in an environment where\n\n1. You issue at least one command\n2. The system executes the command(s) in a subshell\n3. You see the result(s)\n4. You write your next command(s)\n\nEach response should include:\n\n1. **Reasoning text** where you explain your analysis and plan\n2. At least one tool call with your command\n\n**CRITICAL REQUIREMENTS:**\n\n- Your response SHOULD include reasoning text explaining what you're doing\n- Your response MUST include AT LEAST ONE bash tool call. You can make MULTIPLE tool calls in a single response when the commands are independent (e.g., searching multiple files, reading different parts of the codebase).\n- Directory or environment variable changes are not persistent. Every action is executed in a new subshell.\n- However, you can prefix any action with `MY_ENV_VAR=MY_VALUE cd /path/to/working/dir && ...` or write/load environment variables from files\n\nExample of a CORRECT response:\n<example_response>\nI need to understand the Builder-related code. Let me find relevant files and check the project structure.\n\n[Makes multiple bash tool calls: {\"command\": \"ls -la\"}, {\"command\": \"find src -name '*.java' | grep -i builder\"}, {\"command\": \"cat README.md | head -50\"}]\n</example_response>\n\n## Environment Details\n\n- You have a full Linux shell environment\n- Always use non-interactive flags (-y, -f) for commands\n- Avoid interactive tools like vi, nano, or any that require user input\n- You can use bash commands or invoke any tool that is available in the environment\n- You can also create new tools or scripts to help you with the task\n- If a tool isn't available, you can also install it\n\n## Submission\n\nWhen you've completed your work, you MUST submit your changes as a git patch.\nFollow these steps IN ORDER, with SEPARATE commands:\n\nStep 1: Create the patch file\nRun `git diff -- path/to/file1 path/to/file2 > patch.txt` listing only the source files you modified.\nDo NOT commit your changes.\n\n<IMPORTANT>\nThe patch must only contain changes to the specific source files you modified to fix the issue.\nDo not submit file creations or changes to any of the following files:\n\n- test and reproduction files\n- helper scripts, tests, or tools that you created\n- installation, build, packaging, configuration, or setup scripts unless they are directly part of the issue you were fixing (you can assume that the environment is already set up for your client)\n- binary or compiled files\n</IMPORTANT>\n\nStep 2: Verify your patch\nInspect patch.txt to confirm it only contains your intended changes and headers show `--- a/` and `+++ b/` paths.\n\nStep 3: Submit (EXACT command required)\nYou MUST use this EXACT command to submit:\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\n```\n\nIf the command fails (nonzero exit status), it will not submit.\n\n<CRITICAL>\n- Creating/viewing the patch and submitting it MUST be separate commands (not combined with &&).\n- If you modify patch.txt after verifying, you SHOULD verify again before submitting.\n- You CANNOT continue working (reading, editing, testing) in any way on this task after submitting.\n</CRITICAL>\n</instructions>\n",
+        "step_limit": 250,
+        "cost_limit": 3.0,
+        "wall_time_limit_seconds": 0,
+        "max_consecutive_format_errors": 3,
+        "output_path": null
+      },
+      "agent_type": "minisweagent.run.benchmarks.utils.common.ProgressTrackingAgent",
+      "model": {
+        "model_name": "anthropic/claude-opus-5",
+        "model_kwargs": {
+          "drop_params": true,
+          "parallel_tool_calls": true
+        },
+        "set_cache_control": "default_end",
+        "cost_tracking": "default",
+        "format_error_template": "{% if finish_reason is defined and (finish_reason == \"length\" or (finish_reason == \"tool_calls\" and not has_tool_calls)) -%}\nYour previous response reached the output token limit (finish_reason={{ finish_reason }}) before you produced a tool call, so it was cut off. Respond more concisely and finish with exactly one bash tool call. If you need to think more, do so briefly.\n{%- else -%}\nTool call error:\n\n<error>\n{{error}}\n</error>\n\nHere is general guidance on how to submit correct toolcalls:\n\nEvery response needs to use the 'bash' tool at least once to execute commands.\n\nCall the bash tool with your command as the argument:\n- Tool: bash\n- Arguments: {\"command\": \"your_command_here\"}\n\nIf you have completed your assignment, please consult the first message about how to\nsubmit your solution (you will not be able to continue working on this task after that).\n{%- endif %}\n",
+        "observation_template": "{% if output.exception_info -%}\n<exception>{{output.exception_info}}</exception>\n{% endif -%}\n<returncode>{{output.returncode}}</returncode>\n{% if output.output | length < 10000 -%}\n<output>\n{{ output.output -}}\n</output>\n{%- else -%}\n<warning>\nThe output of your last command was too long.\nPlease try a different command that produces less output.\nIf you're looking at a file you can try use head, tail or sed to view a smaller number of lines selectively.\nIf you're using grep or find and it produced too much output, you can use a more selective search pattern.\nIf you really need to see something from the full command's output, you can redirect output to a file and then search in that file.\n</warning>\n{%- set elided_chars = output.output | length - 10000 -%}\n<output_head>\n{{ output.output[:5000] }}\n</output_head>\n<elided_chars>\n{{ elided_chars }} characters elided\n</elided_chars>\n<output_tail>\n{{ output.output[-5000:] }}\n</output_tail>\n{%- endif -%}\n",
+        "multimodal_regex": ""
+      },
+      "model_type": "minisweagent.models.openrouter_model.OpenRouterModel",
+      "environment": {
+        "image": "docker.io/swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-8365:latest",
+        "cwd": "/testbed",
+        "env": {
+          "PAGER": "cat",
+          "MANPAGER": "cat",
+          "LESS": "-R",
+          "PIP_PROGRESS_BAR": "off",
+          "TQDM_DISABLE": "1",
+          "BASH_ENV": "/root/.bashrc"
+        },
+        "forward_env": [],
+        "timeout": 60,
+        "executable": "docker",
+        "run_args": [
+          "--rm"
+        ],
+        "container_timeout": "2h",
+        "pull_timeout": 900,
+        "interpreter": [
+          "bash",
+          "-c"
+        ]
+      },
+      "environment_type": "minisweagent.environments.docker.DockerEnvironment"
+    },
+    "mini_version": "2.4.6",
+    "exit_status": "Submitted",
+    "submission": "diff --git a/src/_pytest/tmpdir.py b/src/_pytest/tmpdir.py\nindex 29c7e19d7..47729ae5f 100644\n--- a/src/_pytest/tmpdir.py\n+++ b/src/_pytest/tmpdir.py\n@@ -115,7 +115,12 @@ class TempPathFactory:\n             # use a sub-directory in the temproot to speed-up\n             # make_numbered_dir() call\n             rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n-            rootdir.mkdir(exist_ok=True)\n+            try:\n+                rootdir.mkdir(exist_ok=True)\n+            except OSError:\n+                # getuser() likely returned illegal characters for the platform, use unknown back off mechanism\n+                rootdir = temproot.joinpath(\"pytest-of-unknown\")\n+                rootdir.mkdir(exist_ok=True)\n             basetemp = make_numbered_dir_with_cleanup(\n                 prefix=\"pytest-\", root=rootdir, keep=3, lock_timeout=LOCK_TIMEOUT\n             )\n"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant that can interact with a computer shell to solve programming tasks."
+    },
+    {
+      "role": "user",
+      "content": "<pr_description>\nConsider the following PR description:\ntmpdir creation fails when the username contains illegal characters for directory names\n`tmpdir`, `tmpdir_factory` and `tmp_path_factory` rely on `getpass.getuser()` for determining the `basetemp` directory. I found that the user name returned by `getpass.getuser()` may return characters that are not allowed for directory names. This may lead to errors while creating the temporary directory.\r\n\r\nThe situation in which I reproduced this issue was while being logged in through an ssh connection into my Windows 10 x64 Enterprise version (1909) using an OpenSSH_for_Windows_7.7p1 server. In this configuration the command `python -c \"import getpass; print(getpass.getuser())\"` returns my domain username e.g. `contoso\\john_doe` instead of `john_doe` as when logged in regularly using a local session.\r\n\r\nWhen trying to create a temp directory in pytest through e.g. `tmpdir_factory.mktemp('foobar')` this fails with the following error message:\r\n```\r\nself = WindowsPath('C:/Users/john_doe/AppData/Local/Temp/pytest-of-contoso/john_doe')\r\nmode = 511, parents = False, exist_ok = True\r\n\r\n    def mkdir(self, mode=0o777, parents=False, exist_ok=False):\r\n        \"\"\"\r\n        Create a new directory at this given path.\r\n        \"\"\"\r\n        if self._closed:\r\n            self._raise_closed()\r\n        try:\r\n>           self._accessor.mkdir(self, mode)\r\nE           FileNotFoundError: [WinError 3] The system cannot find the path specified: 'C:\\\\Users\\\\john_doe\\\\AppData\\\\Local\\\\Temp\\\\pytest-of-contoso\\\\john_doe'\r\n\r\nC:\\Python38\\lib\\pathlib.py:1266: FileNotFoundError\r\n```\r\n\r\nI could also reproduce this without the complicated ssh/windows setup with pytest 6.2.2 using the following commands from a `cmd`:\r\n```bat\r\necho def test_tmpdir(tmpdir):>test_tmp.py\r\necho   pass>>test_tmp.py\r\nset LOGNAME=contoso\\john_doe\r\npy.test test_tmp.py\r\n```\r\n\r\nThanks for having a look at this!\n\n</pr_description>\n\n<instructions>\n# Task Instructions\n\n## Overview\n\nYou're a software engineer interacting continuously with a computer by submitting commands.\nYou'll be helping implement necessary changes to meet requirements in the PR description.\nYour task is specifically to make changes to non-test files in the current directory in order to fix the issue described in the PR description in a way that is general and consistent with the codebase.\n<IMPORTANT>This is an interactive process where you will think and issue AT LEAST ONE command, see the result, then think and issue your next command(s).</important>\n\nFor each response:\n\n1. Include a THOUGHT section explaining your reasoning and what you're trying to accomplish\n2. Provide one or more bash tool calls to execute\n\n## Important Boundaries\n\n- MODIFY: Regular source code files in /testbed (this is the working directory for all your subsequent commands)\n- DO NOT MODIFY: Tests, configuration files (pyproject.toml, setup.cfg, etc.)\n\n## Recommended Workflow\n\n1. Analyze the codebase by finding and reading relevant files\n2. Create a script to reproduce the issue\n3. Edit the source code to resolve the issue\n4. Verify your fix works by running your script again\n5. Test edge cases to ensure your fix is robust\n\n## Command Execution Rules\n\nYou are operating in an environment where\n\n1. You issue at least one command\n2. The system executes the command(s) in a subshell\n3. You see the result(s)\n4. You write your next command(s)\n\nEach response should include:\n\n1. **Reasoning text** where you explain your analysis and plan\n2. At least one tool call with your command\n\n**CRITICAL REQUIREMENTS:**\n\n- Your response SHOULD include reasoning text explaining what you're doing\n- Your response MUST include AT LEAST ONE bash tool call. You can make MULTIPLE tool calls in a single response when the commands are independent (e.g., searching multiple files, reading different parts of the codebase).\n- Directory or environment variable changes are not persistent. Every action is executed in a new subshell.\n- However, you can prefix any action with `MY_ENV_VAR=MY_VALUE cd /path/to/working/dir && ...` or write/load environment variables from files\n\nExample of a CORRECT response:\n<example_response>\nI need to understand the Builder-related code. Let me find relevant files and check the project structure.\n\n[Makes multiple bash tool calls: {\"command\": \"ls -la\"}, {\"command\": \"find src -name '*.java' | grep -i builder\"}, {\"command\": \"cat README.md | head -50\"}]\n</example_response>\n\n## Environment Details\n\n- You have a full Linux shell environment\n- Always use non-interactive flags (-y, -f) for commands\n- Avoid interactive tools like vi, nano, or any that require user input\n- You can use bash commands or invoke any tool that is available in the environment\n- You can also create new tools or scripts to help you with the task\n- If a tool isn't available, you can also install it\n\n## Submission\n\nWhen you've completed your work, you MUST submit your changes as a git patch.\nFollow these steps IN ORDER, with SEPARATE commands:\n\nStep 1: Create the patch file\nRun `git diff -- path/to/file1 path/to/file2 > patch.txt` listing only the source files you modified.\nDo NOT commit your changes.\n\n<IMPORTANT>\nThe patch must only contain changes to the specific source files you modified to fix the issue.\nDo not submit file creations or changes to any of the following files:\n\n- test and reproduction files\n- helper scripts, tests, or tools that you created\n- installation, build, packaging, configuration, or setup scripts unless they are directly part of the issue you were fixing (you can assume that the environment is already set up for your client)\n- binary or compiled files\n</IMPORTANT>\n\nStep 2: Verify your patch\nInspect patch.txt to confirm it only contains your intended changes and headers show `--- a/` and `+++ b/` paths.\n\nStep 3: Submit (EXACT command required)\nYou MUST use this EXACT command to submit:\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\n```\n\nIf the command fails (nonzero exit status), it will not submit.\n\n<CRITICAL>\n- Creating/viewing the patch and submitting it MUST be separate commands (not combined with &&).\n- If you modify patch.txt after verifying, you SHOULD verify again before submitting.\n- You CANNOT continue working (reading, editing, testing) in any way on this task after submitting.\n</CRITICAL>\n</instructions>"
+    },
+    {
+      "role": "assistant",
+      "content": "I'll start by exploring the codebase to find the tmpdir implementation.",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01AGSKeaXPePsD3HqYfRotuc",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && cat src/_pytest/tmpdir.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "index": 1,
+          "id": "toolu_01HNFwc8vhwVh5cLM8TquFgA",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && git log --oneline -3\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && cat src/_pytest/tmpdir.py",
+            "tool_call_id": "toolu_01AGSKeaXPePsD3HqYfRotuc"
+          },
+          {
+            "command": "cd /testbed && git log --oneline -3",
+            "tool_call_id": "toolu_01HNFwc8vhwVh5cLM8TquFgA"
+          }
+        ],
+        "response": {
+          "id": "gen-1786162556-bSmwujUwms76Ys0lcKAg",
+          "object": "chat.completion",
+          "created": 1786162556,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "I'll start by exploring the codebase to find the tmpdir implementation.",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01AGSKeaXPePsD3HqYfRotuc",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && cat src/_pytest/tmpdir.py\"}"
+                    }
+                  },
+                  {
+                    "type": "function",
+                    "index": 1,
+                    "id": "toolu_01HNFwc8vhwVh5cLM8TquFgA",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && git log --oneline -3\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 2660,
+            "completion_tokens": 150,
+            "total_tokens": 2810,
+            "cost": 0.0203725,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 2658,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0203725,
+              "upstream_inference_prompt_cost": 0.0166225,
+              "upstream_inference_completions_cost": 0.00375
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.0203725,
+        "timestamp": 1786162559.7163892
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n\"\"\"Support for providing temporary directories to test functions.\"\"\"\nimport os\nimport re\nimport tempfile\nfrom pathlib import Path\nfrom typing import Optional\n\nimport attr\nimport py\n\nfrom .pathlib import ensure_reset_dir\nfrom .pathlib import LOCK_TIMEOUT\nfrom .pathlib import make_numbered_dir\nfrom .pathlib import make_numbered_dir_with_cleanup\nfrom _pytest.compat import final\nfrom _pytest.config import Config\nfrom _pytest.deprecated import check_ispytest\nfrom _pytest.fixtures import fixture\nfrom _pytest.fixtures import FixtureRequest\nfrom _pytest.monkeypatch import MonkeyPatch\n\n\n@final\n@attr.s(init=False)\nclass TempPathFactory:\n    \"\"\"Factory for temporary directories under the common base temp directory.\n\n    The base directory can be configured using the ``--basetemp`` option.\n    \"\"\"\n\n    _given_basetemp = attr.ib(type=Optional[Path])\n    _trace = attr.ib()\n    _basetemp = attr.ib(type=Optional[Path])\n\n    def __init__(\n        self,\n        given_basetemp: Optional[Path],\n        trace,\n        basetemp: Optional[Path] = None,\n        *,\n        _ispytest: bool = False,\n    ) -> None:\n        check_ispytest(_ispytest)\n        if given_basetemp is None:\n            self._given_basetemp = None\n        else:\n            # Use os.path.abspath() to get absolute path instead of resolve() as it\n            # does not work the same in all platforms (see #4427).\n            # Path.absolute() exists, but it is not public (see https://bugs.python.org/issue25012).\n            self._given_basetemp = Path(os.path.abspath(str(given_basetemp)))\n        self._trace = trace\n        self._basetemp = basetemp\n\n    @classmethod\n    def from_config(\n        cls,\n        config: Config,\n        *,\n        _ispytest: bool = False,\n    ) -> \"TempPathFactory\":\n        \"\"\"Create a factory according to pytest configuration.\n\n        :meta private:\n        \"\"\"\n        check_ispytest(_ispytest)\n        return cls(\n            given_basetemp=config.option.basetemp,\n            trace=config.trace.get(\"tmpdir\"),\n            _ispytest=True,\n        )\n\n    def _ensure_relative_to_basetemp(self, basename: str) -> str:\n        basename = os.path.normpath(basename)\n        if (self.getbasetemp() / basename).resolve().parent != self.getbasetemp():\n            raise ValueError(f\"{basename} is not a normalized and relative path\")\n        return basename\n\n    def mktemp(self, basename: str, numbered: bool = True) -> Path:\n        \"\"\"Create a new temporary directory managed by the factory.\n\n        :param basename:\n            Directory base name, must be a relative path.\n\n        :param numbered:\n            If ``True``, ensure the directory is unique by adding a numbered\n            suffix greater than any existing one: ``basename=\"foo-\"`` and ``numbered=True``\n            means that this function will create directories named ``\"foo-0\"``,\n            ``\"foo-1\"``, ``\"foo-2\"`` and so on.\n\n        :returns:\n            The path to the new directory.\n        \"\"\"\n        basename = self._ensure_relative_to_basetemp(basename)\n        if not numbered:\n            p = self.getbasetemp().joinpath(basename)\n            p.mkdir()\n        else:\n            p = make_numbered_dir(root=self.getbasetemp(), prefix=basename)\n            self._trace(\"mktemp\", p)\n        return p\n\n    def getbasetemp(self) -> Path:\n        \"\"\"Return base temporary directory.\"\"\"\n        if self._basetemp is not None:\n            return self._basetemp\n\n        if self._given_basetemp is not None:\n            basetemp = self._given_basetemp\n            ensure_reset_dir(basetemp)\n            basetemp = basetemp.resolve()\n        else:\n            from_env = os.environ.get(\"PYTEST_DEBUG_TEMPROOT\")\n            temproot = Path(from_env or tempfile.gettempdir()).resolve()\n            user = get_user() or \"unknown\"\n            # use a sub-directory in the temproot to speed-up\n            # make_numbered_dir() call\n            rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n            rootdir.mkdir(exist_ok=True)\n            basetemp = make_numbered_dir_with_cleanup(\n                prefix=\"pytest-\", root=rootdir, keep=3, lock_timeout=LOCK_TIMEOUT\n            )\n        assert basetemp is not None, basetemp\n        self._basetemp = t = basetemp\n        self._trace(\"new basetemp\", t)\n        return t\n\n\n@final\n@attr.s(init=False)\nclass TempdirFactory:\n    \"\"\"Backward comptibility wrapper that implements :class:``py.path.local``\n    for :class:``TempPathFactory``.\"\"\"\n\n    _tmppath_factory = attr.ib(type=TempPathFactory)\n\n    def __init__(\n        self, tmppath_factory: TempPathFactory, *, _ispytest: bool = False\n    ) -> None:\n        check_ispytest(_ispytest)\n        self._tmppath_factory = tmppath_factory\n\n    def mktemp(self, basename: str, numbered: bool = True) -> py.path.local:\n        \"\"\"Same as :meth:`TempPathFactory.mktemp`, but returns a ``py.path.local`` object.\"\"\"\n        return py.path.local(self._tmppath_factory.mktemp(basename, numbered).resolve())\n\n    def getbasetemp(self) -> py.path.local:\n        \"\"\"Backward compat wrapper for ``_tmppath_factory.getbasetemp``.\"\"\"\n        return py.path.local(self._tmppath_factory.getbasetemp().resolve())\n\n\ndef get_user() -> Optional[str]:\n    \"\"\"Return the current user name, or None if getuser() does not work\n    in the current environment (see #1010).\"\"\"\n    import getpass\n\n    try:\n        return getpass.getuser()\n    except (ImportError, KeyError):\n        return None\n\n\ndef pytest_configure(config: Config) -> None:\n    \"\"\"Create a TempdirFactory and attach it to the config object.\n\n    This is to comply with existing plugins which expect the handler to be\n    available at pytest_configure time, but ideally should be moved entirely\n    to the tmpdir_factory session fixture.\n    \"\"\"\n    mp = MonkeyPatch()\n    tmppath_handler = TempPathFactory.from_config(config, _ispytest=True)\n    t = TempdirFactory(tmppath_handler, _ispytest=True)\n    config._cleanup.append(mp.undo)\n    mp.setattr(config, \"_tmp_path_factory\", tmppath_handler, raising=False)\n    mp.setattr(config, \"_tmpdirhandler\", t, raising=False)\n\n\n@fixture(scope=\"session\")\ndef tmpdir_factory(request: FixtureRequest) -> TempdirFactory:\n    \"\"\"Return a :class:`_pytest.tmpdir.TempdirFactory` instance for the test session.\"\"\"\n    # Set dynamically by pytest_configure() above.\n    return request.config._tmpdirhandler  # type: ignore\n\n\n@fixture(scope=\"session\")\ndef tmp_path_factory(request: FixtureRequest) -> TempPathFactory:\n    \"\"\"Return a :class:`_pytest.tmpdir.TempPathFactory` instance for the test session.\"\"\"\n    # Set dynamically by pytest_configure() above.\n    return request.config._tmp_path_factory  # type: ignore\n\n\ndef _mk_tmp(request: FixtureRequest, factory: TempPathFactory) -> Path:\n    name = request.node.name\n    name = re.sub(r\"[\\W]\", \"_\", name)\n    MAXVAL = 30\n    name = name[:MAXVAL]\n    return factory.mktemp(name, numbered=True)\n\n\n@fixture\ndef tmpdir(tmp_path: Path) -> py.path.local:\n    \"\"\"Return a temporary directory path object which is unique to each test\n    function invocation, created as a sub directory of the base temporary\n    directory.\n\n    By default, a new base temporary directory is created each test session,\n    and old bases are removed after 3 sessions, to aid in debugging. If\n    ``--basetemp`` is used then it is cleared each session. See :ref:`base\n    temporary directory`.\n\n    The returned object is a `py.path.local`_ path object.\n\n    .. _`py.path.local`: https://py.readthedocs.io/en/latest/path.html\n    \"\"\"\n    return py.path.local(tmp_path)\n\n\n@fixture\ndef tmp_path(request: FixtureRequest, tmp_path_factory: TempPathFactory) -> Path:\n    \"\"\"Return a temporary directory path object which is unique to each test\n    function invocation, created as a sub directory of the base temporary\n    directory.\n\n    By default, a new base temporary directory is created each test session,\n    and old bases are removed after 3 sessions, to aid in debugging. If\n    ``--basetemp`` is used then it is cleared each session. See :ref:`base\n    temporary directory`.\n\n    The returned object is a :class:`pathlib.Path` object.\n    \"\"\"\n\n    return _mk_tmp(request, tmp_path_factory)\n</output>",
+      "extra": {
+        "raw_output": "\"\"\"Support for providing temporary directories to test functions.\"\"\"\nimport os\nimport re\nimport tempfile\nfrom pathlib import Path\nfrom typing import Optional\n\nimport attr\nimport py\n\nfrom .pathlib import ensure_reset_dir\nfrom .pathlib import LOCK_TIMEOUT\nfrom .pathlib import make_numbered_dir\nfrom .pathlib import make_numbered_dir_with_cleanup\nfrom _pytest.compat import final\nfrom _pytest.config import Config\nfrom _pytest.deprecated import check_ispytest\nfrom _pytest.fixtures import fixture\nfrom _pytest.fixtures import FixtureRequest\nfrom _pytest.monkeypatch import MonkeyPatch\n\n\n@final\n@attr.s(init=False)\nclass TempPathFactory:\n    \"\"\"Factory for temporary directories under the common base temp directory.\n\n    The base directory can be configured using the ``--basetemp`` option.\n    \"\"\"\n\n    _given_basetemp = attr.ib(type=Optional[Path])\n    _trace = attr.ib()\n    _basetemp = attr.ib(type=Optional[Path])\n\n    def __init__(\n        self,\n        given_basetemp: Optional[Path],\n        trace,\n        basetemp: Optional[Path] = None,\n        *,\n        _ispytest: bool = False,\n    ) -> None:\n        check_ispytest(_ispytest)\n        if given_basetemp is None:\n            self._given_basetemp = None\n        else:\n            # Use os.path.abspath() to get absolute path instead of resolve() as it\n            # does not work the same in all platforms (see #4427).\n            # Path.absolute() exists, but it is not public (see https://bugs.python.org/issue25012).\n            self._given_basetemp = Path(os.path.abspath(str(given_basetemp)))\n        self._trace = trace\n        self._basetemp = basetemp\n\n    @classmethod\n    def from_config(\n        cls,\n        config: Config,\n        *,\n        _ispytest: bool = False,\n    ) -> \"TempPathFactory\":\n        \"\"\"Create a factory according to pytest configuration.\n\n        :meta private:\n        \"\"\"\n        check_ispytest(_ispytest)\n        return cls(\n            given_basetemp=config.option.basetemp,\n            trace=config.trace.get(\"tmpdir\"),\n            _ispytest=True,\n        )\n\n    def _ensure_relative_to_basetemp(self, basename: str) -> str:\n        basename = os.path.normpath(basename)\n        if (self.getbasetemp() / basename).resolve().parent != self.getbasetemp():\n            raise ValueError(f\"{basename} is not a normalized and relative path\")\n        return basename\n\n    def mktemp(self, basename: str, numbered: bool = True) -> Path:\n        \"\"\"Create a new temporary directory managed by the factory.\n\n        :param basename:\n            Directory base name, must be a relative path.\n\n        :param numbered:\n            If ``True``, ensure the directory is unique by adding a numbered\n            suffix greater than any existing one: ``basename=\"foo-\"`` and ``numbered=True``\n            means that this function will create directories named ``\"foo-0\"``,\n            ``\"foo-1\"``, ``\"foo-2\"`` and so on.\n\n        :returns:\n            The path to the new directory.\n        \"\"\"\n        basename = self._ensure_relative_to_basetemp(basename)\n        if not numbered:\n            p = self.getbasetemp().joinpath(basename)\n            p.mkdir()\n        else:\n            p = make_numbered_dir(root=self.getbasetemp(), prefix=basename)\n            self._trace(\"mktemp\", p)\n        return p\n\n    def getbasetemp(self) -> Path:\n        \"\"\"Return base temporary directory.\"\"\"\n        if self._basetemp is not None:\n            return self._basetemp\n\n        if self._given_basetemp is not None:\n            basetemp = self._given_basetemp\n            ensure_reset_dir(basetemp)\n            basetemp = basetemp.resolve()\n        else:\n            from_env = os.environ.get(\"PYTEST_DEBUG_TEMPROOT\")\n            temproot = Path(from_env or tempfile.gettempdir()).resolve()\n            user = get_user() or \"unknown\"\n            # use a sub-directory in the temproot to speed-up\n            # make_numbered_dir() call\n            rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n            rootdir.mkdir(exist_ok=True)\n            basetemp = make_numbered_dir_with_cleanup(\n                prefix=\"pytest-\", root=rootdir, keep=3, lock_timeout=LOCK_TIMEOUT\n            )\n        assert basetemp is not None, basetemp\n        self._basetemp = t = basetemp\n        self._trace(\"new basetemp\", t)\n        return t\n\n\n@final\n@attr.s(init=False)\nclass TempdirFactory:\n    \"\"\"Backward comptibility wrapper that implements :class:``py.path.local``\n    for :class:``TempPathFactory``.\"\"\"\n\n    _tmppath_factory = attr.ib(type=TempPathFactory)\n\n    def __init__(\n        self, tmppath_factory: TempPathFactory, *, _ispytest: bool = False\n    ) -> None:\n        check_ispytest(_ispytest)\n        self._tmppath_factory = tmppath_factory\n\n    def mktemp(self, basename: str, numbered: bool = True) -> py.path.local:\n        \"\"\"Same as :meth:`TempPathFactory.mktemp`, but returns a ``py.path.local`` object.\"\"\"\n        return py.path.local(self._tmppath_factory.mktemp(basename, numbered).resolve())\n\n    def getbasetemp(self) -> py.path.local:\n        \"\"\"Backward compat wrapper for ``_tmppath_factory.getbasetemp``.\"\"\"\n        return py.path.local(self._tmppath_factory.getbasetemp().resolve())\n\n\ndef get_user() -> Optional[str]:\n    \"\"\"Return the current user name, or None if getuser() does not work\n    in the current environment (see #1010).\"\"\"\n    import getpass\n\n    try:\n        return getpass.getuser()\n    except (ImportError, KeyError):\n        return None\n\n\ndef pytest_configure(config: Config) -> None:\n    \"\"\"Create a TempdirFactory and attach it to the config object.\n\n    This is to comply with existing plugins which expect the handler to be\n    available at pytest_configure time, but ideally should be moved entirely\n    to the tmpdir_factory session fixture.\n    \"\"\"\n    mp = MonkeyPatch()\n    tmppath_handler = TempPathFactory.from_config(config, _ispytest=True)\n    t = TempdirFactory(tmppath_handler, _ispytest=True)\n    config._cleanup.append(mp.undo)\n    mp.setattr(config, \"_tmp_path_factory\", tmppath_handler, raising=False)\n    mp.setattr(config, \"_tmpdirhandler\", t, raising=False)\n\n\n@fixture(scope=\"session\")\ndef tmpdir_factory(request: FixtureRequest) -> TempdirFactory:\n    \"\"\"Return a :class:`_pytest.tmpdir.TempdirFactory` instance for the test session.\"\"\"\n    # Set dynamically by pytest_configure() above.\n    return request.config._tmpdirhandler  # type: ignore\n\n\n@fixture(scope=\"session\")\ndef tmp_path_factory(request: FixtureRequest) -> TempPathFactory:\n    \"\"\"Return a :class:`_pytest.tmpdir.TempPathFactory` instance for the test session.\"\"\"\n    # Set dynamically by pytest_configure() above.\n    return request.config._tmp_path_factory  # type: ignore\n\n\ndef _mk_tmp(request: FixtureRequest, factory: TempPathFactory) -> Path:\n    name = request.node.name\n    name = re.sub(r\"[\\W]\", \"_\", name)\n    MAXVAL = 30\n    name = name[:MAXVAL]\n    return factory.mktemp(name, numbered=True)\n\n\n@fixture\ndef tmpdir(tmp_path: Path) -> py.path.local:\n    \"\"\"Return a temporary directory path object which is unique to each test\n    function invocation, created as a sub directory of the base temporary\n    directory.\n\n    By default, a new base temporary directory is created each test session,\n    and old bases are removed after 3 sessions, to aid in debugging. If\n    ``--basetemp`` is used then it is cleared each session. See :ref:`base\n    temporary directory`.\n\n    The returned object is a `py.path.local`_ path object.\n\n    .. _`py.path.local`: https://py.readthedocs.io/en/latest/path.html\n    \"\"\"\n    return py.path.local(tmp_path)\n\n\n@fixture\ndef tmp_path(request: FixtureRequest, tmp_path_factory: TempPathFactory) -> Path:\n    \"\"\"Return a temporary directory path object which is unique to each test\n    function invocation, created as a sub directory of the base temporary\n    directory.\n\n    By default, a new base temporary directory is created each test session,\n    and old bases are removed after 3 sessions, to aid in debugging. If\n    ``--basetemp`` is used then it is cleared each session. See :ref:`base\n    temporary directory`.\n\n    The returned object is a :class:`pathlib.Path` object.\n    \"\"\"\n\n    return _mk_tmp(request, tmp_path_factory)\n",
+        "returncode": 0,
+        "timestamp": 1786162560.252959,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01AGSKeaXPePsD3HqYfRotuc",
+      "role": "tool"
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n4964b468c Merge pull request #8354 from feanil/patch-1\ne6012612b Remove a redundant paragraph\na44dcf5ec Merge pull request #8351 from vpoulailleau/patch-1\n</output>",
+      "extra": {
+        "raw_output": "4964b468c Merge pull request #8354 from feanil/patch-1\ne6012612b Remove a redundant paragraph\na44dcf5ec Merge pull request #8351 from vpoulailleau/patch-1\n",
+        "returncode": 0,
+        "timestamp": 1786162560.255136,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01HNFwc8vhwVh5cLM8TquFgA",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": "I'm looking at how to handle usernames with illegal characters. The upstream fix in pytest handles this by getting the user from the system and falling back to \"unknown\" if needed, then using that to construct a subdirectory path.",
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01NEkGbLDY9V8MeSRfPJKm1f",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && grep -n \\\"unknown\\\\|get_user\\\\|pytest-of\\\" testing/test_tmpdir.py | head -40\"}"
+          }
+        }
+      ],
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "text": "I'm looking at how to handle usernames with illegal characters. The upstream fix in pytest handles this by getting the user from the system and falling back to \"unknown\" if needed, then using that to construct a subdirectory path.",
+          "format": "anthropic-claude-v1",
+          "index": 0,
+          "signature": "CAIShxEKhwEIEBgCKkAbabjYabvmpwaueeF8C5LaEv1mEQ/Ut67lS983WHfJJ/u1+z14smtvOE84vEwHtWMjW5U9lVRUliRvHSG2iWF+Mg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDJw0Q8b9sR7wL+T1KBoMN8aygc9GyLqhyDJSIjCms4aWnfrtDS84DLc3Z45HjB6uhRyoasboCo2sC49UMkmzIiBAM/aPW/YV6QM/i+AqrA88zHx8yFZjB2PpEzLIJV/0OSjPw9jt014cdn/30nX22jhNweF7WSx9notEwQBYtVjMzg5csezNsmidE8C6iqPq7Fdm/ouk/88w2NeG39BRRIs4V57CC4nuGJ1f8qbiSHAYkgLAM9dBZgBkT3ynlcCE9vRME5KERLZUnOjXBCIYMXRAMD1zLlhszT1u/jviV5sggE6w9L5ltWk+xZnL/QNRksVma1xz8puMZ3SkbB98dpHNK73nCzlP2CdWtH7lnVVQ5i09dYvP2shN3WKBVFD92W4WS1L8Zi9F0Izy0axqlyayEpa9Ynrnas+mfS3QydK3t0EhlWPCrG6Y1XczRBinINUJ/66C3z1ZoipsDMogCLcWhRKSODVjsfV65u1s8jneeoW4BiUYvX4mZ3Pt8pEUCPyh8SIRcQL0snvDHjhz8I05Ixaxo7XVnobt/HsGKcRQY9Uvsl47mbWAHTwjxwg7LQGF9gXRv9fIWSx0zl0eV+6Cz1gRx1u7JxVl37mDOnKBYPjGIUO3IjhQYGlYii1/llgHRZJiWDlKOBqsRqzlxVsa448gbfN18gacsJKMURHqsZnosrlTrKzqXmQuigIWDmlVemuAzDW0Fuypr4pi9H+sEuwGSvUqAhs1xlSpvgPEs7GUNy1xLuErcPKWwrXJ280IPJ7EhczrqgJJKs6rpOjmtlIQ22CLbE45msCPejt1VLTzAkfnRCGxY9mDqGDUaB5yZICVN5kKUuzt8IsomJMdjQNQuYJJXMREvuocqdASAehrugyZ9b8MGnnozQ8ShI8Pn6xZw1lcJx2+yA1cIYsz+ORzCg47DO2x0d0m+ksFyHmmMDrokmH0Tk6JDhLK2muLS+yQBnEFPGUf2uSE5504Onlusa1fq09lPJdaCHJ6+L8mWCYshDe75rlWUNupLGRZmJgMiWON7H/cZIx12+FhZb5BlFj6apDHvuet3rVpL1VFK1QSbmt+S9FzgoybN5yGPrYRA69pK0g83qiN4mtmD/I1vl7+o0PwqUqkaLsNWBpzZOgWCL+ApyJux4N7xdF7MeadDvzXsoW2a8J+mVVtv38wXGKD9/LmtOKvyPbhFg7oAkjvIwchgaptpqxhcvtqJvI6r+V+2NFIspbNqftXfF9cbWS+uIzXwG056GzjFKToNSzhhxK4xgDR0GRhgAAklrvfusEiZxKFPWWFY0QBFd9ZAlrrViApG58NcuYrA7Zl77Rejxu8yUPwfmBx0W196TW1OlcaPZ3xt90aRyAj9M8nDkdoYJbnLr3Nw/4dVBPM0XeYWtCEk38mVk3MOlMdXowlSWaXMXf0eVlhCmOn8e0O3yWkT/tHiWbzyVhrDQcrPadGdCgA2fI1QW8iNIvzbMSkaqb/ij6ExU61N8V8Hpk2cj3Bf7KvKa8jO7MgYZyWtljHTQyJ6o/5mVxSVPyQLINvHVmCHWBuRCDidhmIGAaKVh84/fNDn4+k/XxZhv4MsFde+JHJbZej74QZc8iKO6AALLK89YWsLTPQVWhWq9yzP8jxq8AMV+VE4zWJk9g/I2xGo3z6ptV8q6GXf5XAXApOoc/ba7wEoWfxPV/hWUyyJryAYIgn+Lf/7joOvapK5aR1Qlnq7ZljDz4Tul3aZa35FMlfRSDEUosyUYyOabd0lJzimNChB6ZN5ZqaAxX5215tBBxFgXZMMCuyfQQaVHFFjeTc8pQiWW0ComK+u6pWgGqIRLmsJCLBCBp+pzgQ1t6os2dCrAOcpKwqXXS+d2bDL+Y9wNQwWA/iutkLlY6150Fyn76AaAPz5WaRxnB4qZXeUHXUqMcR77L4sL7fkS5iqhOpHfG1T5fpzanh/XLYp7loq0y4hV5gbqhJQ4yq0P7fvSLrh1nYlyPqzoyHgkg+zNYNtXF8gh+dT/dq9tRhDT1gcUpD1ydFTo8LdgHonGZ3D1p7+rv3dyb/oZApzfzMz9B+qBzlN3t1h7PMzD0ejHVqoWR4klKtqZxKAc6eRQcsJOR8bD8FNtvNCEh8Ko5WhEEK3pFTotZNnGiUtCSUPM66747/fqzFcG9JKMARUc1MNI2c3fOcryZDpYnaX1lM3QnJtFYCMMjk9oreVBRx1Kz6mCSxr+SN9g37tlMyeDNpjE0bUzGVWkh+IDf73V96rZaxRGMd0buxehkw6e8nVJT39s9VYWAy60Rl/Etga1Z/bJXHSNJIqoV5VhPiSlGlO0HYQLfTrV0l30Bt/MP7tcCGYOHUgSEEwHJeZ2sBuLc/8cvuqwhun3v3ZV0rBHHi56oymL0rkWDD698OR23G2ymGJFVzavdbYteMG7iDvCqawpfBTz9/Sc2nB7G5pwHp1ToByToJNOoS94zjvPCdYa3Tu4MZyGvVfMcbseaEkvLwmq+D8oZQ6ql/YbbF9Hj215ZmmZcNZfqOF+0GvxUQXVIkV4zyAEj8Vag8IMWr1zHJxEv0xBa54bULRQdfCLyAowje2vkNdoK6bZGUeSUymrUDzz+b/i2iiFlhyBeBBn72DIIrth9Ltlj132mOhnlUivhCnXt8ZVyZW2wc+uS6Zt3pVK1pqT0kH2M9ZfkMIliOY82Sfdx+5Wye064KCQirQtghKT1cYPDRSLr97GrhCF4ucEtbShgB"
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && grep -n \"unknown\\|get_user\\|pytest-of\" testing/test_tmpdir.py | head -40",
+            "tool_call_id": "toolu_01NEkGbLDY9V8MeSRfPJKm1f"
+          }
+        ],
+        "response": {
+          "id": "gen-1786162560-sUoJFPHpQOY3dCiuA78y",
+          "object": "chat.completion",
+          "created": 1786162560,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": "I'm looking at how to handle usernames with illegal characters. The upstream fix in pytest handles this by getting the user from the system and falling back to \"unknown\" if needed, then using that to construct a subdirectory path.",
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01NEkGbLDY9V8MeSRfPJKm1f",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && grep -n \\\"unknown\\\\|get_user\\\\|pytest-of\\\" testing/test_tmpdir.py | head -40\"}"
+                    }
+                  }
+                ],
+                "reasoning_details": [
+                  {
+                    "type": "reasoning.text",
+                    "text": "I'm looking at how to handle usernames with illegal characters. The upstream fix in pytest handles this by getting the user from the system and falling back to \"unknown\" if needed, then using that to construct a subdirectory path.",
+                    "format": "anthropic-claude-v1",
+                    "index": 0,
+                    "signature": "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"
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 6073,
+            "completion_tokens": 842,
+            "total_tokens": 6915,
+            "cost": 0.04372025,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 2658,
+              "cache_write_tokens": 3413,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.04372025,
+              "upstream_inference_prompt_cost": 0.02267025,
+              "upstream_inference_completions_cost": 0.02105
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 58,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.04372025,
+        "timestamp": 1786162570.3018801
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n22:from _pytest.tmpdir import get_user\n230:def test_get_user_uid_not_found():\n231:    \"\"\"Test that get_user() function works even if the current process's\n235:    assert get_user() is None\n239:def test_get_user(monkeypatch):\n240:    \"\"\"Test that get_user() function works even if environment variables\n246:    assert get_user() is None\n385:        # unknown exception\n395:        # unknown function\n398:            match=r\"^\\(rm_rf\\) unknown function None when removing .*foo.txt:\\nNone: \",\n</output>",
+      "extra": {
+        "raw_output": "22:from _pytest.tmpdir import get_user\n230:def test_get_user_uid_not_found():\n231:    \"\"\"Test that get_user() function works even if the current process's\n235:    assert get_user() is None\n239:def test_get_user(monkeypatch):\n240:    \"\"\"Test that get_user() function works even if environment variables\n246:    assert get_user() is None\n385:        # unknown exception\n395:        # unknown function\n398:            match=r\"^\\(rm_rf\\) unknown function None when removing .*foo.txt:\\nNone: \",\n",
+        "returncode": 0,
+        "timestamp": 1786162570.6080241,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01NEkGbLDY9V8MeSRfPJKm1f",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01XC4t33hkS6A466RzR47f6i",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && python - <<'EOF'\\nimport re\\np = \\\"src/_pytest/tmpdir.py\\\"\\ns = open(p).read()\\nold = \\\"\\\"\\\"            rootdir = temproot.joinpath(f\\\"pytest-of-{user}\\\")\\n            rootdir.mkdir(exist_ok=True)\\n\\\"\\\"\\\"\\nnew = \\\"\\\"\\\"            rootdir = temproot.joinpath(f\\\"pytest-of-{user}\\\")\\n            try:\\n                rootdir.mkdir(exist_ok=True)\\n            except OSError:\\n                # getuser() likely returned illegal characters for the platform, use unknown back off mechanism\\n                rootdir = temproot.joinpath(\\\"pytest-of-unknown\\\")\\n                rootdir.mkdir(exist_ok=True)\\n\\\"\\\"\\\"\\nassert old in s\\ns = s.replace(old, new)\\nopen(p, \\\"w\\\").write(s)\\nEOF\\nsed -n 100,120p src/_pytest/tmpdir.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "index": 1,
+          "id": "toolu_0175YZF8u94r5Aa6CrEWTwam",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && ls changelog | head\"}"
+          }
+        }
+      ],
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "signature": "CAISxAIKhwEIEBgCKkBDTzBZUAUzgZGgnhB8cYZvQk1d0L5N1KC22iM3HDpctu01s5STtltwmZ8Faw2D8XzyvIpjKfWfCD52L5BpepA2Mg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDOzCJLVydo4oTT0azRoM2oDrsSy+6c4kULBGIjAJeNb4LoV2uxK2uBUHj22AVeo6iRTHwLmBQaR78oI23TKQD1icDFENraU+2Im3WvkqavV30zpUkVkV1sveXvODNX/XmRNDbCPGUjZvC6m102OW2OQMqmqfBuyORmWQ6Zc+Lh+KfHCrqzWSyn599DP7wXo5xokY7hxJB2L1/vQUXd9lRBagXvC/mLt4+sY9NnCSyj+m/f9zWKRFoa8YAQ==",
+          "format": "anthropic-claude-v1",
+          "index": 0
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && python - <<'EOF'\nimport re\np = \"src/_pytest/tmpdir.py\"\ns = open(p).read()\nold = \"\"\"            rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n            rootdir.mkdir(exist_ok=True)\n\"\"\"\nnew = \"\"\"            rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n            try:\n                rootdir.mkdir(exist_ok=True)\n            except OSError:\n                # getuser() likely returned illegal characters for the platform, use unknown back off mechanism\n                rootdir = temproot.joinpath(\"pytest-of-unknown\")\n                rootdir.mkdir(exist_ok=True)\n\"\"\"\nassert old in s\ns = s.replace(old, new)\nopen(p, \"w\").write(s)\nEOF\nsed -n 100,120p src/_pytest/tmpdir.py",
+            "tool_call_id": "toolu_01XC4t33hkS6A466RzR47f6i"
+          },
+          {
+            "command": "cd /testbed && ls changelog | head",
+            "tool_call_id": "toolu_0175YZF8u94r5Aa6CrEWTwam"
+          }
+        ],
+        "response": {
+          "id": "gen-1786162570-LxNFgXcJSFJEOXSqZe3F",
+          "object": "chat.completion",
+          "created": 1786162570,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01XC4t33hkS6A466RzR47f6i",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && python - <<'EOF'\\nimport re\\np = \\\"src/_pytest/tmpdir.py\\\"\\ns = open(p).read()\\nold = \\\"\\\"\\\"            rootdir = temproot.joinpath(f\\\"pytest-of-{user}\\\")\\n            rootdir.mkdir(exist_ok=True)\\n\\\"\\\"\\\"\\nnew = \\\"\\\"\\\"            rootdir = temproot.joinpath(f\\\"pytest-of-{user}\\\")\\n            try:\\n                rootdir.mkdir(exist_ok=True)\\n            except OSError:\\n                # getuser() likely returned illegal characters for the platform, use unknown back off mechanism\\n                rootdir = temproot.joinpath(\\\"pytest-of-unknown\\\")\\n                rootdir.mkdir(exist_ok=True)\\n\\\"\\\"\\\"\\nassert old in s\\ns = s.replace(old, new)\\nopen(p, \\\"w\\\").write(s)\\nEOF\\nsed -n 100,120p src/_pytest/tmpdir.py\"}"
+                    }
+                  },
+                  {
+                    "type": "function",
+                    "index": 1,
+                    "id": "toolu_0175YZF8u94r5Aa6CrEWTwam",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && ls changelog | head\"}"
+                    }
+                  }
+                ],
+                "reasoning_details": [
+                  {
+                    "type": "reasoning.text",
+                    "signature": "CAISxAIKhwEIEBgCKkBDTzBZUAUzgZGgnhB8cYZvQk1d0L5N1KC22iM3HDpctu01s5STtltwmZ8Faw2D8XzyvIpjKfWfCD52L5BpepA2Mg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDOzCJLVydo4oTT0azRoM2oDrsSy+6c4kULBGIjAJeNb4LoV2uxK2uBUHj22AVeo6iRTHwLmBQaR78oI23TKQD1icDFENraU+2Im3WvkqavV30zpUkVkV1sveXvODNX/XmRNDbCPGUjZvC6m102OW2OQMqmqfBuyORmWQ6Zc+Lh+KfHCrqzWSyn599DP7wXo5xokY7hxJB2L1/vQUXd9lRBagXvC/mLt4+sY9NnCSyj+m/f9zWKRFoa8YAQ==",
+                    "format": "anthropic-claude-v1",
+                    "index": 0
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 7115,
+            "completion_tokens": 441,
+            "total_tokens": 7556,
+            "cost": 0.020583,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 6071,
+              "cache_write_tokens": 1042,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.020583,
+              "upstream_inference_prompt_cost": 0.009558,
+              "upstream_inference_completions_cost": 0.011025
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.020583,
+        "timestamp": 1786162575.884348
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n        return p\n\n    def getbasetemp(self) -> Path:\n        \"\"\"Return base temporary directory.\"\"\"\n        if self._basetemp is not None:\n            return self._basetemp\n\n        if self._given_basetemp is not None:\n            basetemp = self._given_basetemp\n            ensure_reset_dir(basetemp)\n            basetemp = basetemp.resolve()\n        else:\n            from_env = os.environ.get(\"PYTEST_DEBUG_TEMPROOT\")\n            temproot = Path(from_env or tempfile.gettempdir()).resolve()\n            user = get_user() or \"unknown\"\n            # use a sub-directory in the temproot to speed-up\n            # make_numbered_dir() call\n            rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n            try:\n                rootdir.mkdir(exist_ok=True)\n            except OSError:\n</output>",
+      "extra": {
+        "raw_output": "        return p\n\n    def getbasetemp(self) -> Path:\n        \"\"\"Return base temporary directory.\"\"\"\n        if self._basetemp is not None:\n            return self._basetemp\n\n        if self._given_basetemp is not None:\n            basetemp = self._given_basetemp\n            ensure_reset_dir(basetemp)\n            basetemp = basetemp.resolve()\n        else:\n            from_env = os.environ.get(\"PYTEST_DEBUG_TEMPROOT\")\n            temproot = Path(from_env or tempfile.gettempdir()).resolve()\n            user = get_user() or \"unknown\"\n            # use a sub-directory in the temproot to speed-up\n            # make_numbered_dir() call\n            rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n            try:\n                rootdir.mkdir(exist_ok=True)\n            except OSError:\n",
+        "returncode": 0,
+        "timestamp": 1786162576.4822772,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01XC4t33hkS6A466RzR47f6i",
+      "role": "tool"
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n5105.doc.rst\n7469.deprecation.rst\n7469.feature.rst\n8061.bugfix.rst\n8144.feature.rst\n8174.trivial.rst\n8192.bugfix.rst\n8242.deprecation.rst\n8248.trivial.rst\n8258.bugfix.rst\n</output>",
+      "extra": {
+        "raw_output": "5105.doc.rst\n7469.deprecation.rst\n7469.feature.rst\n8061.bugfix.rst\n8144.feature.rst\n8174.trivial.rst\n8192.bugfix.rst\n8242.deprecation.rst\n8248.trivial.rst\n8258.bugfix.rst\n",
+        "returncode": 0,
+        "timestamp": 1786162576.484492,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_0175YZF8u94r5Aa6CrEWTwam",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01TJYnMqCSsphR63WExoqVJj",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && cat > changelog/8317.bugfix.rst <<'EOF'\\nFix `tmpdir`, `tmpdir_factory` and `tmp_path_factory` failing to create the base temporary directory\\nwhen the user name returned by ``getpass.getuser()`` contains characters which are illegal in\\ndirectory names: in this case a directory named ``pytest-of-unknown`` is used instead.\\nEOF\\ncat > /tmp/test_tmp.py <<'EOF'\\ndef test_tmpdir(tmpdir):\\n    print(tmpdir)\\nEOF\\ncd /tmp && LOGNAME='contoso/john_doe' python -m pytest test_tmp.py -s -q 2>&1 | tail -5\"}"
+          }
+        }
+      ],
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "signature": "CAISqwQKhwEIEBgCKkDjK3Th75IIvWDzRZZ1xHzc6W0iW1IcaQ9+165xCGNmew/HhtkERcIPhQaSLB8W6GtkfBslCcykLKbUNTlVbL5uMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDHcJPY1j8/YywAbRzhoM/nF0LITpRi943SUWIjDm7bduuLzdoV1mnedwf8d4iSKaE/HtvHhf5yLWBBdgbQ7ewcthigL4pPGHARtPBNQq0AJeJRFY/q6vEvvJ9jBNAeWvwzTmvuR14vX8OLQIDU0Dyvtuzeqbu0NMAOys5AW66rDabEtHUEb2pkv4echu07sTPQpHxSUQBhBJUlpd89VoQlVEdotVudX9ETZyVyAWKoJ5K/HH4KgHr+L+jhJldGim6J+4hET1TeN1Jq/6qYrvzRLL9o10lmxEaptMDVg7DKsGUgcGZYJOyzl4o59saz/9MOLavVBYpZWEuOCxycKvl+hsjbCzInrBaOazd9PHvvjm9psyc3JFY5DZxbWgmaXQC4Qv0zbbIqRUx1w3Zv6SNnbIaPO9myXq9XDbegFq6D3JCjD3aO9zuX68KvDmUYn2mtU/+UGTyf+b1z7Ykl1lVwmLRzmeXwasGbaZ8QaSvlhbzZuzBgiDBHapOQMe2ugxbmPch6b0rh3LsDPr/FI5zcYVQCfmSS+yA7k+6dQ2byIYAQ==",
+          "format": "anthropic-claude-v1",
+          "index": 0
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && cat > changelog/8317.bugfix.rst <<'EOF'\nFix `tmpdir`, `tmpdir_factory` and `tmp_path_factory` failing to create the base temporary directory\nwhen the user name returned by ``getpass.getuser()`` contains characters which are illegal in\ndirectory names: in this case a directory named ``pytest-of-unknown`` is used instead.\nEOF\ncat > /tmp/test_tmp.py <<'EOF'\ndef test_tmpdir(tmpdir):\n    print(tmpdir)\nEOF\ncd /tmp && LOGNAME='contoso/john_doe' python -m pytest test_tmp.py -s -q 2>&1 | tail -5",
+            "tool_call_id": "toolu_01TJYnMqCSsphR63WExoqVJj"
+          }
+        ],
+        "response": {
+          "id": "gen-1786162576-mv64TKbd7oMABdWpn7Ma",
+          "object": "chat.completion",
+          "created": 1786162576,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01TJYnMqCSsphR63WExoqVJj",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && cat > changelog/8317.bugfix.rst <<'EOF'\\nFix `tmpdir`, `tmpdir_factory` and `tmp_path_factory` failing to create the base temporary directory\\nwhen the user name returned by ``getpass.getuser()`` contains characters which are illegal in\\ndirectory names: in this case a directory named ``pytest-of-unknown`` is used instead.\\nEOF\\ncat > /tmp/test_tmp.py <<'EOF'\\ndef test_tmpdir(tmpdir):\\n    print(tmpdir)\\nEOF\\ncd /tmp && LOGNAME='contoso/john_doe' python -m pytest test_tmp.py -s -q 2>&1 | tail -5\"}"
+                    }
+                  }
+                ],
+                "reasoning_details": [
+                  {
+                    "type": "reasoning.text",
+                    "signature": "CAISqwQKhwEIEBgCKkDjK3Th75IIvWDzRZZ1xHzc6W0iW1IcaQ9+165xCGNmew/HhtkERcIPhQaSLB8W6GtkfBslCcykLKbUNTlVbL5uMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDHcJPY1j8/YywAbRzhoM/nF0LITpRi943SUWIjDm7bduuLzdoV1mnedwf8d4iSKaE/HtvHhf5yLWBBdgbQ7ewcthigL4pPGHARtPBNQq0AJeJRFY/q6vEvvJ9jBNAeWvwzTmvuR14vX8OLQIDU0Dyvtuzeqbu0NMAOys5AW66rDabEtHUEb2pkv4echu07sTPQpHxSUQBhBJUlpd89VoQlVEdotVudX9ETZyVyAWKoJ5K/HH4KgHr+L+jhJldGim6J+4hET1TeN1Jq/6qYrvzRLL9o10lmxEaptMDVg7DKsGUgcGZYJOyzl4o59saz/9MOLavVBYpZWEuOCxycKvl+hsjbCzInrBaOazd9PHvvjm9psyc3JFY5DZxbWgmaXQC4Qv0zbbIqRUx1w3Zv6SNnbIaPO9myXq9XDbegFq6D3JCjD3aO9zuX68KvDmUYn2mtU/+UGTyf+b1z7Ykl1lVwmLRzmeXwasGbaZ8QaSvlhbzZuzBgiDBHapOQMe2ugxbmPch6b0rh3LsDPr/FI5zcYVQCfmSS+yA7k+6dQ2byIYAQ==",
+                    "format": "anthropic-claude-v1",
+                    "index": 0
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 8037,
+            "completion_tokens": 421,
+            "total_tokens": 8458,
+            "cost": 0.019854,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 7113,
+              "cache_write_tokens": 922,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.019854,
+              "upstream_inference_prompt_cost": 0.009329,
+              "upstream_inference_completions_cost": 0.010525
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.019854,
+        "timestamp": 1786162582.863276
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n/tmp/pytest-of-unknown/pytest-0/test_tmpdir0\n.\n1 passed in 0.01s\n</output>",
+      "extra": {
+        "raw_output": "/tmp/pytest-of-unknown/pytest-0/test_tmpdir0\n.\n1 passed in 0.01s\n",
+        "returncode": 0,
+        "timestamp": 1786162583.427082,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01TJYnMqCSsphR63WExoqVJj",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": "The fallback works. Let me run the existing tmpdir tests to make sure nothing broke.",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01NWn8WgsN95ER7gzKxgtdh8",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && python -m pytest testing/test_tmpdir.py -q 2>&1 | tail -5\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && python -m pytest testing/test_tmpdir.py -q 2>&1 | tail -5",
+            "tool_call_id": "toolu_01NWn8WgsN95ER7gzKxgtdh8"
+          }
+        ],
+        "response": {
+          "id": "gen-1786162583-eJKdK6HupNyi50DDYGMO",
+          "object": "chat.completion",
+          "created": 1786162583,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "The fallback works. Let me run the existing tmpdir tests to make sure nothing broke.",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01NWn8WgsN95ER7gzKxgtdh8",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && python -m pytest testing/test_tmpdir.py -q 2>&1 | tail -5\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 8525,
+            "completion_tokens": 114,
+            "total_tokens": 8639,
+            "cost": 0.0099275,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 8035,
+              "cache_write_tokens": 488,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0099275,
+              "upstream_inference_prompt_cost": 0.0070775,
+              "upstream_inference_completions_cost": 0.00285
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.0099275,
+        "timestamp": 1786162586.1671638
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n...s.............................                                        [100%]\n32 passed, 1 skipped in 0.27s\n</output>",
+      "extra": {
+        "raw_output": "...s.............................                                        [100%]\n32 passed, 1 skipped in 0.27s\n",
+        "returncode": 0,
+        "timestamp": 1786162586.902005,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01NWn8WgsN95ER7gzKxgtdh8",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01BMv7HNmA6uCinABqKryuee",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && git diff -- src/_pytest/tmpdir.py > patch.txt && cat patch.txt\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && git diff -- src/_pytest/tmpdir.py > patch.txt && cat patch.txt",
+            "tool_call_id": "toolu_01BMv7HNmA6uCinABqKryuee"
+          }
+        ],
+        "response": {
+          "id": "gen-1786162587-KARO4ePaQaLHNjkgslLH",
+          "object": "chat.completion",
+          "created": 1786162587,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01BMv7HNmA6uCinABqKryuee",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && git diff -- src/_pytest/tmpdir.py > patch.txt && cat patch.txt\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 8694,
+            "completion_tokens": 85,
+            "total_tokens": 8779,
+            "cost": 0.00745275,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 8523,
+              "cache_write_tokens": 169,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.00745275,
+              "upstream_inference_prompt_cost": 0.00532775,
+              "upstream_inference_completions_cost": 0.002125
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.00745275,
+        "timestamp": 1786162589.088554
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\ndiff --git a/src/_pytest/tmpdir.py b/src/_pytest/tmpdir.py\nindex 29c7e19d7..47729ae5f 100644\n--- a/src/_pytest/tmpdir.py\n+++ b/src/_pytest/tmpdir.py\n@@ -115,7 +115,12 @@ class TempPathFactory:\n             # use a sub-directory in the temproot to speed-up\n             # make_numbered_dir() call\n             rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n-            rootdir.mkdir(exist_ok=True)\n+            try:\n+                rootdir.mkdir(exist_ok=True)\n+            except OSError:\n+                # getuser() likely returned illegal characters for the platform, use unknown back off mechanism\n+                rootdir = temproot.joinpath(\"pytest-of-unknown\")\n+                rootdir.mkdir(exist_ok=True)\n             basetemp = make_numbered_dir_with_cleanup(\n                 prefix=\"pytest-\", root=rootdir, keep=3, lock_timeout=LOCK_TIMEOUT\n             )\n</output>",
+      "extra": {
+        "raw_output": "diff --git a/src/_pytest/tmpdir.py b/src/_pytest/tmpdir.py\nindex 29c7e19d7..47729ae5f 100644\n--- a/src/_pytest/tmpdir.py\n+++ b/src/_pytest/tmpdir.py\n@@ -115,7 +115,12 @@ class TempPathFactory:\n             # use a sub-directory in the temproot to speed-up\n             # make_numbered_dir() call\n             rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n-            rootdir.mkdir(exist_ok=True)\n+            try:\n+                rootdir.mkdir(exist_ok=True)\n+            except OSError:\n+                # getuser() likely returned illegal characters for the platform, use unknown back off mechanism\n+                rootdir = temproot.joinpath(\"pytest-of-unknown\")\n+                rootdir.mkdir(exist_ok=True)\n             basetemp = make_numbered_dir_with_cleanup(\n                 prefix=\"pytest-\", root=rootdir, keep=3, lock_timeout=LOCK_TIMEOUT\n             )\n",
+        "returncode": 0,
+        "timestamp": 1786162589.398426,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01BMv7HNmA6uCinABqKryuee",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": "The patch contains exactly the intended source change: when creating the `pytest-of-<user>` root directory fails due to illegal characters in the username, it falls back to `pytest-of-unknown`.",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01WR8h8Q2UEqKHLokcTL3GXv",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\"}"
+          }
+        }
+      ],
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "signature": "CAISxQMKhwEIEBgCKkAnrCoxEItiacuQJPSh280wJkxjuPUdMm9vTPYcAGjY/yqUiaFykhcaVYL72Rd5eZzUHNLXBfxvZp8m4CerzjaEMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDOQuG/bKhUZzB4IEvhoMrxVNsrodSYADxMSFIjBb6HtR1E8griIaK5ZwQZL/OzPtWEV+KvU79IwpBcPmD233cnVVJVOUwgv4psUOzkcq6gFdCbUMLxhh1BZnQs9e3Hfaoq579qfsBV3G2P0i4vlbq5g7xqDXTJhfM/MRv7nM9xd/QLtj1+P7qNNOQ+7P3C9DBRFiYLsQ2MzHMPJBuj7VghfdbDLHalQcK/9vQ1Re1i7DFdxx1Z14jRpz9uZJ8czf0Z73Ff1nV4frMZZ72SCl3vaKxxQFPhQTxZyfhCy3RiVFy6O8WWadwlvgKMoVly4poqCYyGmIfvuWzWlaKrBR0OKLogVBl4OSJ9m9eR6usKIBH9+5ZBcZ0jk2jBrW6/KfyU8RfAqyeJtzkWunLvPM3CBiCxABJPpxakIYAQ==",
+          "format": "anthropic-claude-v1",
+          "index": 0
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt",
+            "tool_call_id": "toolu_01WR8h8Q2UEqKHLokcTL3GXv"
+          }
+        ],
+        "response": {
+          "id": "gen-1786162589-J0zHbk2np7ahsJr5ukRK",
+          "object": "chat.completion",
+          "created": 1786162589,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "The patch contains exactly the intended source change: when creating the `pytest-of-<user>` root directory fails due to illegal characters in the username, it falls back to `pytest-of-unknown`.",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01WR8h8Q2UEqKHLokcTL3GXv",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\"}"
+                    }
+                  }
+                ],
+                "reasoning_details": [
+                  {
+                    "type": "reasoning.text",
+                    "signature": "CAISxQMKhwEIEBgCKkAnrCoxEItiacuQJPSh280wJkxjuPUdMm9vTPYcAGjY/yqUiaFykhcaVYL72Rd5eZzUHNLXBfxvZp8m4CerzjaEMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDOQuG/bKhUZzB4IEvhoMrxVNsrodSYADxMSFIjBb6HtR1E8griIaK5ZwQZL/OzPtWEV+KvU79IwpBcPmD233cnVVJVOUwgv4psUOzkcq6gFdCbUMLxhh1BZnQs9e3Hfaoq579qfsBV3G2P0i4vlbq5g7xqDXTJhfM/MRv7nM9xd/QLtj1+P7qNNOQ+7P3C9DBRFiYLsQ2MzHMPJBuj7VghfdbDLHalQcK/9vQ1Re1i7DFdxx1Z14jRpz9uZJ8czf0Z73Ff1nV4frMZZ72SCl3vaKxxQFPhQTxZyfhCy3RiVFy6O8WWadwlvgKMoVly4poqCYyGmIfvuWzWlaKrBR0OKLogVBl4OSJ9m9eR6usKIBH9+5ZBcZ0jk2jBrW6/KfyU8RfAqyeJtzkWunLvPM3CBiCxABJPpxakIYAQ==",
+                    "format": "anthropic-claude-v1",
+                    "index": 0
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 9190,
+            "completion_tokens": 216,
+            "total_tokens": 9406,
+            "cost": 0.012856,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 8692,
+              "cache_write_tokens": 496,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.012856,
+              "upstream_inference_prompt_cost": 0.007456,
+              "upstream_inference_completions_cost": 0.0054
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.012856,
+        "timestamp": 1786162593.4931278
+      }
+    },
+    {
+      "role": "exit",
+      "content": "diff --git a/src/_pytest/tmpdir.py b/src/_pytest/tmpdir.py\nindex 29c7e19d7..47729ae5f 100644\n--- a/src/_pytest/tmpdir.py\n+++ b/src/_pytest/tmpdir.py\n@@ -115,7 +115,12 @@ class TempPathFactory:\n             # use a sub-directory in the temproot to speed-up\n             # make_numbered_dir() call\n             rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n-            rootdir.mkdir(exist_ok=True)\n+            try:\n+                rootdir.mkdir(exist_ok=True)\n+            except OSError:\n+                # getuser() likely returned illegal characters for the platform, use unknown back off mechanism\n+                rootdir = temproot.joinpath(\"pytest-of-unknown\")\n+                rootdir.mkdir(exist_ok=True)\n             basetemp = make_numbered_dir_with_cleanup(\n                 prefix=\"pytest-\", root=rootdir, keep=3, lock_timeout=LOCK_TIMEOUT\n             )\n",
+      "extra": {
+        "exit_status": "Submitted",
+        "submission": "diff --git a/src/_pytest/tmpdir.py b/src/_pytest/tmpdir.py\nindex 29c7e19d7..47729ae5f 100644\n--- a/src/_pytest/tmpdir.py\n+++ b/src/_pytest/tmpdir.py\n@@ -115,7 +115,12 @@ class TempPathFactory:\n             # use a sub-directory in the temproot to speed-up\n             # make_numbered_dir() call\n             rootdir = temproot.joinpath(f\"pytest-of-{user}\")\n-            rootdir.mkdir(exist_ok=True)\n+            try:\n+                rootdir.mkdir(exist_ok=True)\n+            except OSError:\n+                # getuser() likely returned illegal characters for the platform, use unknown back off mechanism\n+                rootdir = temproot.joinpath(\"pytest-of-unknown\")\n+                rootdir.mkdir(exist_ok=True)\n             basetemp = make_numbered_dir_with_cleanup(\n                 prefix=\"pytest-\", root=rootdir, keep=3, lock_timeout=LOCK_TIMEOUT\n             )\n"
+      }
+    }
+  ],
+  "trajectory_format": "mini-swe-agent-1.1",
+  "instance_id": "pytest-dev__pytest-8365"
+}

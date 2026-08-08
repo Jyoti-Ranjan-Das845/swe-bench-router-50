@@ -1,0 +1,40 @@
+diff --git a/sklearn/utils/validation.py b/sklearn/utils/validation.py
+index fe1f7236e..3f04e7b50 100644
+--- a/sklearn/utils/validation.py
++++ b/sklearn/utils/validation.py
+@@ -351,6 +351,26 @@ def _ensure_no_complex_data(array):
+                          "{}\n".format(array))
+ 
+ 
++
++def _get_numpy_dtype(array):
++    """Get the numpy dtype of the array-like object.
++
++    This helper handles the case where ``array`` is a pandas object
++    (e.g. ``DataFrame`` or ``Series``) for which the ``dtype`` attribute
++    does not necessarily carry the actual data dtype (a ``DataFrame``
++    does not have a ``dtype`` attribute and a ``Series`` may have a
++    ``dtype`` attribute which is a column named "dtype").
++    """
++    # pandas DataFrame and Series expose the underlying ndarray via the
++    # ``values`` attribute. Note that some other objects (e.g. a dict-like
++    # ``scipy.sparse.dok_matrix``) also expose a ``values`` attribute but
++    # they should not be confused with pandas objects.
++    is_pandas = hasattr(array, "values") and not sp.issparse(array)
++    if is_pandas:
++        return array.values.dtype
++    return getattr(array, "dtype", None)
++
++
+ def check_array(array, accept_sparse=False, accept_large_sparse=True,
+                 dtype="numeric", order=None, copy=False, force_all_finite=True,
+                 ensure_2d=True, allow_nd=False, ensure_min_samples=1,
+@@ -461,7 +481,7 @@ def check_array(array, accept_sparse=False, accept_large_sparse=True,
+     # store whether originally we wanted numeric dtype
+     dtype_numeric = isinstance(dtype, six.string_types) and dtype == "numeric"
+ 
+-    dtype_orig = getattr(array, "dtype", None)
++    dtype_orig = _get_numpy_dtype(array)
+     if not hasattr(dtype_orig, 'kind'):
+         # not a data type (e.g. a column named dtype in a pandas DataFrame)
+         dtype_orig = None

@@ -1,0 +1,19 @@
+diff --git a/sympy/polys/polytools.py b/sympy/polys/polytools.py
+index bfec61de64..360da1b83d 100644
+--- a/sympy/polys/polytools.py
++++ b/sympy/polys/polytools.py
+@@ -5321,6 +5321,14 @@ def gcd(f, g=None, *gens, **args):
+         except NotImplementedError:
+             raise ComputationFailed('gcd', 2, exc)
+ 
++    except PolynomialError as exc:
++        domain, (a, b) = construct_domain((f, g))
++
++        try:
++            return domain.to_sympy(domain.gcd(a, b))
++        except NotImplementedError:
++            raise ComputationFailed('gcd', 2, exc)
++
+     result = F.gcd(G)
+ 
+     if not opt.polys:

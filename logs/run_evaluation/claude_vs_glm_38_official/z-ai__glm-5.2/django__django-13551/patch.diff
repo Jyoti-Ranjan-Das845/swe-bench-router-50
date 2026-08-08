@@ -1,0 +1,47 @@
+diff --git a/django/contrib/auth/tokens.py b/django/contrib/auth/tokens.py
+index 93e2d71af2..65e3f45c10 100644
+--- a/django/contrib/auth/tokens.py
++++ b/django/contrib/auth/tokens.py
+@@ -85,6 +85,9 @@ class PasswordResetTokenGenerator:
+            same password is chosen, due to password salting).
+         2. The last_login field will usually be updated very shortly after
+            a password reset.
++        3. The email field will change if the user updates their email address,
++           invalidating any outstanding password reset tokens that were sent
++           to the previous address.
+         Failing those things, settings.PASSWORD_RESET_TIMEOUT eventually
+         invalidates the token.
+ 
+@@ -93,8 +96,14 @@ class PasswordResetTokenGenerator:
+         """
+         # Truncate microseconds so that tokens are consistent even if the
+         # database doesn't support microseconds.
+-        login_timestamp = '' if user.last_login is None else user.last_login.replace(microsecond=0, tzinfo=None)
+-        return str(user.pk) + user.password + str(login_timestamp) + str(timestamp)
++        login_timestamp = (
++            ''
++            if user.last_login is None
++            else user.last_login.replace(microsecond=0, tzinfo=None)
++        )
++        email_field = user.get_email_field_name()
++        email = getattr(user, email_field, '') or ''
++        return str(user.pk) + user.password + str(login_timestamp) + str(timestamp) + email
+ 
+     def _num_seconds(self, dt):
+         return int((dt - datetime(2001, 1, 1)).total_seconds())
+diff --git a/docs/releases/3.2.txt b/docs/releases/3.2.txt
+index 10842af4fc..82ce062572 100644
+--- a/docs/releases/3.2.txt
++++ b/docs/releases/3.2.txt
+@@ -552,6 +552,11 @@ Miscellaneous
+   ``False`` if the file cannot be locked, instead of raising
+   :exc:`BlockingIOError`.
+ 
++* Password reset tokens now take into account the user's email address, if
++  set. As a consequence, password reset tokens generated before a user
++  changed their email address will no longer be valid. Existing password
++  reset tokens generated before upgrading will no longer be valid.
++
+ .. _deprecated-features-3.2:
+ 
+ Features deprecated in 3.2

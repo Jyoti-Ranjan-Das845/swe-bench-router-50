@@ -1,0 +1,20 @@
+instances_by_exit_status:
+    Submitted:
+    - astropy__astropy-6938
+    - django__django-11019
+    - django__django-11179
+    - django__django-11848
+    - django__django-12589
+    - django__django-12708
+    - django__django-13265
+    - django__django-13551
+    - django__django-13757
+    - django__django-13933
+    - django__django-14155
+    - django__django-14667
+    - django__django-14752
+    - django__django-16041
+    - django__django-16046
+    - django__django-16400
+    - django__django-16408
+    - django__django-16527

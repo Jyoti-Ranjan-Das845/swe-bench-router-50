@@ -1,0 +1,138 @@
+diff --git a/changelog/5101.feature.rst b/changelog/5101.feature.rst
+new file mode 100644
+index 000000000..2631e134e
+--- /dev/null
++++ b/changelog/5101.feature.rst
+@@ -0,0 +1,5 @@
++``assert all(<iterable>)`` and ``assert any(<iterable>)`` calls where the
++argument is a generator expression or list comprehension are now rewritten so
++that the failing element (for ``all``) or the last element checked (for
++``any``) is shown in the assertion error message, instead of the unhelpful
++``all(<generator object ...>)``.
+diff --git a/src/_pytest/assertion/rewrite.py b/src/_pytest/assertion/rewrite.py
+index 2903b8995..7815ba32b 100644
+--- a/src/_pytest/assertion/rewrite.py
++++ b/src/_pytest/assertion/rewrite.py
+@@ -968,6 +968,14 @@ warn_explicit(
+         """
+         visit `ast.Call` nodes on Python3.5 and after
+         """
++        if (
++            isinstance(call.func, ast.Name)
++            and call.func.id in ("all", "any")
++            and len(call.args) == 1
++            and not call.keywords
++            and isinstance(call.args[0], (ast.GeneratorExp, ast.ListComp))
++        ):
++            return self._visit_all_any(call.func.id, call)
+         new_func, func_expl = self.visit(call.func)
+         arg_expls = []
+         new_args = []
+@@ -991,6 +999,90 @@ warn_explicit(
+         outer_expl = "%s\n{%s = %s\n}" % (res_expl, res_expl, expl)
+         return res, outer_expl
+ 
++    def _visit_all_any(self, name, call):
++        """Rewrite an ``all``/``any`` call over a generator expression or list
++        comprehension, unrolling the iterable into a loop.
++
++        This produces much better failure reports than the builtin ``all``/
++        ``any``: instead of ``all(<generator object ...>)`` the existing
++        assertion reporting kicks in and shows the element that triggered the
++        failure (for ``all``) or the last element that was checked (for
++        ``any``).
++        """
++        arg = call.args[0]
++        elt = arg.elt
++        generators = arg.generators
++
++        # Variable holding the overall result.  ``all`` starts out True and
++        # becomes False as soon as a falsy element is found; ``any`` starts
++        # out False and becomes True as soon as a truthy element is found.
++        res_var = self.variable()
++        self.statements.append(
++            ast.Assign(
++                [ast.Name(res_var, ast.Store())], _NameConstant(name == "all")
++            )
++        )
++
++        # Variable holding the explanation of the iteration that decides the
++        # outcome.  It is pre-initialised so that it is always defined even
++        # when the iterable is empty (in which case there is no element to
++        # explain).
++        expl_var = self.variable()
++        self.statements.append(
++            ast.Assign([ast.Name(expl_var, ast.Store())], ast.Str(""))
++        )
++
++        # Evaluate the element expression inside the loop body.  The
++        # intermediate variables it introduces are reassigned on every
++        # iteration, and - importantly - its explanation is *formatted inside
++        # the loop* (where those variables are bound) and stored in
++        # ``expl_var``.  This avoids referencing loop-local variables from the
++        # failure path, which would be unbound for empty iterables.
++        loop_body = []
++        save_statements = self.statements
++        save_on_failure = self.on_failure
++        self.statements = loop_body
++        self.on_failure = loop_body
++        self.push_format_context()
++        res, expl = self.visit(elt)
++        expl_expression = self.pop_format_context(ast.Str(expl))
++        self.on_failure = save_on_failure
++        self.statements = save_statements
++        loop_body.append(ast.Assign([ast.Name(expl_var, ast.Store())], expl_expression))
++
++        # On the relevant condition, record the outcome and stop iterating:
++        # for ``all`` a falsy element fails, for ``any`` a truthy element
++        # succeeds.
++        if name == "all":
++            cond = ast.UnaryOp(ast.Not(), res)
++            value = _NameConstant(False)
++        else:
++            cond = res
++            value = _NameConstant(True)
++        loop_body.append(
++            ast.If(
++                cond,
++                [
++                    ast.Assign([ast.Name(res_var, ast.Store())], value),
++                    ast.Break(),
++                ],
++                [],
++            )
++        )
++
++        # Nest the for-loops (and any if-clauses) of the comprehension.
++        inner = loop_body
++        for gen in reversed(generators):
++            body = inner
++            for if_clause in reversed(gen.ifs):
++                body = [ast.If(if_clause, body, [])]
++            inner = [ast.For(gen.target, gen.iter, body, [])]
++        self.statements.extend(inner)
++
++        return ast.Name(res_var, ast.Load()), self.explanation_param(
++            ast.Name(expl_var, ast.Load())
++        )
++
+     def visit_Starred(self, starred):
+         # From Python 3.5, a Starred node can appear in a function call
+         res, expl = self.visit(starred.value)
+@@ -1001,6 +1093,16 @@ warn_explicit(
+         """
+         visit `ast.Call nodes on 3.4 and below`
+         """
++        if (
++            isinstance(call.func, ast.Name)
++            and call.func.id in ("all", "any")
++            and len(call.args) == 1
++            and not call.keywords
++            and not call.starargs
++            and not call.kwargs
++            and isinstance(call.args[0], (ast.GeneratorExp, ast.ListComp))
++        ):
++            return self._visit_all_any(call.func.id, call)
+         new_func, func_expl = self.visit(call.func)
+         arg_expls = []
+         new_args = []

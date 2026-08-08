@@ -1,0 +1,103 @@
+diff --git a/django/db/migrations/operations/models.py b/django/db/migrations/operations/models.py
+index b89b6b511b..9c5bd5fbcb 100644
+--- a/django/db/migrations/operations/models.py
++++ b/django/db/migrations/operations/models.py
+@@ -303,6 +303,71 @@ class CreateModel(ModelOperation):
+                         managers=self.managers,
+                     ),
+                 ]
++        elif (
++            isinstance(operation, IndexOperation)
++            and self.name_lower == operation.model_name_lower
++        ):
++            if isinstance(operation, AddIndex):
++                return [
++                    CreateModel(
++                        self.name,
++                        fields=self.fields,
++                        options={
++                            **self.options,
++                            "indexes": [
++                                *self.options.get("indexes", []),
++                                operation.index,
++                            ],
++                        },
++                        bases=self.bases,
++                        managers=self.managers,
++                    ),
++                ]
++            elif isinstance(operation, RemoveIndex):
++                options_indexes = [
++                    index
++                    for index in self.options.get("indexes", [])
++                    if index.name != operation.name
++                ]
++                return [
++                    CreateModel(
++                        self.name,
++                        fields=self.fields,
++                        options={
++                            **self.options,
++                            "indexes": options_indexes,
++                        },
++                        bases=self.bases,
++                        managers=self.managers,
++                    ),
++                ]
++            elif isinstance(operation, RenameIndex) and operation.old_fields:
++                options_index_together = {
++                    fields
++                    for fields in self.options.get("index_together", [])
++                    if fields != operation.old_fields
++                }
++                if options_index_together:
++                    self.options["index_together"] = options_index_together
++                else:
++                    self.options.pop("index_together", None)
++                return [
++                    CreateModel(
++                        self.name,
++                        fields=self.fields,
++                        options={
++                            **self.options,
++                            "indexes": [
++                                *self.options.get("indexes", []),
++                                models.Index(
++                                    fields=operation.old_fields, name=operation.new_name
++                                ),
++                            ],
++                        },
++                        bases=self.bases,
++                        managers=self.managers,
++                    ),
++                ]
+         return super().reduce(operation, app_label)
+ 
+ 
+diff --git a/docs/releases/4.2.1.txt b/docs/releases/4.2.1.txt
+index a1130effe8..bed64f6ad1 100644
+--- a/docs/releases/4.2.1.txt
++++ b/docs/releases/4.2.1.txt
+@@ -53,3 +53,8 @@ Bugfixes
+ 
+ * Fixed a regression in Django 4.2 where breadcrumbs didn't appear on admin
+   site app index views (:ticket:`34512`).
++
++* Made squashing migrations reduce ``AddIndex``, ``RemoveIndex``,
++  ``RenameIndex``, and ``CreateModel`` operations which allows removing a
++  deprecated ``Meta.index_together`` option from historical migrations and use
++  ``Meta.indexes`` instead (:ticket:`34525`).
+diff --git a/docs/releases/4.2.txt b/docs/releases/4.2.txt
+index d923be55b8..7d7848708d 100644
+--- a/docs/releases/4.2.txt
++++ b/docs/releases/4.2.txt
+@@ -502,7 +502,8 @@ Should become::
+ 
+ Running the :djadmin:`makemigrations` command will generate a migration
+ containing a :class:`~django.db.migrations.operations.RenameIndex` operation
+-which will rename the existing index.
++which will rename the existing index. Next, consider squashing migrations to
++remove ``index_together`` from historical migrations.
+ 
+ The ``AlterIndexTogether`` migration operation is now officially supported only
+ for pre-Django 4.2 migration files. For backward compatibility reasons, it's

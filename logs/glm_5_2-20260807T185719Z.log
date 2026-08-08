@@ -1,0 +1,313 @@
+This is mini-swe-agent version 2.4.6.
+Check the v2 migration guide at https://klieret.short.gy/mini-v2-migration
+Loading global config from '/Users/dzen/Library/Application 
+Support/mini-swe-agent/.env'
+minisweagent: INFO: Results will be saved to                                    
+/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2                
+Logging to '/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/minisweagent.log'
+minisweagent: INFO: Loading dataset                                             
+/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/data/SWE-bench_Lite, split  
+test...                                                                         
+minisweagent: INFO: Instance filter: 300 -> 50 instances                        
+minisweagent: INFO: Skipping 18 existing instances                              
+minisweagent: INFO: Running on 32 instances...                                  
+minisweagent: INFO: Building agent config from specs:                           
+['/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/
+minisweagent/config/benchmarks/swebench.yaml',                                  
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/config/glm_5_2.yaml']      
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-78e139b8 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.django_1776_django-16820:latest sleep 2h    
+minisweagent.environment: INFO: Started container minisweagent-78e139b8 with ID 
+83787d49269af9cdb3cfe5bace71a089f99d1ea7f59ca0513146e40d74873afa                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/django__django
+-16820/django__django-16820.traj.json'                                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-23506889 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-22711:latest     
+sleep 2h                                                                        
+minisweagent.environment: INFO: Started container minisweagent-23506889 with ID 
+cfe2ce3a9ee423da0a67cfe28a82555c2ca2b3d5fb6d27b9cbc8c347dc49d612                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/matplotlib__ma
+tplotlib-22711/matplotlib__matplotlib-22711.traj.json'                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-56c03c61 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-23913:latest     
+sleep 2h                                                                        
+minisweagent.environment: INFO: Started container minisweagent-56c03c61 with ID 
+4894d41b66f3d71f2eaef9017d06cb27243b42b5070286141b9aa868d6e234b2                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/matplotlib__ma
+tplotlib-23913/matplotlib__matplotlib-23913.traj.json'                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-8abe988c -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-23987:latest     
+sleep 2h                                                                        
+minisweagent.environment: INFO: Started container minisweagent-8abe988c with ID 
+0861c1f68a3ec9b942eeabe7aaf7fac0f91a247fd61002b87372b88fa8064f7e                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/matplotlib__ma
+tplotlib-23987/matplotlib__matplotlib-23987.traj.json'                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-1f2c31cc -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-24970:latest     
+sleep 2h                                                                        
+minisweagent.environment: INFO: Started container minisweagent-1f2c31cc with ID 
+2a4b387be752ed4dc59d7f7e42feab0a6e5d75fcacb890f647d181f31087434c                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/matplotlib__ma
+tplotlib-24970/matplotlib__matplotlib-24970.traj.json'                          
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-99bb0cbf -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.mwaskom_1776_seaborn-2848:latest sleep 2h   
+minisweagent.environment: INFO: Started container minisweagent-99bb0cbf with ID 
+b66758b38a62af4d48450a59db19cd698901a16e6fc4510bbff2910e3900a9d9                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/mwaskom__seabo
+rn-2848/mwaskom__seaborn-2848.traj.json'                                        
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-2bf49efc -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.pallets_1776_flask-5063:latest sleep 2h     
+minisweagent.environment: INFO: Started container minisweagent-2bf49efc with ID 
+f868c8a6e745ecc77419cbc5ce7821273a53d95539c8db0739616da9f6cf2805                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/pallets__flask
+-5063/pallets__flask-5063.traj.json'                                            
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-a0cf8f6e -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.psf_1776_requests-2674:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-a0cf8f6e with ID 
+74c30641788b3d7dd3b0f17097717799753a17e0a14e1437396555c6a9098d79                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/psf__requests-
+2674/psf__requests-2674.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-6f35ae70 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.pydata_1776_xarray-3364:latest sleep 2h     
+minisweagent.environment: INFO: Started container minisweagent-6f35ae70 with ID 
+17708d86b89edfedade0ce89fcc8847af32afc8f8ef638ccd3f9cd49413ab46b                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/pydata__xarray
+-3364/pydata__xarray-3364.traj.json'                                            
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-f889d8aa -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-7228:latest sleep 2h 
+minisweagent.environment: INFO: Started container minisweagent-f889d8aa with ID 
+08d7d7cab0f069a6395b5f513ac6aa3a600e4474b486caeeb81a0ee5964d7499                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/pylint-dev__py
+lint-7228/pylint-dev__pylint-7228.traj.json'                                    
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-7abcf17c -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-5103:latest sleep 2h 
+minisweagent.environment: INFO: Started container minisweagent-7abcf17c with ID 
+e779d521710b9d3672dee149a00cbe4f79f404af661cd51f89cbac59fb30aeec                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/pytest-dev__py
+test-5103/pytest-dev__pytest-5103.traj.json'                                    
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-eb0417f5 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-7490:latest sleep 2h 
+minisweagent.environment: INFO: Started container minisweagent-eb0417f5 with ID 
+ec387eb0578cfe04ee155daea0d4ad77388c9123901945963677a564ca9813e2                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/pytest-dev__py
+test-7490/pytest-dev__pytest-7490.traj.json'                                    
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-59766c1b -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.pytest-dev_1776_pytest-8365:latest sleep 2h 
+minisweagent.environment: INFO: Started container minisweagent-59766c1b with ID 
+ed5ac57faafe672fa9dd70636966899da1b2646251251f8a3591e70d74661e50                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/pytest-dev__py
+test-8365/pytest-dev__pytest-8365.traj.json'                                    
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-b20074dd -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10949:latest 
+sleep 2h                                                                        
+minisweagent.environment: INFO: Started container minisweagent-b20074dd with ID 
+df5e069a3cd3430b4df9c5e9fd0e187973bda7e4b39a6f38df5ddf265c731a82                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/scikit-learn__
+scikit-learn-10949/scikit-learn__scikit-learn-10949.traj.json'                  
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-c6fb4064 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-13241:latest 
+sleep 2h                                                                        
+minisweagent.environment: INFO: Started container minisweagent-c6fb4064 with ID 
+cdbc3379afee3e62a345b28063635f95565f220154681d0a0964f7346f32f671                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/scikit-learn__
+scikit-learn-13241/scikit-learn__scikit-learn-13241.traj.json'                  
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-222b33e1 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-13496:latest 
+sleep 2h                                                                        
+minisweagent.environment: INFO: Started container minisweagent-222b33e1 with ID 
+b10d80e408fcf1077cff5929578956363a4d8bb5d5b710c86f02698bf584a7a2                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/scikit-learn__
+scikit-learn-13496/scikit-learn__scikit-learn-13496.traj.json'                  
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-1e380db0 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25638:latest 
+sleep 2h                                                                        
+minisweagent.environment: INFO: Started container minisweagent-1e380db0 with ID 
+ed4ea524ed28615a914fc5da218efe7701756adc292d96e8daebeaf2bcf9aab9                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/scikit-learn__
+scikit-learn-25638/scikit-learn__scikit-learn-25638.traj.json'                  
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-226978a9 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-10451:latest sleep 2h
+minisweagent.environment: INFO: Started container minisweagent-226978a9 with ID 
+d7f151826b81a684acb14649a3042c8e7d529482a124887e6127522eded21451                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sphinx-doc__sp
+hinx-10451/sphinx-doc__sphinx-10451.traj.json'                                  
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-7905361e -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7686:latest sleep 2h 
+minisweagent.environment: INFO: Started container minisweagent-7905361e with ID 
+dc7fddd15ec161eac4dc1faada0f4e7d729cca95ecddf6b997930400b671fb37                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sphinx-doc__sp
+hinx-7686/sphinx-doc__sphinx-7686.traj.json'                                    
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-576aec77 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8721:latest sleep 2h 
+minisweagent.environment: INFO: Started container minisweagent-576aec77 with ID 
+4086e8c24f46c3c66ed060020040bb25888d007946bb5abee61ab63f9eb23208                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sphinx-doc__sp
+hinx-8721/sphinx-doc__sphinx-8721.traj.json'                                    
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-a7fef125 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-12171:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-a7fef125 with ID 
+352716ef4a1c89f6015ec8ea4df85f9633a8396f5a04afd6dc3be5febc4003fd                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-1
+2171/sympy__sympy-12171.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-185bc486 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-13480:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-185bc486 with ID 
+34d2764ebde9cd10bf0b46eb05751c59eafc0054d075e0c91ab9cae8d95ca0c0                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-1
+3480/sympy__sympy-13480.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-4714aafc -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-13895:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-4714aafc with ID 
+f4fb504107ed0164493f8861444b5614db3d29560262748fcc367dc819a6dd51                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-1
+3895/sympy__sympy-13895.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-f8334c11 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-14024:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-f8334c11 with ID 
+df59c51b0e2acc89f2fd4d18d49a5889c02e79dbef3ecb209ddd18c6c5de17e4                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-1
+4024/sympy__sympy-14024.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-c50a4ec1 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-14317:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-c50a4ec1 with ID 
+0103e078e6179e64a900135714a56c2e42b4e0dc7439ca93f64c96674471f5d7                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-1
+4317/sympy__sympy-14317.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-1a579267 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-15345:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-1a579267 with ID 
+2d72081c300bdd2568c12d8eab4f55b2c55ec23c4080bdd86e32f9c38c60cb79                
+Retrying <unknown> in 4 seconds as it raised OpenRouterAPIError: Request failed: HTTPSConnectionPool(host='openrouter.ai', port=443): Read timed out..
+minisweagent: ERROR: Error processing instance sympy__sympy-15345: No valid cost
+information available from OpenRouter API for model z-ai/glm-5.2: Usage         
+{'prompt_tokens': 5637, 'completion_tokens': 104, 'total_tokens': 5741, 'cost': 
+0, 'is_byok': False, 'prompt_tokens_details': {'cached_tokens': 0,              
+'cache_write_tokens': 0, 'audio_tokens': 0, 'video_tokens': 0}, 'cost_details': 
+{'upstream_inference_cost': 0.0083494, 'upstream_inference_prompt_cost':        
+0.0078918, 'upstream_inference_completions_cost': 0.0004576},                   
+'completion_tokens_details': {'reasoning_tokens': 104, 'image_tokens': 0,       
+'audio_tokens': 0}}, cost 0. Cost must be > 0.0. Set cost_tracking:             
+'ignore_errors' in your config file or export                                   
+MSWEA_COST_TRACKING='ignore_errors' to ignore cost tracking errors (for example 
+for free/local models), more information at                                     
+https://klieret.short.gy/mini-local-models for more details. Still stuck? Please
+open a github issue at                                                          
+https://github.com/SWE-agent/mini-swe-agent/issues/new/choose!                  
+Traceback (most recent call last):                                              
+  File                                                                          
+"/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/m
+inisweagent/run/benchmarks/swebench.py", line 154, in process_instance          
+    info = agent.run(task)                                                      
+           ^^^^^^^^^^^^^^^                                                      
+  File                                                                          
+"/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/m
+inisweagent/agents/default.py", line 98, in run                                 
+    self.step()                                                                 
+  File                                                                          
+"/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/m
+inisweagent/run/benchmarks/utils/common.py", line 17, in step                   
+    return super().step()                                                       
+           ^^^^^^^^^^^^^^                                                       
+  File                                                                          
+"/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/m
+inisweagent/agents/default.py", line 128, in step                               
+    return self.execute_actions(self.query())                                   
+                                ^^^^^^^^^^^^                                    
+  File                                                                          
+"/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/m
+inisweagent/agents/default.py", line 149, in query                              
+    message = self.model.query(self.messages)                                   
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                   
+  File                                                                          
+"/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/m
+inisweagent/models/openrouter_model.py", line 101, in query                     
+    cost_output = self._calculate_cost(response)                                
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                
+  File                                                                          
+"/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/m
+inisweagent/models/openrouter_model.py", line 123, in _calculate_cost           
+    raise RuntimeError(                                                         
+RuntimeError: No valid cost information available from OpenRouter API for model 
+z-ai/glm-5.2: Usage {'prompt_tokens': 5637, 'completion_tokens': 104,           
+'total_tokens': 5741, 'cost': 0, 'is_byok': False, 'prompt_tokens_details':     
+{'cached_tokens': 0, 'cache_write_tokens': 0, 'audio_tokens': 0, 'video_tokens':
+0}, 'cost_details': {'upstream_inference_cost': 0.0083494,                      
+'upstream_inference_prompt_cost': 0.0078918,                                    
+'upstream_inference_completions_cost': 0.0004576}, 'completion_tokens_details': 
+{'reasoning_tokens': 104, 'image_tokens': 0, 'audio_tokens': 0}}, cost 0. Cost  
+must be > 0.0. Set cost_tracking: 'ignore_errors' in your config file or export 
+MSWEA_COST_TRACKING='ignore_errors' to ignore cost tracking errors (for example 
+for free/local models), more information at                                     
+https://klieret.short.gy/mini-local-models for more details. Still stuck? Please
+open a github issue at                                                          
+https://github.com/SWE-agent/mini-swe-agent/issues/new/choose!                  
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-1
+5345/sympy__sympy-15345.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-c49fe93d -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-16792:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-c49fe93d with ID 
+0ed06ad99005d278e712ee38e1da69a67f6ece8a50eed1ca4de3b46a1f92ba31                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-1
+6792/sympy__sympy-16792.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-d0b8e66b -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-20049:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-d0b8e66b with ID 
+b55ea835087828a558bf647c4d3bce0733fc7bf203a82889c039b4cf2bcaff33                
+Retrying <unknown> in 4 seconds as it raised OpenRouterAPIError: Request failed: HTTPSConnectionPool(host='openrouter.ai', port=443): Read timed out..
+/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

@@ -1,0 +1,98 @@
+diff --git a/sklearn/utils/multiclass.py b/sklearn/utils/multiclass.py
+index 5eaef2fde..85f9e0a2b 100644
+--- a/sklearn/utils/multiclass.py
++++ b/sklearn/utils/multiclass.py
+@@ -20,6 +20,64 @@ from .validation import check_array, _assert_all_finite
+ from ..utils._array_api import get_namespace
+ 
+ 
++def _is_pandas_series_with_extension_dtype(y):
++    """Check if y is a pandas Series with a nullable extension dtype."""
++    try:
++        import pandas as pd
++    except ImportError:
++        return False
++
++    from pandas.api.types import (
++        is_extension_array_dtype,
++        is_bool_dtype,
++        is_integer_dtype,
++        is_float_dtype,
++    )
++
++    return isinstance(y, pd.Series) and is_extension_array_dtype(y.dtype) and (
++        is_bool_dtype(y.dtype)
++        or is_integer_dtype(y.dtype)
++        or is_float_dtype(y.dtype)
++    )
++
++
++def _convert_pandas_nullable_series(y):
++    """Convert a pandas nullable extension Series to a numpy array.
++
++    This avoids the conversion to an ``object`` dtype that ``numpy.asarray``
++    would otherwise perform on pandas nullable extension arrays (e.g. "Int64",
++    "Float64", "boolean").
++    """
++    import numpy as np
++    from pandas.api.types import (
++        is_bool_dtype,
++        is_integer_dtype,
++        is_float_dtype,
++    )
++
++    if is_bool_dtype(y.dtype):
++        # boolean nullable arrays with missing values cannot be converted to a
++        # dense bool array; map the missing values to NaN and use an object
++        # array in that case.
++        try:
++            return np.asarray(y, dtype=bool)
++        except ValueError:
++            return y.to_numpy(dtype=object, na_value=np.nan)
++    elif is_integer_dtype(y.dtype):
++        # Integer nullable arrays with missing values (pd.NA) cannot be
++        # converted to a dense int array. Map the missing values to NaN and
++        # use a float array so that the missing values are detected later by
++        # _assert_all_finite.
++        try:
++            return np.asarray(y, dtype=np.int64)
++        except ValueError:
++            return y.to_numpy(dtype=np.float64, na_value=np.nan)
++    elif is_float_dtype(y.dtype):
++        # Float nullable arrays already map pd.NA to np.nan.
++        return y.to_numpy(dtype=np.float64, na_value=np.nan)
++    return np.asarray(y)
++
++
+ def _unique_multiclass(y):
+     xp, is_array_api = get_namespace(y)
+     if hasattr(y, "__array__") or is_array_api:
+@@ -76,6 +134,18 @@ def unique_labels(*ys):
+     xp, is_array_api = get_namespace(*ys)
+     if not ys:
+         raise ValueError("No argument has been passed.")
++
++    # Convert pandas Series with nullable extension dtypes (e.g. "Int64",
++    # "Float64", "boolean") early, so that the type inference and the
++    # computation of the unique labels are consistent with their numpy
++    # counterparts.
++    ys = [
++        _convert_pandas_nullable_series(y)
++        if _is_pandas_series_with_extension_dtype(y)
++        else y
++        for y in ys
++    ]
++
+     # Check that we don't mix label format
+ 
+     ys_types = set(type_of_target(x) for x in ys)
+@@ -295,6 +365,9 @@ def type_of_target(y, input_name=""):
+     if sparse_pandas:
+         raise ValueError("y cannot be class 'SparseSeries' or 'SparseArray'")
+ 
++    if _is_pandas_series_with_extension_dtype(y):
++        y = _convert_pandas_nullable_series(y)
++
+     if is_multilabel(y):
+         return "multilabel-indicator"
+ 

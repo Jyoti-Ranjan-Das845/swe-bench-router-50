@@ -1,0 +1,24 @@
+This is mini-swe-agent version 2.4.6.
+Check the v2 migration guide at https://klieret.short.gy/mini-v2-migration
+Loading global config from '/Users/dzen/Library/Application 
+Support/mini-swe-agent/.env'
+minisweagent: INFO: Results will be saved to                                    
+/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/claude_opus_5          
+Logging to '/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/claude_opus_5/minisweagent.log'
+minisweagent: INFO: Loading dataset                                             
+/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/data/SWE-bench_Lite, split  
+test...                                                                         
+minisweagent: INFO: Instance filter: 300 -> 50 instances                        
+minisweagent: INFO: Skipping 26 existing instances                              
+minisweagent: INFO: Running on 24 instances...                                  
+minisweagent: INFO: Building agent config from specs:                           
+['/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/
+minisweagent/config/benchmarks/swebench.yaml',                                  
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/config/claude_opus_5.yaml']
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-a6941830 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.mwaskom_1776_seaborn-2848:latest sleep 2h   
+minisweagent.environment: INFO: Started container minisweagent-a6941830 with ID 
+efc6520a9bff92bcc6479c817796fcd0794474575860f6ca02af85840fd0cf0b                
+/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 1 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '

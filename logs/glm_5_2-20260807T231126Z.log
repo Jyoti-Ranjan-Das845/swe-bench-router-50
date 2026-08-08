@@ -1,0 +1,65 @@
+This is mini-swe-agent version 2.4.6.
+Check the v2 migration guide at https://klieret.short.gy/mini-v2-migration
+Loading global config from '/Users/dzen/Library/Application 
+Support/mini-swe-agent/.env'
+minisweagent: INFO: Results will be saved to                                    
+/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2                
+Logging to '/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/minisweagent.log'
+minisweagent: INFO: Loading dataset                                             
+/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/data/SWE-bench_Lite, split  
+test...                                                                         
+minisweagent: INFO: Instance filter: 300 -> 50 instances                        
+minisweagent: INFO: Skipping 45 existing instances                              
+minisweagent: INFO: Running on 5 instances...                                   
+minisweagent: INFO: Building agent config from specs:                           
+['/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/
+minisweagent/config/benchmarks/swebench.yaml',                                  
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/config/glm_5_2.yaml']      
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-d7a547b1 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-20049:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-d7a547b1 with ID 
+6aa67e167cfaaee356325815bd1788556fef0f41820b41bd7cfc8a0023442689                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-2
+0049/sympy__sympy-20049.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-58bbcd8a -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-21379:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-58bbcd8a with ID 
+854ebb4edfcc17fe2f6eb752c78769e86399cc55030f960dadb2fd33febf0ce8                
+Retrying <unknown> in 4 seconds as it raised OpenRouterAPIError: Request failed: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer')).
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-2
+1379/sympy__sympy-21379.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-27f16870 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-21614:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-27f16870 with ID 
+9fecb2d5054136bc3f174816f83028d70b49a9bf7b7aa9b766ae47d1c1bdeae6                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-2
+1614/sympy__sympy-21614.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-db1d9e6d -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-22005:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-db1d9e6d with ID 
+20fb9ac1968f88e331d618b1fffe876615337635e687123c5f0dc8f722dc367c                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-2
+2005/sympy__sympy-22005.traj.json'                                              
+minisweagent.environment: DEBUG: Starting container with command: docker run -d 
+--name minisweagent-0cf86fc9 -w /testbed --rm                                   
+docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-24152:latest sleep 2h      
+minisweagent.environment: INFO: Started container minisweagent-0cf86fc9 with ID 
+4006b861096b9ce9ee1ffeae90371e27e0724a2708823869d0679e6e748cec84                
+minisweagent: INFO: Saved trajectory to                                         
+'/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/sympy__sympy-2
+4152/sympy__sympy-24152.traj.json'                                              
+  Overall Progress ($0.81) ━━━━━━━━━━━━━━━━━━━━━━━ 5/5 100% 0:29:07 eta: 0:00:00
+┏━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Exit Status ┃ Count ┃ Most recent instances                                  ┃
+┡━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Submitted   │     5 │ sympy__sympy-24152, sympy__sympy-22005,                │
+│             │       │ sympy__sympy...                                        │
+└─────────────┴───────┴────────────────────────────────────────────────────────┘

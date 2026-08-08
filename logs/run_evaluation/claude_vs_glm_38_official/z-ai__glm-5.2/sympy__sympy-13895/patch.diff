@@ -1,0 +1,44 @@
+diff --git a/sympy/core/numbers.py b/sympy/core/numbers.py
+index 8c8e2d738c..a1c7f7646c 100644
+--- a/sympy/core/numbers.py
++++ b/sympy/core/numbers.py
+@@ -2258,6 +2258,9 @@ def _eval_power(self, expt):
+         sqr_int = 1
+         sqr_gcd = 0
+         sqr_dict = {}
++        # remainder exponent of the -1 (sign) factor, if any, that could
++        # not be extracted as an integer power of -1
++        neg_rem = 0
+         for prime, exponent in dict.items():
+             exponent *= expt.p
+             # remove multiples of expt.q: (2**12)**(1/10) -> 2*(2**2)**(1/10)
+@@ -2272,6 +2275,8 @@ def _eval_power(self, expt):
+                     out_rad *= Pow(prime, Rational(div_m//g, expt.q//g))
+                 else:
+                     sqr_dict[prime] = div_m
++                    if prime == -1:
++                        neg_rem = div_m
+         # identify gcd of remaining powers
+         for p, ex in sqr_dict.items():
+             if sqr_gcd == 0:
+@@ -2284,6 +2289,20 @@ def _eval_power(self, expt):
+             sqr_int *= k**(v//sqr_gcd)
+         if sqr_int == self and out_int == 1 and out_rad == 1:
+             result = None
++        elif neg_rem and neg_rem != sqr_gcd:
++            # The sign factor (-1) cannot be combined with the other prime
++            # factors by raising (-1)**k (reduced to +/-1) to a rational
++            # power since that does not preserve the value, e.g.
++            # ((-1)**2)**(1/5) != (-1)**(2/5). When the -1 factor was folded
++            # into sqr_int (i.e. neg_rem > sqr_gcd) its fractional
++            # contribution (-1)**(neg_rem/expt.q) is wrong and must be
++            # restored explicitly, keeping (-1) as a separate factor of the
++            # form (-1)**(neg_rem/expt.q). This is only done when
++            # neg_rem != sqr_gcd so the restored factor cannot recombine
++            # with Pow(abs(sqr_int), sqr_gcd/expt.q) and cause a cycle.
++            result = (out_int*out_rad*
++                      Pow(abs(sqr_int), Rational(sqr_gcd, expt.q))*
++                      Pow(-1, Rational(neg_rem, expt.q)))
+         else:
+             result = out_int*out_rad*Pow(sqr_int, Rational(sqr_gcd, expt.q))
+         return result

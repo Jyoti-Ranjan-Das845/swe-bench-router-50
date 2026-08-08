@@ -1,0 +1,65 @@
+2026-08-07 23:35:02,595 - INFO - Creating container for sympy__sympy-22005...
+2026-08-07 23:35:02,613 - INFO - Container for sympy__sympy-22005 created: d1d784920e90fff792aaaf03f0fa8b9355d7f64add47c8693587183d2b53b355
+2026-08-07 23:35:02,668 - INFO - Container for sympy__sympy-22005 started: d1d784920e90fff792aaaf03f0fa8b9355d7f64add47c8693587183d2b53b355
+2026-08-07 23:35:02,668 - INFO - Intermediate patch for sympy__sympy-22005 written to logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/sympy__sympy-22005/patch.diff, now applying to container...
+2026-08-07 23:35:02,807 - INFO - >>>>> Applied Patch:
+Checking patch sympy/solvers/polysys.py...
+Applied patch sympy/solvers/polysys.py cleanly.
+
+2026-08-07 23:35:03,231 - INFO - Git diff before:
+diff --git a/sympy/solvers/polysys.py b/sympy/solvers/polysys.py
+index b9809fd4e9..a4e412d7cd 100644
+--- a/sympy/solvers/polysys.py
++++ b/sympy/solvers/polysys.py
+@@ -46,6 +46,9 @@ def solve_poly_system(seq, *gens, **args):
+     [(0, 0), (2, -sqrt(2)), (2, sqrt(2))]
+ 
+     """
++    if isinstance(seq, Poly):
++        seq = [seq]
++
+     try:
+         polys, opt = parallel_poly_from_expr(seq, *gens, **args)
+     except PolificationFailed as exc:
+@@ -256,7 +259,7 @@ def _solve_reduced_system(system, gens, entry=False):
+         if not zeros:
+             return []
+ 
+-        if len(basis) == 1:
++        if len(basis) == 1 and len(gens) == 1:
+             return [(zero,) for zero in zeros]
+ 
+         solutions = []
+2026-08-07 23:35:03,232 - INFO - Eval script for sympy__sympy-22005 written to logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/sympy__sympy-22005/eval.sh; copying to container...
+2026-08-07 23:35:08,636 - INFO - Test runtime: 5.36 seconds
+2026-08-07 23:35:08,637 - INFO - Test output for sympy__sympy-22005 written to logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/sympy__sympy-22005/test_output.txt
+2026-08-07 23:35:08,706 - INFO - Git diff after:
+diff --git a/sympy/solvers/polysys.py b/sympy/solvers/polysys.py
+index b9809fd4e9..a4e412d7cd 100644
+--- a/sympy/solvers/polysys.py
++++ b/sympy/solvers/polysys.py
+@@ -46,6 +46,9 @@ def solve_poly_system(seq, *gens, **args):
+     [(0, 0), (2, -sqrt(2)), (2, sqrt(2))]
+ 
+     """
++    if isinstance(seq, Poly):
++        seq = [seq]
++
+     try:
+         polys, opt = parallel_poly_from_expr(seq, *gens, **args)
+     except PolificationFailed as exc:
+@@ -256,7 +259,7 @@ def _solve_reduced_system(system, gens, entry=False):
+         if not zeros:
+             return []
+ 
+-        if len(basis) == 1:
++        if len(basis) == 1 and len(gens) == 1:
+             return [(zero,) for zero in zeros]
+ 
+         solutions = []
+2026-08-07 23:35:08,706 - INFO - Grading answer for sympy__sympy-22005...
+2026-08-07 23:35:08,707 - INFO - report: {'sympy__sympy-22005': {'patch_is_None': False, 'patch_exists': True, 'patch_successfully_applied': True, 'resolved': True, 'tests_status': {'FAIL_TO_PASS': {'success': ['test_solve_poly_system'], 'failure': []}, 'PASS_TO_PASS': {'success': ['test_solve_biquadratic', 'test_solve_triangulated'], 'failure': []}, 'FAIL_TO_FAIL': {'success': [], 'failure': []}, 'PASS_TO_FAIL': {'success': [], 'failure': []}}}}
+Result for sympy__sympy-22005: resolved: True
+2026-08-07 23:35:08,708 - INFO - Attempting to stop container sweb.eval.sympy__sympy-22005.claude_vs_glm_38_official...
+2026-08-07 23:35:23,815 - INFO - Attempting to remove container sweb.eval.sympy__sympy-22005.claude_vs_glm_38_official...
+2026-08-07 23:35:23,831 - INFO - Container sweb.eval.sympy__sympy-22005.claude_vs_glm_38_official removed.

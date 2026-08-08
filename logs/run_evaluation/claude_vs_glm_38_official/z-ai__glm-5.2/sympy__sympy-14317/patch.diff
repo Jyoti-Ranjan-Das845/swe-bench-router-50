@@ -1,0 +1,50 @@
+diff --git a/sympy/printing/latex.py b/sympy/printing/latex.py
+index 737e16cc74..405a486dfa 100644
+--- a/sympy/printing/latex.py
++++ b/sympy/printing/latex.py
+@@ -6,7 +6,7 @@
+ 
+ import itertools
+ 
+-from sympy.core import S, Add, Symbol, Mod
++from sympy.core import S, Add, Mul, Symbol, Mod
+ from sympy.core.function import _coeff_isneg
+ from sympy.core.sympify import SympifyError
+ from sympy.core.alphabets import greeks
+@@ -1852,9 +1852,35 @@ def _print_PolynomialRingBase(self, expr):
+             inv = r"S_<^{-1}"
+         return r"%s%s\left[%s\right]" % (inv, domain, symbols)
+ 
++    def _print_poly_terms(self, poly):
++        # Print the polynomial expression using the same ordering of
++        # monomials (from highest to lowest degree) as the str and pretty
++        # printers instead of relying on ``poly.as_expr()`` which may
++        # reorder the terms (see issue with the latex printer using a
++        # different order of monomials than str and pretty).
++        tex = ""
++        for i, (monom, coeff) in enumerate(poly.terms()):
++            factors = [coeff]
++            for gen, exp in zip(poly.gens, monom):
++                if exp:
++                    factors.append(gen**exp)
++            term = Mul(*factors)
++            if i == 0:
++                pass
++            elif _coeff_isneg(term):
++                tex += " - "
++                term = -term
++            else:
++                tex += " + "
++            term_tex = self._print(term)
++            if self._needs_add_brackets(term):
++                term_tex = r"\left(%s\right)" % term_tex
++            tex += term_tex
++        return tex
++
+     def _print_Poly(self, poly):
+         cls = poly.__class__.__name__
+-        expr = self._print(poly.as_expr())
++        expr = self._print_poly_terms(poly)
+         gens = list(map(self._print, poly.gens))
+         domain = "domain=%s" % self._print(poly.get_domain())
+ 

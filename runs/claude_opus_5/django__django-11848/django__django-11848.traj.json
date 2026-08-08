@@ -1,0 +1,548 @@
+{
+  "info": {
+    "model_stats": {
+      "instance_cost": 0.0774845,
+      "api_calls": 4
+    },
+    "config": {
+      "agent": {
+        "system_template": "You are a helpful assistant that can interact with a computer shell to solve programming tasks.\n",
+        "instance_template": "<pr_description>\nConsider the following PR description:\n{{task}}\n</pr_description>\n\n<instructions>\n# Task Instructions\n\n## Overview\n\nYou're a software engineer interacting continuously with a computer by submitting commands.\nYou'll be helping implement necessary changes to meet requirements in the PR description.\nYour task is specifically to make changes to non-test files in the current directory in order to fix the issue described in the PR description in a way that is general and consistent with the codebase.\n<IMPORTANT>This is an interactive process where you will think and issue AT LEAST ONE command, see the result, then think and issue your next command(s).</important>\n\nFor each response:\n\n1. Include a THOUGHT section explaining your reasoning and what you're trying to accomplish\n2. Provide one or more bash tool calls to execute\n\n## Important Boundaries\n\n- MODIFY: Regular source code files in /testbed (this is the working directory for all your subsequent commands)\n- DO NOT MODIFY: Tests, configuration files (pyproject.toml, setup.cfg, etc.)\n\n## Recommended Workflow\n\n1. Analyze the codebase by finding and reading relevant files\n2. Create a script to reproduce the issue\n3. Edit the source code to resolve the issue\n4. Verify your fix works by running your script again\n5. Test edge cases to ensure your fix is robust\n\n## Command Execution Rules\n\nYou are operating in an environment where\n\n1. You issue at least one command\n2. The system executes the command(s) in a subshell\n3. You see the result(s)\n4. You write your next command(s)\n\nEach response should include:\n\n1. **Reasoning text** where you explain your analysis and plan\n2. At least one tool call with your command\n\n**CRITICAL REQUIREMENTS:**\n\n- Your response SHOULD include reasoning text explaining what you're doing\n- Your response MUST include AT LEAST ONE bash tool call. You can make MULTIPLE tool calls in a single response when the commands are independent (e.g., searching multiple files, reading different parts of the codebase).\n- Directory or environment variable changes are not persistent. Every action is executed in a new subshell.\n- However, you can prefix any action with `MY_ENV_VAR=MY_VALUE cd /path/to/working/dir && ...` or write/load environment variables from files\n\nExample of a CORRECT response:\n<example_response>\nI need to understand the Builder-related code. Let me find relevant files and check the project structure.\n\n[Makes multiple bash tool calls: {\"command\": \"ls -la\"}, {\"command\": \"find src -name '*.java' | grep -i builder\"}, {\"command\": \"cat README.md | head -50\"}]\n</example_response>\n\n## Environment Details\n\n- You have a full Linux shell environment\n- Always use non-interactive flags (-y, -f) for commands\n- Avoid interactive tools like vi, nano, or any that require user input\n- You can use bash commands or invoke any tool that is available in the environment\n- You can also create new tools or scripts to help you with the task\n- If a tool isn't available, you can also install it\n\n## Submission\n\nWhen you've completed your work, you MUST submit your changes as a git patch.\nFollow these steps IN ORDER, with SEPARATE commands:\n\nStep 1: Create the patch file\nRun `git diff -- path/to/file1 path/to/file2 > patch.txt` listing only the source files you modified.\nDo NOT commit your changes.\n\n<IMPORTANT>\nThe patch must only contain changes to the specific source files you modified to fix the issue.\nDo not submit file creations or changes to any of the following files:\n\n- test and reproduction files\n- helper scripts, tests, or tools that you created\n- installation, build, packaging, configuration, or setup scripts unless they are directly part of the issue you were fixing (you can assume that the environment is already set up for your client)\n- binary or compiled files\n</IMPORTANT>\n\nStep 2: Verify your patch\nInspect patch.txt to confirm it only contains your intended changes and headers show `--- a/` and `+++ b/` paths.\n\nStep 3: Submit (EXACT command required)\nYou MUST use this EXACT command to submit:\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\n```\n\nIf the command fails (nonzero exit status), it will not submit.\n\n<CRITICAL>\n- Creating/viewing the patch and submitting it MUST be separate commands (not combined with &&).\n- If you modify patch.txt after verifying, you SHOULD verify again before submitting.\n- You CANNOT continue working (reading, editing, testing) in any way on this task after submitting.\n</CRITICAL>\n</instructions>\n",
+        "step_limit": 250,
+        "cost_limit": 3.0,
+        "wall_time_limit_seconds": 0,
+        "max_consecutive_format_errors": 3,
+        "output_path": null
+      },
+      "agent_type": "minisweagent.run.benchmarks.utils.common.ProgressTrackingAgent",
+      "model": {
+        "model_name": "anthropic/claude-opus-5",
+        "model_kwargs": {
+          "drop_params": true,
+          "parallel_tool_calls": true
+        },
+        "set_cache_control": "default_end",
+        "cost_tracking": "default",
+        "format_error_template": "{% if finish_reason is defined and (finish_reason == \"length\" or (finish_reason == \"tool_calls\" and not has_tool_calls)) -%}\nYour previous response reached the output token limit (finish_reason={{ finish_reason }}) before you produced a tool call, so it was cut off. Respond more concisely and finish with exactly one bash tool call. If you need to think more, do so briefly.\n{%- else -%}\nTool call error:\n\n<error>\n{{error}}\n</error>\n\nHere is general guidance on how to submit correct toolcalls:\n\nEvery response needs to use the 'bash' tool at least once to execute commands.\n\nCall the bash tool with your command as the argument:\n- Tool: bash\n- Arguments: {\"command\": \"your_command_here\"}\n\nIf you have completed your assignment, please consult the first message about how to\nsubmit your solution (you will not be able to continue working on this task after that).\n{%- endif %}\n",
+        "observation_template": "{% if output.exception_info -%}\n<exception>{{output.exception_info}}</exception>\n{% endif -%}\n<returncode>{{output.returncode}}</returncode>\n{% if output.output | length < 10000 -%}\n<output>\n{{ output.output -}}\n</output>\n{%- else -%}\n<warning>\nThe output of your last command was too long.\nPlease try a different command that produces less output.\nIf you're looking at a file you can try use head, tail or sed to view a smaller number of lines selectively.\nIf you're using grep or find and it produced too much output, you can use a more selective search pattern.\nIf you really need to see something from the full command's output, you can redirect output to a file and then search in that file.\n</warning>\n{%- set elided_chars = output.output | length - 10000 -%}\n<output_head>\n{{ output.output[:5000] }}\n</output_head>\n<elided_chars>\n{{ elided_chars }} characters elided\n</elided_chars>\n<output_tail>\n{{ output.output[-5000:] }}\n</output_tail>\n{%- endif -%}\n",
+        "multimodal_regex": ""
+      },
+      "model_type": "minisweagent.models.openrouter_model.OpenRouterModel",
+      "environment": {
+        "image": "docker.io/swebench/sweb.eval.x86_64.django_1776_django-11848:latest",
+        "cwd": "/testbed",
+        "env": {
+          "PAGER": "cat",
+          "MANPAGER": "cat",
+          "LESS": "-R",
+          "PIP_PROGRESS_BAR": "off",
+          "TQDM_DISABLE": "1",
+          "BASH_ENV": "/root/.bashrc"
+        },
+        "forward_env": [],
+        "timeout": 60,
+        "executable": "docker",
+        "run_args": [
+          "--rm"
+        ],
+        "container_timeout": "2h",
+        "pull_timeout": 900,
+        "interpreter": [
+          "bash",
+          "-c"
+        ]
+      },
+      "environment_type": "minisweagent.environments.docker.DockerEnvironment"
+    },
+    "mini_version": "2.4.6",
+    "exit_status": "Submitted",
+    "submission": "diff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..ff2f08ac1e 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -176,10 +176,14 @@ def parse_http_date(date):\n     try:\n         year = int(m.group('year'))\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n+            current_year = datetime.datetime.utcnow().year\n+            current_century = current_year - (current_year % 100)\n+            if year - (current_year % 100) > 50:\n+                # year that appears to be more than 50 years in the future are\n+                # interpreted as representing the past.\n+                year += current_century - 100\n             else:\n-                year += 1900\n+                year += current_century\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant that can interact with a computer shell to solve programming tasks."
+    },
+    {
+      "role": "user",
+      "content": "<pr_description>\nConsider the following PR description:\ndjango.utils.http.parse_http_date two digit year check is incorrect\nDescription\n\t \n\t\t(last modified by Ad Timmering)\n\t \nRFC 850 does not mention this, but in RFC 7231 (and there's something similar in RFC 2822), there's the following quote:\nRecipients of a timestamp value in rfc850-date format, which uses a\ntwo-digit year, MUST interpret a timestamp that appears to be more\nthan 50 years in the future as representing the most recent year in\nthe past that had the same last two digits.\nCurrent logic is hard coded to consider 0-69 to be in 2000-2069, and 70-99 to be 1970-1999, instead of comparing versus the current year.\n\n</pr_description>\n\n<instructions>\n# Task Instructions\n\n## Overview\n\nYou're a software engineer interacting continuously with a computer by submitting commands.\nYou'll be helping implement necessary changes to meet requirements in the PR description.\nYour task is specifically to make changes to non-test files in the current directory in order to fix the issue described in the PR description in a way that is general and consistent with the codebase.\n<IMPORTANT>This is an interactive process where you will think and issue AT LEAST ONE command, see the result, then think and issue your next command(s).</important>\n\nFor each response:\n\n1. Include a THOUGHT section explaining your reasoning and what you're trying to accomplish\n2. Provide one or more bash tool calls to execute\n\n## Important Boundaries\n\n- MODIFY: Regular source code files in /testbed (this is the working directory for all your subsequent commands)\n- DO NOT MODIFY: Tests, configuration files (pyproject.toml, setup.cfg, etc.)\n\n## Recommended Workflow\n\n1. Analyze the codebase by finding and reading relevant files\n2. Create a script to reproduce the issue\n3. Edit the source code to resolve the issue\n4. Verify your fix works by running your script again\n5. Test edge cases to ensure your fix is robust\n\n## Command Execution Rules\n\nYou are operating in an environment where\n\n1. You issue at least one command\n2. The system executes the command(s) in a subshell\n3. You see the result(s)\n4. You write your next command(s)\n\nEach response should include:\n\n1. **Reasoning text** where you explain your analysis and plan\n2. At least one tool call with your command\n\n**CRITICAL REQUIREMENTS:**\n\n- Your response SHOULD include reasoning text explaining what you're doing\n- Your response MUST include AT LEAST ONE bash tool call. You can make MULTIPLE tool calls in a single response when the commands are independent (e.g., searching multiple files, reading different parts of the codebase).\n- Directory or environment variable changes are not persistent. Every action is executed in a new subshell.\n- However, you can prefix any action with `MY_ENV_VAR=MY_VALUE cd /path/to/working/dir && ...` or write/load environment variables from files\n\nExample of a CORRECT response:\n<example_response>\nI need to understand the Builder-related code. Let me find relevant files and check the project structure.\n\n[Makes multiple bash tool calls: {\"command\": \"ls -la\"}, {\"command\": \"find src -name '*.java' | grep -i builder\"}, {\"command\": \"cat README.md | head -50\"}]\n</example_response>\n\n## Environment Details\n\n- You have a full Linux shell environment\n- Always use non-interactive flags (-y, -f) for commands\n- Avoid interactive tools like vi, nano, or any that require user input\n- You can use bash commands or invoke any tool that is available in the environment\n- You can also create new tools or scripts to help you with the task\n- If a tool isn't available, you can also install it\n\n## Submission\n\nWhen you've completed your work, you MUST submit your changes as a git patch.\nFollow these steps IN ORDER, with SEPARATE commands:\n\nStep 1: Create the patch file\nRun `git diff -- path/to/file1 path/to/file2 > patch.txt` listing only the source files you modified.\nDo NOT commit your changes.\n\n<IMPORTANT>\nThe patch must only contain changes to the specific source files you modified to fix the issue.\nDo not submit file creations or changes to any of the following files:\n\n- test and reproduction files\n- helper scripts, tests, or tools that you created\n- installation, build, packaging, configuration, or setup scripts unless they are directly part of the issue you were fixing (you can assume that the environment is already set up for your client)\n- binary or compiled files\n</IMPORTANT>\n\nStep 2: Verify your patch\nInspect patch.txt to confirm it only contains your intended changes and headers show `--- a/` and `+++ b/` paths.\n\nStep 3: Submit (EXACT command required)\nYou MUST use this EXACT command to submit:\n\n```bash\necho COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\n```\n\nIf the command fails (nonzero exit status), it will not submit.\n\n<CRITICAL>\n- Creating/viewing the patch and submitting it MUST be separate commands (not combined with &&).\n- If you modify patch.txt after verifying, you SHOULD verify again before submitting.\n- You CANNOT continue working (reading, editing, testing) in any way on this task after submitting.\n</CRITICAL>\n</instructions>"
+    },
+    {
+      "role": "assistant",
+      "content": "I'll start by examining the relevant code.",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_014HYZVVKMAnShzBaP9i47KL",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && sed -n 1,60p django/utils/http.py && grep -n \\\"two.digit\\\\|year\\\" django/utils/http.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "index": 1,
+          "id": "toolu_01MdXZk79mnaXmMikqcT7Y9q",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && grep -n \\\"parse_http_date\\\" -A 40 django/utils/http.py | head -80\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && sed -n 1,60p django/utils/http.py && grep -n \"two.digit\\|year\" django/utils/http.py",
+            "tool_call_id": "toolu_014HYZVVKMAnShzBaP9i47KL"
+          },
+          {
+            "command": "cd /testbed && grep -n \"parse_http_date\" -A 40 django/utils/http.py | head -80",
+            "tool_call_id": "toolu_01MdXZk79mnaXmMikqcT7Y9q"
+          }
+        ],
+        "response": {
+          "id": "gen-1786146678-KhgUaZdxDyXamqz56xhI",
+          "object": "chat.completion",
+          "created": 1786146678,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "I'll start by examining the relevant code.",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_014HYZVVKMAnShzBaP9i47KL",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && sed -n 1,60p django/utils/http.py && grep -n \\\"two.digit\\\\|year\\\" django/utils/http.py\"}"
+                    }
+                  },
+                  {
+                    "type": "function",
+                    "index": 1,
+                    "id": "toolu_01MdXZk79mnaXmMikqcT7Y9q",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && grep -n \\\"parse_http_date\\\" -A 40 django/utils/http.py | head -80\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 2166,
+            "completion_tokens": 183,
+            "total_tokens": 2349,
+            "cost": 0.01811,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 2164,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.01811,
+              "upstream_inference_prompt_cost": 0.013535,
+              "upstream_inference_completions_cost": 0.004575
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.01811,
+        "timestamp": 1786146681.816577
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\nimport base64\nimport calendar\nimport datetime\nimport re\nimport unicodedata\nimport warnings\nfrom binascii import Error as BinasciiError\nfrom email.utils import formatdate\nfrom urllib.parse import (\n    ParseResult, SplitResult, _coerce_args, _splitnetloc, _splitparams, quote,\n    quote_plus, scheme_chars, unquote, unquote_plus,\n    urlencode as original_urlencode, uses_params,\n)\n\nfrom django.core.exceptions import TooManyFieldsSent\nfrom django.utils.datastructures import MultiValueDict\nfrom django.utils.deprecation import RemovedInDjango40Warning\nfrom django.utils.functional import keep_lazy_text\n\n# based on RFC 7232, Appendix C\nETAG_MATCH = re.compile(r'''\n    \\A(      # start of string and capture group\n    (?:W/)?  # optional weak indicator\n    \"        # opening quote\n    [^\"]*    # any sequence of non-quote characters\n    \"        # end quote\n    )\\Z      # end of string and capture group\n''', re.X)\n\nMONTHS = 'jan feb mar apr may jun jul aug sep oct nov dec'.split()\n__D = r'(?P<day>\\d{2})'\n__D2 = r'(?P<day>[ \\d]\\d)'\n__M = r'(?P<mon>\\w{3})'\n__Y = r'(?P<year>\\d{4})'\n__Y2 = r'(?P<year>\\d{2})'\n__T = r'(?P<hour>\\d{2}):(?P<min>\\d{2}):(?P<sec>\\d{2})'\nRFC1123_DATE = re.compile(r'^\\w{3}, %s %s %s %s GMT$' % (__D, __M, __Y, __T))\nRFC850_DATE = re.compile(r'^\\w{6,9}, %s-%s-%s %s GMT$' % (__D, __M, __Y2, __T))\nASCTIME_DATE = re.compile(r'^\\w{3} %s %s %s %s$' % (__M, __D2, __T, __Y))\n\nRFC3986_GENDELIMS = \":/?#[]@\"\nRFC3986_SUBDELIMS = \"!$&'()*+,;=\"\n\nFIELDS_MATCH = re.compile('[&;]')\n\n\n@keep_lazy_text\ndef urlquote(url, safe='/'):\n    \"\"\"\n    A legacy compatibility wrapper to Python's urllib.parse.quote() function.\n    (was used for unicode handling on Python 2)\n    \"\"\"\n    warnings.warn(\n        'django.utils.http.urlquote() is deprecated in favor of '\n        'urllib.parse.quote().',\n        RemovedInDjango40Warning, stacklevel=2,\n    )\n    return quote(url, safe)\n\n\n34:__Y = r'(?P<year>\\d{4})'\n35:__Y2 = r'(?P<year>\\d{2})'\n177:        year = int(m.group('year'))\n178:        if year < 100:\n179:            if year < 70:\n180:                year += 2000\n182:                year += 1900\n188:        result = datetime.datetime(year, month, day, hour, min, sec)\n</output>",
+      "extra": {
+        "raw_output": "import base64\nimport calendar\nimport datetime\nimport re\nimport unicodedata\nimport warnings\nfrom binascii import Error as BinasciiError\nfrom email.utils import formatdate\nfrom urllib.parse import (\n    ParseResult, SplitResult, _coerce_args, _splitnetloc, _splitparams, quote,\n    quote_plus, scheme_chars, unquote, unquote_plus,\n    urlencode as original_urlencode, uses_params,\n)\n\nfrom django.core.exceptions import TooManyFieldsSent\nfrom django.utils.datastructures import MultiValueDict\nfrom django.utils.deprecation import RemovedInDjango40Warning\nfrom django.utils.functional import keep_lazy_text\n\n# based on RFC 7232, Appendix C\nETAG_MATCH = re.compile(r'''\n    \\A(      # start of string and capture group\n    (?:W/)?  # optional weak indicator\n    \"        # opening quote\n    [^\"]*    # any sequence of non-quote characters\n    \"        # end quote\n    )\\Z      # end of string and capture group\n''', re.X)\n\nMONTHS = 'jan feb mar apr may jun jul aug sep oct nov dec'.split()\n__D = r'(?P<day>\\d{2})'\n__D2 = r'(?P<day>[ \\d]\\d)'\n__M = r'(?P<mon>\\w{3})'\n__Y = r'(?P<year>\\d{4})'\n__Y2 = r'(?P<year>\\d{2})'\n__T = r'(?P<hour>\\d{2}):(?P<min>\\d{2}):(?P<sec>\\d{2})'\nRFC1123_DATE = re.compile(r'^\\w{3}, %s %s %s %s GMT$' % (__D, __M, __Y, __T))\nRFC850_DATE = re.compile(r'^\\w{6,9}, %s-%s-%s %s GMT$' % (__D, __M, __Y2, __T))\nASCTIME_DATE = re.compile(r'^\\w{3} %s %s %s %s$' % (__M, __D2, __T, __Y))\n\nRFC3986_GENDELIMS = \":/?#[]@\"\nRFC3986_SUBDELIMS = \"!$&'()*+,;=\"\n\nFIELDS_MATCH = re.compile('[&;]')\n\n\n@keep_lazy_text\ndef urlquote(url, safe='/'):\n    \"\"\"\n    A legacy compatibility wrapper to Python's urllib.parse.quote() function.\n    (was used for unicode handling on Python 2)\n    \"\"\"\n    warnings.warn(\n        'django.utils.http.urlquote() is deprecated in favor of '\n        'urllib.parse.quote().',\n        RemovedInDjango40Warning, stacklevel=2,\n    )\n    return quote(url, safe)\n\n\n34:__Y = r'(?P<year>\\d{4})'\n35:__Y2 = r'(?P<year>\\d{2})'\n177:        year = int(m.group('year'))\n178:        if year < 100:\n179:            if year < 70:\n180:                year += 2000\n182:                year += 1900\n188:        result = datetime.datetime(year, month, day, hour, min, sec)\n",
+        "returncode": 0,
+        "timestamp": 1786146682.356701,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_014HYZVVKMAnShzBaP9i47KL",
+      "role": "tool"
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n158:def parse_http_date(date):\n159-    \"\"\"\n160-    Parse a date format as specified by HTTP RFC7231 section 7.1.1.1.\n161-\n162-    The three formats allowed by the RFC are accepted, even if only the first\n163-    one is still in widespread use.\n164-\n165-    Return an integer expressed in seconds since the epoch, in UTC.\n166-    \"\"\"\n167-    # email.utils.parsedate() does the job for RFC1123 dates; unfortunately\n168-    # RFC7231 makes it mandatory to support RFC850 dates too. So we roll\n169-    # our own RFC-compliant parsing.\n170-    for regex in RFC1123_DATE, RFC850_DATE, ASCTIME_DATE:\n171-        m = regex.match(date)\n172-        if m is not None:\n173-            break\n174-    else:\n175-        raise ValueError(\"%r is not in a valid HTTP date format\" % date)\n176-    try:\n177-        year = int(m.group('year'))\n178-        if year < 100:\n179-            if year < 70:\n180-                year += 2000\n181-            else:\n182-                year += 1900\n183-        month = MONTHS.index(m.group('mon').lower()) + 1\n184-        day = int(m.group('day'))\n185-        hour = int(m.group('hour'))\n186-        min = int(m.group('min'))\n187-        sec = int(m.group('sec'))\n188-        result = datetime.datetime(year, month, day, hour, min, sec)\n189-        return calendar.timegm(result.utctimetuple())\n190-    except Exception as exc:\n191-        raise ValueError(\"%r is not a valid date\" % date) from exc\n192-\n193-\n194:def parse_http_date_safe(date):\n195-    \"\"\"\n196:    Same as parse_http_date, but return None if the input is invalid.\n197-    \"\"\"\n198-    try:\n199:        return parse_http_date(date)\n200-    except Exception:\n201-        pass\n202-\n203-\n204-# Base 36 functions: useful for generating compact URLs\n205-\n206-def base36_to_int(s):\n207-    \"\"\"\n208-    Convert a base 36 string to an int. Raise ValueError if the input won't fit\n209-    into an int.\n210-    \"\"\"\n211-    # To prevent overconsumption of server resources, reject any\n212-    # base36 string that is longer than 13 base36 digits (13 digits\n213-    # is sufficient to base36-encode any 64-bit integer)\n214-    if len(s) > 13:\n215-        raise ValueError(\"Base36 input too large\")\n216-    return int(s, 36)\n217-\n218-\n219-def int_to_base36(i):\n220-    \"\"\"Convert an integer to a base36 string.\"\"\"\n221-    char_set = '0123456789abcdefghijklmnopqrstuvwxyz'\n222-    if i < 0:\n223-        raise ValueError(\"Negative base36 conversion input.\")\n224-    if i < 36:\n225-        return char_set[i]\n226-    b36 = ''\n227-    while i != 0:\n228-        i, n = divmod(i, 36)\n229-        b36 = char_set[n] + b36\n230-    return b36\n231-\n232-\n233-def urlsafe_base64_encode(s):\n234-    \"\"\"\n235-    Encode a bytestring to a base64 string for use in URLs. Strip any trailing\n236-    equal signs.\n237-    \"\"\"\n</output>",
+      "extra": {
+        "raw_output": "158:def parse_http_date(date):\n159-    \"\"\"\n160-    Parse a date format as specified by HTTP RFC7231 section 7.1.1.1.\n161-\n162-    The three formats allowed by the RFC are accepted, even if only the first\n163-    one is still in widespread use.\n164-\n165-    Return an integer expressed in seconds since the epoch, in UTC.\n166-    \"\"\"\n167-    # email.utils.parsedate() does the job for RFC1123 dates; unfortunately\n168-    # RFC7231 makes it mandatory to support RFC850 dates too. So we roll\n169-    # our own RFC-compliant parsing.\n170-    for regex in RFC1123_DATE, RFC850_DATE, ASCTIME_DATE:\n171-        m = regex.match(date)\n172-        if m is not None:\n173-            break\n174-    else:\n175-        raise ValueError(\"%r is not in a valid HTTP date format\" % date)\n176-    try:\n177-        year = int(m.group('year'))\n178-        if year < 100:\n179-            if year < 70:\n180-                year += 2000\n181-            else:\n182-                year += 1900\n183-        month = MONTHS.index(m.group('mon').lower()) + 1\n184-        day = int(m.group('day'))\n185-        hour = int(m.group('hour'))\n186-        min = int(m.group('min'))\n187-        sec = int(m.group('sec'))\n188-        result = datetime.datetime(year, month, day, hour, min, sec)\n189-        return calendar.timegm(result.utctimetuple())\n190-    except Exception as exc:\n191-        raise ValueError(\"%r is not a valid date\" % date) from exc\n192-\n193-\n194:def parse_http_date_safe(date):\n195-    \"\"\"\n196:    Same as parse_http_date, but return None if the input is invalid.\n197-    \"\"\"\n198-    try:\n199:        return parse_http_date(date)\n200-    except Exception:\n201-        pass\n202-\n203-\n204-# Base 36 functions: useful for generating compact URLs\n205-\n206-def base36_to_int(s):\n207-    \"\"\"\n208-    Convert a base 36 string to an int. Raise ValueError if the input won't fit\n209-    into an int.\n210-    \"\"\"\n211-    # To prevent overconsumption of server resources, reject any\n212-    # base36 string that is longer than 13 base36 digits (13 digits\n213-    # is sufficient to base36-encode any 64-bit integer)\n214-    if len(s) > 13:\n215-        raise ValueError(\"Base36 input too large\")\n216-    return int(s, 36)\n217-\n218-\n219-def int_to_base36(i):\n220-    \"\"\"Convert an integer to a base36 string.\"\"\"\n221-    char_set = '0123456789abcdefghijklmnopqrstuvwxyz'\n222-    if i < 0:\n223-        raise ValueError(\"Negative base36 conversion input.\")\n224-    if i < 36:\n225-        return char_set[i]\n226-    b36 = ''\n227-    while i != 0:\n228-        i, n = divmod(i, 36)\n229-        b36 = char_set[n] + b36\n230-    return b36\n231-\n232-\n233-def urlsafe_base64_encode(s):\n234-    \"\"\"\n235-    Encode a bytestring to a base64 string for use in URLs. Strip any trailing\n236-    equal signs.\n237-    \"\"\"\n",
+        "returncode": 0,
+        "timestamp": 1786146682.358698,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01MdXZk79mnaXmMikqcT7Y9q",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01RNQeL5c99vnENGnY3gcfk6",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && python - <<'EOF'\\nimport re\\np='django/utils/http.py'\\ns=open(p).read()\\nold = \\\"\\\"\\\"        year = int(m.group('year'))\\n        if year < 100:\\n            if year < 70:\\n                year += 2000\\n            else:\\n                year += 1900\\n\\\"\\\"\\\"\\nnew = \\\"\\\"\\\"        year = int(m.group('year'))\\n        if year < 100:\\n            current_year = datetime.datetime.utcnow().year\\n            current_century = current_year - (current_year % 100)\\n            if year - (current_year % 100) > 50:\\n                # year that appears to be more than 50 years in the future are\\n                # interpreted as representing the past.\\n                year += current_century - 100\\n            else:\\n                year += current_century\\n\\\"\\\"\\\"\\nassert old in s\\nopen(p,'w').write(s.replace(old,new))\\nEOF\\nsed -n 174,192p django/utils/http.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "index": 1,
+          "id": "toolu_017DqPhQKCyQSseigfdMXCou",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && python -c \\\"\\nfrom django.utils.http import parse_http_date\\nimport datetime\\nfor y in ['70','69','25','75','99','00']:\\n    print(y, datetime.datetime.utcfromtimestamp(parse_http_date('Sunday, 06-Nov-%s 08:49:37 GMT' % y)))\\n\\\" && python -m pytest tests/utils_tests/test_http.py -q 2>/dev/null | tail -3; python tests/runtests.py utils_tests.test_http 2>&1 | tail -3\"}"
+          }
+        }
+      ],
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "signature": "CAISkAcKhwEIEBgCKkAdTbP3HwGTWri9KDRB49wbuqswM/IlFwQiqvgWU4aWFPt1bF7qxzdQUTd0ab92vl4V7no95wUZi1/8XkhS9rl4Mg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDHotPcdXPFRRjCAPNBoMxRMWduodNwSoABpiIjDaJhCdF/9ibBn+I7s+5UTDSoN5hLZ8mzFwvxAEuyfeLKPCUO6NbN2WdfxA8mQGnpsqtQXyzodYQsXyDwibQfX0sj86UFeINLpoGqx5IVMNQCND1uX+aU0y32Vc9mskvO58mij/qbM/N3ZxyvPb6bJkmaW+aBKErMM3/JO+kGcJwSfLxNU/zh09wqBj+l2Ta6DwFqkxcg06TXF2V90Txd+d97fnZThutBxjBfgvsPmV6Ej8C8zOAzCOct0w0+pTCUa0DnPlGVh7AY1SdvFB3a4SqFowzWxIMD0sM+DhGGR74vC+RzJQz5vS7q/zNJl6tDv4xWJcFMEZ09y6aOOQA/B3KfkPOn2QTxgusdlw0YzHv2wnf2v/jaQFYBhqXyQOQNlWa+8sLR/lzuSx2GjkvtJU89gTuJdthb1hJF3xsZb7kLp/IMBRTzMrzAzHkXOQgoCArMYT7anAHTeFO035nOtdRMZV4Rf36FAimQlmX4VA8uEEBWdt5tzM+j9zfKac9HJT8afjikagJchCmfRG4W8NDjFqbU0T4Qcv2BxLu0if8Iofy0JioxtRwIaOHncqqHi6hVUGZt9IKY3q9OuZ5VIRwIPAUSQV6at1WkbQQumXK2gjChpUQnBWtk++4EzEhi1mloJo9sOCLLqCefiwks4IXV1jLBL47UG4XwQvcqn4yh2Uy4oLCodC3/zX/dpbxcyqBJFV8hDrp3AhmUoyU9IELCgiCDXct+IgUQHK9LCv2KG1YcU4NhcuARF+HIglX4iqSCY4QPdUxWZhQESaqZlPylgtiSb4jmfu4X3XSQ5LtYRZytxiw7n+9r/CObu/mYvpOpqjc5mWND2zbEdUPn+WrRMg+pyG57NY9x25FbD4i971K8HCl7pw2OZ6uwMdcWsSE2YpSduB/+CIw3wbqMe20cm+qNWKv26Cf2Mzdaau31Ssg7pjiaiuX2AVOtn20gjy3jmkYtTs1yiX71zXt8+BPa7rYvVLVNoYAQ==",
+          "format": "anthropic-claude-v1",
+          "index": 0
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && python - <<'EOF'\nimport re\np='django/utils/http.py'\ns=open(p).read()\nold = \"\"\"        year = int(m.group('year'))\n        if year < 100:\n            if year < 70:\n                year += 2000\n            else:\n                year += 1900\n\"\"\"\nnew = \"\"\"        year = int(m.group('year'))\n        if year < 100:\n            current_year = datetime.datetime.utcnow().year\n            current_century = current_year - (current_year % 100)\n            if year - (current_year % 100) > 50:\n                # year that appears to be more than 50 years in the future are\n                # interpreted as representing the past.\n                year += current_century - 100\n            else:\n                year += current_century\n\"\"\"\nassert old in s\nopen(p,'w').write(s.replace(old,new))\nEOF\nsed -n 174,192p django/utils/http.py",
+            "tool_call_id": "toolu_01RNQeL5c99vnENGnY3gcfk6"
+          },
+          {
+            "command": "cd /testbed && python -c \"\nfrom django.utils.http import parse_http_date\nimport datetime\nfor y in ['70','69','25','75','99','00']:\n    print(y, datetime.datetime.utcfromtimestamp(parse_http_date('Sunday, 06-Nov-%s 08:49:37 GMT' % y)))\n\" && python -m pytest tests/utils_tests/test_http.py -q 2>/dev/null | tail -3; python tests/runtests.py utils_tests.test_http 2>&1 | tail -3",
+            "tool_call_id": "toolu_017DqPhQKCyQSseigfdMXCou"
+          }
+        ],
+        "response": {
+          "id": "gen-1786146682-uviUS4ITBMmqipQ3TvLZ",
+          "object": "chat.completion",
+          "created": 1786146682,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": null,
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01RNQeL5c99vnENGnY3gcfk6",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && python - <<'EOF'\\nimport re\\np='django/utils/http.py'\\ns=open(p).read()\\nold = \\\"\\\"\\\"        year = int(m.group('year'))\\n        if year < 100:\\n            if year < 70:\\n                year += 2000\\n            else:\\n                year += 1900\\n\\\"\\\"\\\"\\nnew = \\\"\\\"\\\"        year = int(m.group('year'))\\n        if year < 100:\\n            current_year = datetime.datetime.utcnow().year\\n            current_century = current_year - (current_year % 100)\\n            if year - (current_year % 100) > 50:\\n                # year that appears to be more than 50 years in the future are\\n                # interpreted as representing the past.\\n                year += current_century - 100\\n            else:\\n                year += current_century\\n\\\"\\\"\\\"\\nassert old in s\\nopen(p,'w').write(s.replace(old,new))\\nEOF\\nsed -n 174,192p django/utils/http.py\"}"
+                    }
+                  },
+                  {
+                    "type": "function",
+                    "index": 1,
+                    "id": "toolu_017DqPhQKCyQSseigfdMXCou",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && python -c \\\"\\nfrom django.utils.http import parse_http_date\\nimport datetime\\nfor y in ['70','69','25','75','99','00']:\\n    print(y, datetime.datetime.utcfromtimestamp(parse_http_date('Sunday, 06-Nov-%s 08:49:37 GMT' % y)))\\n\\\" && python -m pytest tests/utils_tests/test_http.py -q 2>/dev/null | tail -3; python tests/runtests.py utils_tests.test_http 2>&1 | tail -3\"}"
+                    }
+                  }
+                ],
+                "reasoning_details": [
+                  {
+                    "type": "reasoning.text",
+                    "signature": "CAISkAcKhwEIEBgCKkAdTbP3HwGTWri9KDRB49wbuqswM/IlFwQiqvgWU4aWFPt1bF7qxzdQUTd0ab92vl4V7no95wUZi1/8XkhS9rl4Mg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDHotPcdXPFRRjCAPNBoMxRMWduodNwSoABpiIjDaJhCdF/9ibBn+I7s+5UTDSoN5hLZ8mzFwvxAEuyfeLKPCUO6NbN2WdfxA8mQGnpsqtQXyzodYQsXyDwibQfX0sj86UFeINLpoGqx5IVMNQCND1uX+aU0y32Vc9mskvO58mij/qbM/N3ZxyvPb6bJkmaW+aBKErMM3/JO+kGcJwSfLxNU/zh09wqBj+l2Ta6DwFqkxcg06TXF2V90Txd+d97fnZThutBxjBfgvsPmV6Ej8C8zOAzCOct0w0+pTCUa0DnPlGVh7AY1SdvFB3a4SqFowzWxIMD0sM+DhGGR74vC+RzJQz5vS7q/zNJl6tDv4xWJcFMEZ09y6aOOQA/B3KfkPOn2QTxgusdlw0YzHv2wnf2v/jaQFYBhqXyQOQNlWa+8sLR/lzuSx2GjkvtJU89gTuJdthb1hJF3xsZb7kLp/IMBRTzMrzAzHkXOQgoCArMYT7anAHTeFO035nOtdRMZV4Rf36FAimQlmX4VA8uEEBWdt5tzM+j9zfKac9HJT8afjikagJchCmfRG4W8NDjFqbU0T4Qcv2BxLu0if8Iofy0JioxtRwIaOHncqqHi6hVUGZt9IKY3q9OuZ5VIRwIPAUSQV6at1WkbQQumXK2gjChpUQnBWtk++4EzEhi1mloJo9sOCLLqCefiwks4IXV1jLBL47UG4XwQvcqn4yh2Uy4oLCodC3/zX/dpbxcyqBJFV8hDrp3AhmUoyU9IELCgiCDXct+IgUQHK9LCv2KG1YcU4NhcuARF+HIglX4iqSCY4QPdUxWZhQESaqZlPylgtiSb4jmfu4X3XSQ5LtYRZytxiw7n+9r/CObu/mYvpOpqjc5mWND2zbEdUPn+WrRMg+pyG57NY9x25FbD4i971K8HCl7pw2OZ6uwMdcWsSE2YpSduB/+CIw3wbqMe20cm+qNWKv26Cf2Mzdaau31Ssg7pjiaiuX2AVOtn20gjy3jmkYtTs1yiX71zXt8+BPa7rYvVLVNoYAQ==",
+                    "format": "anthropic-claude-v1",
+                    "index": 0
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 4620,
+            "completion_tokens": 746,
+            "total_tokens": 5366,
+            "cost": 0.0350795,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 2164,
+              "cache_write_tokens": 2454,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0350795,
+              "upstream_inference_prompt_cost": 0.0164295,
+              "upstream_inference_completions_cost": 0.01865
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.0350795,
+        "timestamp": 1786146691.118159
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n    else:\n        raise ValueError(\"%r is not in a valid HTTP date format\" % date)\n    try:\n        year = int(m.group('year'))\n        if year < 100:\n            current_year = datetime.datetime.utcnow().year\n            current_century = current_year - (current_year % 100)\n            if year - (current_year % 100) > 50:\n                # year that appears to be more than 50 years in the future are\n                # interpreted as representing the past.\n                year += current_century - 100\n            else:\n                year += current_century\n        month = MONTHS.index(m.group('mon').lower()) + 1\n        day = int(m.group('day'))\n        hour = int(m.group('hour'))\n        min = int(m.group('min'))\n        sec = int(m.group('sec'))\n        result = datetime.datetime(year, month, day, hour, min, sec)\n</output>",
+      "extra": {
+        "raw_output": "    else:\n        raise ValueError(\"%r is not in a valid HTTP date format\" % date)\n    try:\n        year = int(m.group('year'))\n        if year < 100:\n            current_year = datetime.datetime.utcnow().year\n            current_century = current_year - (current_year % 100)\n            if year - (current_year % 100) > 50:\n                # year that appears to be more than 50 years in the future are\n                # interpreted as representing the past.\n                year += current_century - 100\n            else:\n                year += current_century\n        month = MONTHS.index(m.group('mon').lower()) + 1\n        day = int(m.group('day'))\n        hour = int(m.group('hour'))\n        min = int(m.group('min'))\n        sec = int(m.group('sec'))\n        result = datetime.datetime(year, month, day, hour, min, sec)\n",
+        "returncode": 0,
+        "timestamp": 1786146692.529943,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_01RNQeL5c99vnENGnY3gcfk6",
+      "role": "tool"
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\n70 2070-11-06 08:49:37\n69 2069-11-06 08:49:37\n25 2025-11-06 08:49:37\n75 2075-11-06 08:49:37\n99 1999-11-06 08:49:37\n00 2000-11-06 08:49:37\nRan 45 tests in 0.120s\n\nOK\n</output>",
+      "extra": {
+        "raw_output": "70 2070-11-06 08:49:37\n69 2069-11-06 08:49:37\n25 2025-11-06 08:49:37\n75 2075-11-06 08:49:37\n99 1999-11-06 08:49:37\n00 2000-11-06 08:49:37\nRan 45 tests in 0.120s\n\nOK\n",
+        "returncode": 0,
+        "timestamp": 1786146692.53228,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_017DqPhQKCyQSseigfdMXCou",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": "Fix works correctly (e.g. with current year 2025, '75' \u2192 2075, '99' \u2192 1999) and all existing tests pass.",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_014nFD5f9aNJCmo9B52YPXtE",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"cd /testbed && git diff -- django/utils/http.py > patch.txt && cat patch.txt\"}"
+          }
+        }
+      ],
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "signature": "CAISuAMKhwEIEBgCKkDE5iVRAJwampX2c+CKEU3eczNyiwIbUSZ8ia+ip6D3CnjthU6NkLOcU2zKLR5JlCiuSYNOQcQAMuXfUAFVS63QMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDBcPup8I5LGnyZvHsRoMIrT7i9UX0dm4IypcIjDsWycohVeb8Ti0fuxigDIjL3hcrhhFEGThWpjRsQg4kAzODhWOrlAD4iEsO4xjATYq3QHxQ7FOfVgYBF3CubdZQWrGRx7Oc2gKYM9f8Mrw4t1tBhZAmPqna63HFyShGpt60iwbTjBT3XkeMFZjhdd9Ro2U9NjSv4ScwZ6kwyGOB2nGzTlMwVRLOG1PPMOe+JEeMmSAw4RP5MEXPuuhWeS33K4oiLQwVz8o1drOo60PPUgSEM7WoXzB3T3JJYGmQoRAhx5BIb9nxIj68L0Tg6AgcpHtYpE2GRsSVEciQwPpddNQFXIofdJjzOkUVsafehxf8COHDxeOn028RILQuw3yhI0Q97S6R0or/CMB+wo5aRgB",
+          "format": "anthropic-claude-v1",
+          "index": 0
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "cd /testbed && git diff -- django/utils/http.py > patch.txt && cat patch.txt",
+            "tool_call_id": "toolu_014nFD5f9aNJCmo9B52YPXtE"
+          }
+        ],
+        "response": {
+          "id": "gen-1786146693-VDqsSb5LM62brHHuHRsI",
+          "object": "chat.completion",
+          "created": 1786146693,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "Fix works correctly (e.g. with current year 2025, '75' \u2192 2075, '99' \u2192 1999) and all existing tests pass.",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_014nFD5f9aNJCmo9B52YPXtE",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"cd /testbed && git diff -- django/utils/http.py > patch.txt && cat patch.txt\"}"
+                    }
+                  }
+                ],
+                "reasoning_details": [
+                  {
+                    "type": "reasoning.text",
+                    "signature": "CAISuAMKhwEIEBgCKkDE5iVRAJwampX2c+CKEU3eczNyiwIbUSZ8ia+ip6D3CnjthU6NkLOcU2zKLR5JlCiuSYNOQcQAMuXfUAFVS63QMg1jbGF1ZGUtb3B1cy01OAFCCHRoaW5raW5nWiQ0YzBmMDQ2Zi0yNWZkLTQ1ZmItYmZiMy1hMDhhOGUyNDljYTcSDBcPup8I5LGnyZvHsRoMIrT7i9UX0dm4IypcIjDsWycohVeb8Ti0fuxigDIjL3hcrhhFEGThWpjRsQg4kAzODhWOrlAD4iEsO4xjATYq3QHxQ7FOfVgYBF3CubdZQWrGRx7Oc2gKYM9f8Mrw4t1tBhZAmPqna63HFyShGpt60iwbTjBT3XkeMFZjhdd9Ro2U9NjSv4ScwZ6kwyGOB2nGzTlMwVRLOG1PPMOe+JEeMmSAw4RP5MEXPuuhWeS33K4oiLQwVz8o1drOo60PPUgSEM7WoXzB3T3JJYGmQoRAhx5BIb9nxIj68L0Tg6AgcpHtYpE2GRsSVEciQwPpddNQFXIofdJjzOkUVsafehxf8COHDxeOn028RILQuw3yhI0Q97S6R0or/CMB+wo5aRgB",
+                    "format": "anthropic-claude-v1",
+                    "index": 0
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 5834,
+            "completion_tokens": 218,
+            "total_tokens": 6052,
+            "cost": 0.0153565,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 4618,
+              "cache_write_tokens": 1214,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0153565,
+              "upstream_inference_prompt_cost": 0.0099065,
+              "upstream_inference_completions_cost": 0.00545
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.0153565,
+        "timestamp": 1786146699.838763
+      }
+    },
+    {
+      "content": "<returncode>0</returncode>\n<output>\ndiff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..ff2f08ac1e 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -176,10 +176,14 @@ def parse_http_date(date):\n     try:\n         year = int(m.group('year'))\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n+            current_year = datetime.datetime.utcnow().year\n+            current_century = current_year - (current_year % 100)\n+            if year - (current_year % 100) > 50:\n+                # year that appears to be more than 50 years in the future are\n+                # interpreted as representing the past.\n+                year += current_century - 100\n             else:\n-                year += 1900\n+                year += current_century\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n</output>",
+      "extra": {
+        "raw_output": "diff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..ff2f08ac1e 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -176,10 +176,14 @@ def parse_http_date(date):\n     try:\n         year = int(m.group('year'))\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n+            current_year = datetime.datetime.utcnow().year\n+            current_century = current_year - (current_year % 100)\n+            if year - (current_year % 100) > 50:\n+                # year that appears to be more than 50 years in the future are\n+                # interpreted as representing the past.\n+                year += current_century - 100\n             else:\n-                year += 1900\n+                year += current_century\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n",
+        "returncode": 0,
+        "timestamp": 1786146700.152508,
+        "exception_info": ""
+      },
+      "tool_call_id": "toolu_014nFD5f9aNJCmo9B52YPXtE",
+      "role": "tool"
+    },
+    {
+      "role": "assistant",
+      "content": "The patch contains only the intended source change.",
+      "refusal": null,
+      "reasoning": null,
+      "tool_calls": [
+        {
+          "type": "function",
+          "index": 0,
+          "id": "toolu_01UcADSDfWn8YDf9BjgnSe7d",
+          "function": {
+            "name": "bash",
+            "arguments": "{\"command\": \"echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\"}"
+          }
+        }
+      ],
+      "extra": {
+        "actions": [
+          {
+            "command": "echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt",
+            "tool_call_id": "toolu_01UcADSDfWn8YDf9BjgnSe7d"
+          }
+        ],
+        "response": {
+          "id": "gen-1786146700-ndbH4VBDCbBzy2aLhGPL",
+          "object": "chat.completion",
+          "created": 1786146700,
+          "model": "anthropic/claude-opus-5",
+          "provider": "Amazon Bedrock",
+          "system_fingerprint": null,
+          "service_tier": "default",
+          "choices": [
+            {
+              "index": 0,
+              "logprobs": null,
+              "finish_reason": "tool_calls",
+              "native_finish_reason": "tool_use",
+              "message": {
+                "role": "assistant",
+                "content": "The patch contains only the intended source change.",
+                "refusal": null,
+                "reasoning": null,
+                "tool_calls": [
+                  {
+                    "type": "function",
+                    "index": 0,
+                    "id": "toolu_01UcADSDfWn8YDf9BjgnSe7d",
+                    "function": {
+                      "name": "bash",
+                      "arguments": "{\"command\": \"echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt\"}"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 6396,
+            "completion_tokens": 100,
+            "total_tokens": 6496,
+            "cost": 0.0089385,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 5832,
+              "cache_write_tokens": 562,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0089385,
+              "upstream_inference_prompt_cost": 0.0064385,
+              "upstream_inference_completions_cost": 0.0025
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        },
+        "cost": 0.0089385,
+        "timestamp": 1786146702.9519548
+      }
+    },
+    {
+      "role": "exit",
+      "content": "diff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..ff2f08ac1e 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -176,10 +176,14 @@ def parse_http_date(date):\n     try:\n         year = int(m.group('year'))\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n+            current_year = datetime.datetime.utcnow().year\n+            current_century = current_year - (current_year % 100)\n+            if year - (current_year % 100) > 50:\n+                # year that appears to be more than 50 years in the future are\n+                # interpreted as representing the past.\n+                year += current_century - 100\n             else:\n-                year += 1900\n+                year += current_century\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n",
+      "extra": {
+        "exit_status": "Submitted",
+        "submission": "diff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..ff2f08ac1e 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -176,10 +176,14 @@ def parse_http_date(date):\n     try:\n         year = int(m.group('year'))\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n+            current_year = datetime.datetime.utcnow().year\n+            current_century = current_year - (current_year % 100)\n+            if year - (current_year % 100) > 50:\n+                # year that appears to be more than 50 years in the future are\n+                # interpreted as representing the past.\n+                year += current_century - 100\n             else:\n-                year += 1900\n+                year += current_century\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n"
+      }
+    }
+  ],
+  "trajectory_format": "mini-swe-agent-1.1",
+  "instance_id": "django__django-11848"
+}
