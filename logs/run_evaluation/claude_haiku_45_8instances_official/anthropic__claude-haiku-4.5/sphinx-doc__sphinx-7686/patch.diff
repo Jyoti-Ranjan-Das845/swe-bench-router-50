@@ -1,0 +1,31 @@
+diff --git a/sphinx/ext/autosummary/generate.py b/sphinx/ext/autosummary/generate.py
+index a57c73fb7..a63dde191 100644
+--- a/sphinx/ext/autosummary/generate.py
++++ b/sphinx/ext/autosummary/generate.py
+@@ -242,11 +242,25 @@ def generate_autosummary_content(name: str, obj: Any, parent: Any,
+         public = [x for x in items if not x.split('.')[-1].startswith('_')]
+         return public, items
+ 
++    def filter_members(obj: Any, members: List[str], imported: bool) -> List[str]:
++        """Filter members based on whether they are imported."""
++        if imported:
++            return members
++        filtered = []
++        for name in members:
++            try:
++                value = safe_getattr(obj, name)
++            except AttributeError:
++                continue
++            if getattr(value, '__module__', None) == obj.__name__:
++                filtered.append(name)
++        return filtered
++
+     ns = {}  # type: Dict[str, Any]
+     ns.update(context)
+ 
+     if doc.objtype == 'module':
+-        ns['members'] = dir(obj)
++        ns['members'] = filter_members(obj, dir(obj), imported_members)
+         ns['functions'], ns['all_functions'] = \
+             get_members(obj, {'function'}, imported=imported_members)
+         ns['classes'], ns['all_classes'] = \

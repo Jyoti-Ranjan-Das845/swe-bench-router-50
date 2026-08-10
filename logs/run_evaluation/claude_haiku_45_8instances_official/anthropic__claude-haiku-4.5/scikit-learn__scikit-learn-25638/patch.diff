@@ -1,0 +1,63 @@
+diff --git a/sklearn/utils/multiclass.py b/sklearn/utils/multiclass.py
+index 5eaef2fde..2b4ae54ce 100644
+--- a/sklearn/utils/multiclass.py
++++ b/sklearn/utils/multiclass.py
+@@ -207,6 +207,48 @@ def check_classification_targets(y):
+         raise ValueError("Unknown label type: %r" % y_type)
+ 
+ 
++def _convert_pandas_nullable_dtype(y):
++    """Convert pandas nullable dtype to numpy dtype.
++    
++    Pandas nullable dtypes (Int64, Float64, boolean, etc.) are ExtensionDtypes
++    that have a numpy_dtype attribute. This function converts them to the
++    corresponding numpy arrays with the proper dtype.
++    
++    Parameters
++    ----------
++    y : array-like
++        Input array.
++    
++    Returns
++    -------
++    y_converted : array-like
++        If y is a pandas object with nullable dtype, returns numpy array
++        with the corresponding numpy dtype. Otherwise, returns y unchanged.
++    """
++    from contextlib import suppress
++    
++    with suppress(ImportError, AttributeError):
++        import pandas as pd
++        
++        # Check if y is a pandas Series or Index
++        if isinstance(y, (pd.Series, pd.Index)):
++            # Check if it has a numpy_dtype attribute (nullable dtypes)
++            if hasattr(y.dtype, 'numpy_dtype'):
++                # Convert to numpy array with the appropriate dtype
++                return np.asarray(y, dtype=y.dtype.numpy_dtype)
++        
++        # Check if y is a pandas DataFrame
++        elif isinstance(y, pd.DataFrame):
++            # Check if all columns have nullable dtypes
++            if all(hasattr(dtype, 'numpy_dtype') for dtype in y.dtypes):
++                # If all columns have the same nullable dtype, convert directly
++                if y.dtypes.nunique() == 1:
++                    numpy_dtype = y.iloc[:, 0].dtype.numpy_dtype
++                    return np.asarray(y, dtype=numpy_dtype)
++    
++    return y
++
++
+ def type_of_target(y, input_name=""):
+     """Determine the type of data indicated by the target.
+ 
+@@ -295,6 +337,9 @@ def type_of_target(y, input_name=""):
+     if sparse_pandas:
+         raise ValueError("y cannot be class 'SparseSeries' or 'SparseArray'")
+ 
++    # Convert pandas nullable dtypes to numpy arrays with proper dtype
++    y = _convert_pandas_nullable_dtype(y)
++
+     if is_multilabel(y):
+         return "multilabel-indicator"
+ 
