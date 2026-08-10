@@ -57,8 +57,8 @@ Each contains instance-specific `report.json` files showing pass/fail results.
 - GLM: **28/38 resolved (73.7%)**
 
 **Files:** 
-- See [PHASE_INSTANCE_TRACKING.md](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/PHASE_INSTANCE_TRACKING.md)
-- See [PHASE_RESULTS_SUMMARY.md](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/PHASE_RESULTS_SUMMARY.md)
+- See [PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md)
+- See [PHASE_RESULTS_SUMMARY.md](PHASE_RESULTS_SUMMARY.md)
 
 ---
 
@@ -74,8 +74,8 @@ Each contains instance-specific `report.json` files showing pass/fail results.
 - **scikit-learn__scikit-learn-25638**: Haiku PASSED → FAILED (stochastic!)
 
 **Files:** 
-- See [PHASE_INSTANCE_TRACKING.md](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/PHASE_INSTANCE_TRACKING.md)
-- See [PHASE_RESULTS_SUMMARY.md](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/PHASE_RESULTS_SUMMARY.md)
+- See [PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md)
+- See [PHASE_RESULTS_SUMMARY.md](PHASE_RESULTS_SUMMARY.md)
 
 ---
 
@@ -90,23 +90,23 @@ Each contains instance-specific `report.json` files showing pass/fail results.
 **Result:** All 4 instances failed (0/4 resolved)
 
 **Files:** 
-- See [PHASE_INSTANCE_TRACKING.md](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/PHASE_INSTANCE_TRACKING.md)
-- See [PHASE_RESULTS_SUMMARY.md](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/PHASE_RESULTS_SUMMARY.md)
+- See [PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md)
+- See [PHASE_RESULTS_SUMMARY.md](PHASE_RESULTS_SUMMARY.md)
 
 ---
 
 ## Key Files to Read
 
-1. **[PHASE_INSTANCE_TRACKING.md](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/PHASE_INSTANCE_TRACKING.md)**
+1. **[PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md)**
    - Which instances were run in each phase
    - Links to patches and evaluation results
 
-2. **[PHASE_RESULTS_SUMMARY.md](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/PHASE_RESULTS_SUMMARY.md)**
+2. **[PHASE_RESULTS_SUMMARY.md](PHASE_RESULTS_SUMMARY.md)**
    - Pass/fail numbers for each model
    - Stochastic instances identified
    - Summary statistics
 
-3. **[MINI_SWE_AGENT_RUNS.md](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/MINI_SWE_AGENT_RUNS.md)**
+3. **[MINI_SWE_AGENT_RUNS.md](MINI_SWE_AGENT_RUNS.md)**
    - How each run was executed
    - Configurations used (all identical across phases)
    - Command format and parameters
