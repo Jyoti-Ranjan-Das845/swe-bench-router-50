@@ -1,0 +1,7 @@
+2026-08-10 07:31:33,952 - minisweagent - INFO - Loading dataset data/SWE-bench_Lite, split test...
+2026-08-10 07:31:33,968 - minisweagent - INFO - Instance filter: 300 -> 1 instances
+2026-08-10 07:31:33,968 - minisweagent - INFO - Running on 1 instances...
+2026-08-10 07:31:33,968 - minisweagent - INFO - Building agent config from specs: ['vendor/mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml', 'config/claude_haiku_45.yaml']
+2026-08-10 07:31:33,975 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-df500ee4 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25638:latest sleep 2h
+2026-08-10 07:31:34,080 - minisweagent.environment - INFO - Started container minisweagent-df500ee4 with ID 08e2355e8ec9cec0fe938cc4daa45c93c1ee37c6a1cd031f2f432d4a66a5bc83
+2026-08-10 07:34:54,008 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45_priority1/scikit-learn__scikit-learn-25638/scikit-learn__scikit-learn-25638.traj.json'

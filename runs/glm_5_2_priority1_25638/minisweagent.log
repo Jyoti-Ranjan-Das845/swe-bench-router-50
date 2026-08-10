@@ -1,0 +1,7 @@
+2026-08-10 07:31:28,561 - minisweagent - INFO - Loading dataset data/SWE-bench_Lite, split test...
+2026-08-10 07:31:28,581 - minisweagent - INFO - Instance filter: 300 -> 1 instances
+2026-08-10 07:31:28,581 - minisweagent - INFO - Running on 1 instances...
+2026-08-10 07:31:28,582 - minisweagent - INFO - Building agent config from specs: ['vendor/mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml', 'config/glm_5_2.yaml']
+2026-08-10 07:31:28,587 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-12097530 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25638:latest sleep 2h
+2026-08-10 07:31:28,704 - minisweagent.environment - INFO - Started container minisweagent-12097530 with ID 2a37154170d1393a1ff2df88808b184248e32e20a55ebf83c021b54660a6daf2
+2026-08-10 07:33:36,362 - minisweagent - INFO - Saved trajectory to 'runs/glm_5_2_priority1_25638/scikit-learn__scikit-learn-25638/scikit-learn__scikit-learn-25638.traj.json'

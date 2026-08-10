@@ -1,0 +1,10 @@
+2026-08-10 05:56:29,526 - minisweagent - INFO - Loading dataset data/SWE-bench_Lite, split test...
+2026-08-10 05:56:29,548 - minisweagent - INFO - Instance filter: 300 -> 2 instances
+2026-08-10 05:56:29,548 - minisweagent - INFO - Running on 2 instances...
+2026-08-10 05:56:29,549 - minisweagent - INFO - Building agent config from specs: ['vendor/mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml', 'config/claude_opus_5.yaml']
+2026-08-10 05:56:29,557 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-d8b0b302 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-11019:latest sleep 2h
+2026-08-10 05:56:30,753 - minisweagent.environment - INFO - Started container minisweagent-d8b0b302 with ID 6e3479298ee1c14d84329c524481d190d7f567aab9f7411f442a17d8bc078856
+2026-08-10 05:58:37,860 - minisweagent - INFO - Saved trajectory to 'runs/claude_opus_5_retest/django__django-11019/django__django-11019.traj.json'
+2026-08-10 05:58:37,871 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-ab09e998 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-14155:latest sleep 2h
+2026-08-10 05:58:37,996 - minisweagent.environment - INFO - Started container minisweagent-ab09e998 with ID 866a4fe95c84cd727edeb1294704a27aa78ad436b929844053eeb17e7cb5e02c
+2026-08-10 06:01:12,013 - minisweagent - INFO - Saved trajectory to 'runs/claude_opus_5_retest/django__django-14155/django__django-14155.traj.json'

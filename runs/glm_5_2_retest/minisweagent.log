@@ -1,0 +1,10 @@
+2026-08-10 05:56:36,306 - minisweagent - INFO - Loading dataset data/SWE-bench_Lite, split test...
+2026-08-10 05:56:36,324 - minisweagent - INFO - Instance filter: 300 -> 2 instances
+2026-08-10 05:56:36,325 - minisweagent - INFO - Running on 2 instances...
+2026-08-10 05:56:36,325 - minisweagent - INFO - Building agent config from specs: ['vendor/mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml', 'config/glm_5_2.yaml']
+2026-08-10 05:56:36,331 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-ed2c8f18 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-11019:latest sleep 2h
+2026-08-10 05:56:36,422 - minisweagent.environment - INFO - Started container minisweagent-ed2c8f18 with ID b3727ec98b452a940fa057502619fede32c7d5f4eb62d4d4bee2d14a6231f28a
+2026-08-10 06:06:12,889 - minisweagent - INFO - Saved trajectory to 'runs/glm_5_2_retest/django__django-11019/django__django-11019.traj.json'
+2026-08-10 06:06:12,896 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-2bfbf33a -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-14155:latest sleep 2h
+2026-08-10 06:06:13,023 - minisweagent.environment - INFO - Started container minisweagent-2bfbf33a with ID e0cfc26683421a190d43b85688d891007ded5559536b824dd13ade7e3cfbf7c4
+2026-08-10 06:11:20,907 - minisweagent - INFO - Saved trajectory to 'runs/glm_5_2_retest/django__django-14155/django__django-14155.traj.json'

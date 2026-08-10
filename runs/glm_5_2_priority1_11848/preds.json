@@ -1,0 +1,7 @@
+{
+  "django__django-11848": {
+    "model_name_or_path": "z-ai/glm-5.2",
+    "instance_id": "django__django-11848",
+    "model_patch": "diff --git a/django/utils/http.py b/django/utils/http.py\nindex 572cfb4347..7243e96636 100644\n--- a/django/utils/http.py\n+++ b/django/utils/http.py\n@@ -175,11 +175,16 @@ def parse_http_date(date):\n         raise ValueError(\"%r is not in a valid HTTP date format\" % date)\n     try:\n         year = int(m.group('year'))\n+        # RFC 7231 rules that two-digit years should be interpreted as the\n+        # most recent year in the past that has the same last two digits.\n+        # This means that a two-digit year that's more than 50 years in the\n+        # future is interpreted as the corresponding year in the past.\n         if year < 100:\n-            if year < 70:\n-                year += 2000\n-            else:\n-                year += 1900\n+            current_year = datetime.datetime.now().year\n+            century = current_year - (current_year % 100)\n+            year += century\n+            if year - current_year > 50:\n+                year -= 100\n         month = MONTHS.index(m.group('mon').lower()) + 1\n         day = int(m.group('day'))\n         hour = int(m.group('hour'))\n"
+  }
+}
