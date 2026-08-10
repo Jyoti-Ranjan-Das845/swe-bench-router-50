@@ -41,6 +41,8 @@
 
 ### Claude Haiku-4.5 (Phase 0 - Exploratory on 8 Disagreement Tasks)
 
+**Status:** ✅ **FULLY EVALUATED** - Official SWE-bench evaluation completed for all 8 instances
+
 **Instances:** 8 disagreement tasks (instances where Opus and GLM differed)
 
 | Instance | Result |
@@ -56,7 +58,8 @@
 
 **Patches:** [runs/claude_haiku_45/preds.json](runs/claude_haiku_45/preds.json)
 
-**Evaluation:** [anthropic__claude-haiku-4.5.claude_haiku_45_8instances_official.json](anthropic__claude-haiku-4.5.claude_haiku_45_8instances_official.json) (local evaluation file)
+**Evaluation Results:** [logs/run_evaluation/claude_haiku_45_8instances_official/anthropic__claude-haiku-4.5/](logs/run_evaluation/claude_haiku_45_8instances_official/anthropic__claude-haiku-4.5/)
+- Per-instance evaluation: 40 files (patch, eval.sh, report.json, test_output.txt, run_instance.log for each instance)
 
 **Score:** **2/8 resolved (25%)** ⚠️
 
@@ -166,18 +169,19 @@
 
 ### Model Pass Rates Across All Runs
 
-| Model | RUN1 (38 paired) | RUN2 (4 inst.) | RUN3 (4 inst.) |
-|-------|-----------------|-----------------|-----------------|
-| GLM-5.2 | 28/38 (73.7%) | **2/2 (100%)** ✅ | **0/2 (0%)** ❌ |
-| Opus-5 | 32/38 (84.2%) | **1/2 (50%)** ⚠️ | **0/1 (0%)** ❌ |
-| Haiku-4.5 | - | **1/2 (50%)** ⚠️ | **0/1 (0%)** ❌ |
+| Model | RUN1 (38 paired) | Phase 0 (8 inst.) | RUN2 (4 inst.) | RUN3 (4 inst.) |
+|-------|-----------------|-----------------|-----------------|-----------------|
+| GLM-5.2 | 28/38 (73.7%) ✅ | - | **2/2 (100%)** ✅ | **0/2 (0%)** ❌ |
+| Opus-5 | 32/38 (84.2%) ✅ | - | **1/2 (50%)** ⚠️ | **0/1 (0%)** ❌ |
+| Haiku-4.5 | - | **2/8 (25%)** ✅ | **1/2 (50%)** ⚠️ | **0/1 (0%)** ❌ |
 
-**Key Findings:** 
-- RUN1: Opus outperformed GLM (84.2% vs 73.7%) on 38 paired instances
-- RUN2: GLM achieved perfect 100% on retry; Opus showed stochasticity on django-14155
-- RUN3: All models failed on priority instances, indicating task difficulty or stochasticity
+**Key Findings:**
+- RUN1: Opus outperformed GLM on 38 paired instances (84.2% vs 73.7%) ✅
+- Phase 0: Haiku's initial evaluation on 8 disagreement instances (2/8 resolved) ✅
+- RUN2: GLM achieved perfect 100% on retry; Opus showed stochasticity ✅
+- RUN3: All models failed on priority instances, indicating task difficulty ✅
 
 ### Stochastic Instances Identified
 
-- **django__django-14155**: Opus (FAIL → PASS → PASS) - Only instance showing recovery
-- **scikit-learn__scikit-learn-25638**: Haiku (PASS → FAIL → FAIL) - Inconsistent performance
+- **django__django-14155**: Opus (RUN1 FAIL → RUN2 PASS) - Shows recovery
+- **scikit-learn__scikit-learn-25638**: Haiku (Phase 0 PASS → RUN2 PASS → RUN3 FAIL) - Inconsistent performance

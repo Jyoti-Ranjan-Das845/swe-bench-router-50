@@ -145,14 +145,17 @@ This suggests model performance on certain tasks is probabilistic, not determini
 
 **Committed to this branch (complete):**
 - ✅ RUN1 baseline results: GLM (28/38), Opus (32/38) on 38 paired instances
-- ✅ RUN1 Haiku Phase 0: 2/8 on 8 disagreement instances (8 trajectory files, patches, logs)
+- ✅ RUN1 Haiku Phase 0: 2/8 on 8 disagreement instances
+  - 8 trajectory files, preds.json, logs in runs/claude_haiku_45/
+  - Complete official SWE-bench evaluation (40 files with per-instance results)
 - ✅ RUN2 retest results: All model patches, trajectories, and evaluation logs
 - ✅ RUN3 priority1 results: All model patches, trajectories, and evaluation logs
 - ✅ All model configurations (base configs + priority1 configs)
 - ✅ Complete evaluation harness and benchmark configs
 
-**All files in git:**
-- 627 total files tracked in remote repository
+**Files in git:**
+- 670+ total files tracked in remote repository
+- All RUN1, Phase 0, RUN2, RUN3 artifacts with complete evaluations
 
 **Model coverage:**
 - **Opus/GLM:** Full 50-instance run (38 paired instances used for comparison)
