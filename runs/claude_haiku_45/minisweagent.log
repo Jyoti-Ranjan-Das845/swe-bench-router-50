@@ -1,0 +1,406 @@
+2026-08-10 01:17:50,661 - minisweagent - INFO - Loading dataset data/SWE-bench_Lite, split test...
+2026-08-10 01:17:50,678 - minisweagent - INFO - Instance filter: 300 -> 8 instances
+2026-08-10 01:17:50,678 - minisweagent - INFO - Running on 8 instances...
+2026-08-10 01:17:50,679 - minisweagent - INFO - Building agent config from specs: ['vendor/mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml', 'config/claude_haiku_45.yaml']
+2026-08-10 01:17:50,686 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-a3182838 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-11019:latest sleep 2h
+2026-08-10 01:17:51,891 - minisweagent.environment - INFO - Started container minisweagent-a3182838 with ID 1256e86d03f5000f1405f0fe12e09159676f409e358611b6a0f844368a122c5a
+2026-08-10 01:18:25,153 - minisweagent - INFO - Loading dataset data/SWE-bench_Lite, split test...
+2026-08-10 01:18:25,169 - minisweagent - INFO - Instance filter: 300 -> 8 instances
+2026-08-10 01:18:25,169 - minisweagent - INFO - Running on 8 instances...
+2026-08-10 01:18:25,169 - minisweagent - INFO - Building agent config from specs: ['vendor/mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml', 'config/claude_haiku_45.yaml']
+2026-08-10 01:18:25,175 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-a93aad2a -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-11019:latest sleep 2h
+2026-08-10 01:18:25,294 - minisweagent.environment - INFO - Started container minisweagent-a93aad2a with ID 72d30319332aa3a22140a685302bcfad5d0078b031cbc026109ff752ca649c8f
+2026-08-10 01:22:01,120 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/django__django-11019/django__django-11019.traj.json'
+2026-08-10 01:22:01,123 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-68039645 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-11848:latest sleep 2h
+2026-08-10 01:22:01,250 - minisweagent.environment - INFO - Started container minisweagent-68039645 with ID a6ace60bbbbed546e90616ca55c63dd18cba4a94bcbba9aaf3a68ea6b849eac4
+2026-08-10 01:25:52,085 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/django__django-11019/django__django-11019.traj.json'
+2026-08-10 01:25:52,093 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-c59c75e4 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-11848:latest sleep 2h
+2026-08-10 01:25:52,225 - minisweagent.environment - INFO - Started container minisweagent-c59c75e4 with ID f755a9f95e279388adf056e1b22d7cc664ef2ba4e7806359f49584ea6d400c50
+2026-08-10 01:26:12,439 - minisweagent - ERROR - Error processing instance django__django-11848: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 79, in _query
+    response.raise_for_status()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/requests/models.py", line 1167, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+           ^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 98, in run
+    self.step()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 128, in step
+    return self.execute_actions(self.query())
+                                ^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 149, in query
+    message = self.model.query(self.messages)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 98, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 100, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 88, in _query
+    raise OpenRouterAPIError(f"HTTP {response.status_code}: {response.text}") from e
+minisweagent.models.openrouter_model.OpenRouterAPIError: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+2026-08-10 01:26:12,446 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/django__django-11848/django__django-11848.traj.json'
+2026-08-10 01:26:12,447 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-f467f391 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-14155:latest sleep 2h
+2026-08-10 01:26:12,568 - minisweagent.environment - INFO - Started container minisweagent-f467f391 with ID 3fb2932125b4d6c5025c5408e5b26ce4a5522b103c51cb24041aa9edacd38579
+2026-08-10 01:27:33,737 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/django__django-11848/django__django-11848.traj.json'
+2026-08-10 01:27:33,747 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-524e04ac -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-14155:latest sleep 2h
+2026-08-10 01:27:33,866 - minisweagent.environment - INFO - Started container minisweagent-524e04ac with ID 1b6f992191806296e501ddb04bae7be86a6e24a25af3081779a463b31862cfb1
+2026-08-10 01:34:03,001 - minisweagent - ERROR - Error processing instance django__django-14155: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 79, in _query
+    response.raise_for_status()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/requests/models.py", line 1167, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+           ^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 98, in run
+    self.step()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 128, in step
+    return self.execute_actions(self.query())
+                                ^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 149, in query
+    message = self.model.query(self.messages)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 98, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 100, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 88, in _query
+    raise OpenRouterAPIError(f"HTTP {response.status_code}: {response.text}") from e
+minisweagent.models.openrouter_model.OpenRouterAPIError: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+2026-08-10 01:34:03,057 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/django__django-14155/django__django-14155.traj.json'
+2026-08-10 01:34:03,058 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-77a48167 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-14667:latest sleep 2h
+2026-08-10 01:34:03,210 - minisweagent.environment - INFO - Started container minisweagent-77a48167 with ID 03566e90ed5623ad9101f82a781668ef04092e7b265ac575abf63330a9965044
+2026-08-10 01:34:21,476 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/django__django-14155/django__django-14155.traj.json'
+2026-08-10 01:34:21,485 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-0c02a32c -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.django_1776_django-14667:latest sleep 2h
+2026-08-10 01:34:21,634 - minisweagent.environment - INFO - Started container minisweagent-0c02a32c with ID 892a593f5ce5deef248bb37d06cf9599d8df7cb80b8d1663e43484834735b935
+2026-08-10 01:38:13,229 - minisweagent - ERROR - Error processing instance django__django-14667: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 79, in _query
+    response.raise_for_status()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/requests/models.py", line 1167, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+           ^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 98, in run
+    self.step()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 128, in step
+    return self.execute_actions(self.query())
+                                ^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 149, in query
+    message = self.model.query(self.messages)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 98, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 100, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 88, in _query
+    raise OpenRouterAPIError(f"HTTP {response.status_code}: {response.text}") from e
+minisweagent.models.openrouter_model.OpenRouterAPIError: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+2026-08-10 01:38:13,232 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/django__django-14667/django__django-14667.traj.json'
+2026-08-10 01:38:13,233 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-6ac4b600 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-23987:latest sleep 2h
+2026-08-10 01:38:13,360 - minisweagent.environment - INFO - Started container minisweagent-6ac4b600 with ID 7602ac285eaff73d5a0ed28636134a683ba46c675b223ed01119edf96ec23267
+2026-08-10 01:39:56,213 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/django__django-14667/django__django-14667.traj.json'
+2026-08-10 01:39:56,219 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-aeb208ff -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-23987:latest sleep 2h
+2026-08-10 01:39:56,340 - minisweagent.environment - INFO - Started container minisweagent-aeb208ff with ID 53338fbf4d69bbcc36bc8d29ffda11c8174325172cf133de693c63f9c31a3066
+2026-08-10 01:42:22,716 - minisweagent - ERROR - Error processing instance matplotlib__matplotlib-23987: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 79, in _query
+    response.raise_for_status()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/requests/models.py", line 1167, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+           ^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 98, in run
+    self.step()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 128, in step
+    return self.execute_actions(self.query())
+                                ^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 149, in query
+    message = self.model.query(self.messages)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 98, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 100, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 88, in _query
+    raise OpenRouterAPIError(f"HTTP {response.status_code}: {response.text}") from e
+minisweagent.models.openrouter_model.OpenRouterAPIError: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+2026-08-10 01:42:22,726 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/matplotlib__matplotlib-23987/matplotlib__matplotlib-23987.traj.json'
+2026-08-10 01:42:22,728 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-3511c698 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10949:latest sleep 2h
+2026-08-10 01:42:22,855 - minisweagent.environment - INFO - Started container minisweagent-3511c698 with ID 396b4b683aeb763f26a77e0a9a7eed8f5006ea9409de1a0993b9eb782dab07ad
+2026-08-10 01:44:41,565 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/matplotlib__matplotlib-23987/matplotlib__matplotlib-23987.traj.json'
+2026-08-10 01:44:41,575 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-47af4834 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-10949:latest sleep 2h
+2026-08-10 01:44:41,719 - minisweagent.environment - INFO - Started container minisweagent-47af4834 with ID 612f57463870cb66e16bb1020931e610709d72c40d24ee23160048dbd660adef
+2026-08-10 01:46:32,063 - minisweagent - ERROR - Error processing instance scikit-learn__scikit-learn-10949: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 79, in _query
+    response.raise_for_status()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/requests/models.py", line 1167, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+           ^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 98, in run
+    self.step()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 128, in step
+    return self.execute_actions(self.query())
+                                ^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 149, in query
+    message = self.model.query(self.messages)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 98, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 100, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 88, in _query
+    raise OpenRouterAPIError(f"HTTP {response.status_code}: {response.text}") from e
+minisweagent.models.openrouter_model.OpenRouterAPIError: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+2026-08-10 01:46:32,073 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/scikit-learn__scikit-learn-10949/scikit-learn__scikit-learn-10949.traj.json'
+2026-08-10 01:46:32,076 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-151576bd -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25638:latest sleep 2h
+2026-08-10 01:46:32,204 - minisweagent.environment - INFO - Started container minisweagent-151576bd with ID 29a5c34aab9d770c50191b7888bb38ef14d1f2722d570511170f423ff0510497
+2026-08-10 01:47:22,587 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/scikit-learn__scikit-learn-10949/scikit-learn__scikit-learn-10949.traj.json'
+2026-08-10 01:47:22,595 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-27d69c0f -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25638:latest sleep 2h
+2026-08-10 01:47:22,720 - minisweagent.environment - INFO - Started container minisweagent-27d69c0f with ID c78768bd6787d5b269cee22bf45c51f1e3fd8e0768398d6fffaf5c1e224d0f7e
+2026-08-10 01:50:09,183 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/scikit-learn__scikit-learn-25638/scikit-learn__scikit-learn-25638.traj.json'
+2026-08-10 01:50:09,192 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-ef16537d -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7686:latest sleep 2h
+2026-08-10 01:50:09,325 - minisweagent.environment - INFO - Started container minisweagent-ef16537d with ID e2214e249244a63676de9b71fec7c988f7980196ecac8fc9b309fbd25fed628e
+2026-08-10 01:50:41,228 - minisweagent - ERROR - Error processing instance scikit-learn__scikit-learn-25638: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 79, in _query
+    response.raise_for_status()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/requests/models.py", line 1167, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+           ^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 98, in run
+    self.step()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 128, in step
+    return self.execute_actions(self.query())
+                                ^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 149, in query
+    message = self.model.query(self.messages)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 98, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 100, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 88, in _query
+    raise OpenRouterAPIError(f"HTTP {response.status_code}: {response.text}") from e
+minisweagent.models.openrouter_model.OpenRouterAPIError: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+2026-08-10 01:50:41,239 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/scikit-learn__scikit-learn-25638/scikit-learn__scikit-learn-25638.traj.json'
+2026-08-10 01:50:41,242 - minisweagent.environment - DEBUG - Starting container with command: docker run -d --name minisweagent-f9d05061 -w /testbed --rm docker.io/swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7686:latest sleep 2h
+2026-08-10 01:50:41,367 - minisweagent.environment - INFO - Started container minisweagent-f9d05061 with ID bb281bdadfb22d75c5c71668e00028e2cd502e2a2aef923b38f30f96b586b615
+2026-08-10 01:54:51,907 - minisweagent - ERROR - Error processing instance sphinx-doc__sphinx-7686: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 79, in _query
+    response.raise_for_status()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/requests/models.py", line 1167, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://openrouter.ai/api/v1/chat/completions
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/swebench.py", line 154, in process_instance
+    info = agent.run(task)
+           ^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 98, in run
+    self.step()
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/run/benchmarks/utils/common.py", line 17, in step
+    return super().step()
+           ^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 128, in step
+    return self.execute_actions(self.query())
+                                ^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/agents/default.py", line 149, in query
+    message = self.model.query(self.messages)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 98, in query
+    for attempt in retry(logger=logger, abort_exceptions=self.abort_exceptions):
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 438, in __iter__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 371, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/.venv/lib/python3.11/site-packages/tenacity/__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/.local/share/uv/python/cpython-3.11.15-macos-aarch64-none/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 100, in query
+    response = self._query(self._prepare_messages_for_api(messages), **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/vendor/mini-swe-agent/src/minisweagent/models/openrouter_model.py", line 88, in _query
+    raise OpenRouterAPIError(f"HTTP {response.status_code}: {response.text}") from e
+minisweagent.models.openrouter_model.OpenRouterAPIError: HTTP 400: {"error":{"message":"anthropic/claude-haiku-4.5-20250101 is not a valid model ID","code":400},"user_id":"user_2ty8Txs5movna5gIwK8cP7Vrzls"}
+2026-08-10 01:54:51,943 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/sphinx-doc__sphinx-7686/sphinx-doc__sphinx-7686.traj.json'
+2026-08-10 01:55:12,144 - minisweagent - INFO - Saved trajectory to 'runs/claude_haiku_45/sphinx-doc__sphinx-7686/sphinx-doc__sphinx-7686.traj.json'

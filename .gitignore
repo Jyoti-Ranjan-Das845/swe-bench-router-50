@@ -4,6 +4,9 @@ vendor/
 data/
 runs/*
 !runs/.gitkeep
+!runs/glm_5_2/
+!runs/claude_opus_5/
+!runs/claude_haiku_45/
 !runs/glm_5_2_retest/
 !runs/claude_opus_5_retest/
 !runs/claude_haiku_45_retest/

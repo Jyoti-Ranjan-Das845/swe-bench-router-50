@@ -1,0 +1,11 @@
+instances_by_exit_status:
+    null:
+    - django__django-11019
+    OpenRouterAPIError:
+    - django__django-11848
+    - django__django-14155
+    - django__django-14667
+    - matplotlib__matplotlib-23987
+    - scikit-learn__scikit-learn-10949
+    - scikit-learn__scikit-learn-25638
+    - sphinx-doc__sphinx-7686
