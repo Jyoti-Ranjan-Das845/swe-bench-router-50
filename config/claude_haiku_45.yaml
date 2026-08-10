@@ -1,0 +1,11 @@
+model:
+  model_name: anthropic/claude-haiku-4.5
+  model_kwargs:
+    drop_params: true
+    parallel_tool_calls: true
+  set_cache_control: default_end
+  cost_tracking: default
+agent:
+  step_limit: 250
+  cost_limit: 1.0
+  wall_time_limit_seconds: 0
