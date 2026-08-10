@@ -1,187 +1,124 @@
 # Phase Results Summary
 
-## RUN1 (Initial Full Benchmark - Aug 7, 2026)
+All resolved/unresolved figures below are taken from the linked official SWE-bench evaluator reports.
 
-**Explanation:** Full run attempted on 50 fixed instances. GLM-5.2 completed all 50. Claude Opus-5 encountered API issues and completed only 43. For fair comparison, we evaluated both models on the same 38 paired instances where both generated valid patches.
+## RUN1: Baseline
 
-### GLM-5.2 (Full Run)
+The experiment attempted the same fixed 50 Lite test instances for GLM-5.2 and Claude Opus-5. GLM generated 49 non-empty patches and Opus generated 38. The paired set is the [38-instance intersection](common_completed_instances.txt) with non-empty patches from both models.
+
+### GLM-5.2
 
 | Metric | Value |
-|--------|-------|
-| Full Run: Instances Attempted | 50 |
-| Full Run: Valid Patches Generated | 49 |
-| Full Run: Empty Patches | 1 (sympy__sympy-15345) |
-| **Evaluation: 38 Paired Instances** | **38** |
-| **Evaluation: Resolved** | **28/38** ✅ |
-| **Evaluation: Unresolved** | **10/38** ❌ |
+|---|---:|
+| Fixed instances attempted | 50 |
+| Non-empty patches generated | 49 |
+| Empty patches | 1 (`sympy__sympy-15345`) |
+| Full official evaluation | 37/49 resolved; 12/49 unresolved |
+| Paired 38-task evaluation | 28/38 resolved; 10/38 unresolved |
 
 **Patches:** [runs/glm_5_2/preds.json](runs/glm_5_2/preds.json)
+**Official evaluation (49 patches):** [GLM evaluator reports](logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/)
 
-**Evaluation (38 paired):** [logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/](logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/)
-
----
-
-### Claude Opus-5 (Full Run Attempt)
+### Claude Opus-5
 
 | Metric | Value |
-|--------|-------|
-| Full Run: Instances Attempted | 50 |
-| Full Run: Instances Completed | 43 |
-| Full Run: Valid Patches Generated | 38 |
-| Full Run: Empty Patches | 5 |
-| **Evaluation: 38 Paired Instances** | **38** |
-| **Evaluation: Resolved** | **32/38** ✅ |
-| **Evaluation: Unresolved** | **6/38** ❌ |
+|---|---:|
+| Fixed instances attempted | 50 |
+| Instances completed | 43 |
+| Non-empty patches generated | 38 |
+| Empty patches | 5 |
+| Paired 38-task evaluation | 32/38 resolved; 6/38 unresolved |
 
 **Patches:** [runs/claude_opus_5/preds.json](runs/claude_opus_5/preds.json)
+**Official evaluation (38 paired patches):** [Opus evaluator reports](logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/)
 
-**Evaluation (38 paired):** [logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/](logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/)
+### Paired 38-Task Outcome
 
----
+| Outcome | Tasks |
+|---|---:|
+| Both resolved | 26 |
+| Opus only | 6 |
+| GLM only | 2 |
+| Neither resolved | 4 |
 
-### Claude Haiku-4.5 (Phase 0 - Exploratory on 8 Disagreement Tasks)
+The eight disagreements are the six Opus-only and two GLM-only tasks. They were used for the Phase 0 Haiku check.
 
-**Status:** ✅ **FULLY EVALUATED** - Official SWE-bench evaluation completed for all 8 instances
-
-**Instances:** 8 disagreement tasks (instances where Opus and GLM differed)
+### Claude Haiku-4.5: Phase 0 on Eight Disagreements
 
 | Instance | Result |
-|----------|--------|
-| django__django-11019 | ❌ Failed |
-| django__django-14155 | ❌ Failed |
-| django__django-14667 | ❌ Failed |
-| matplotlib__matplotlib-23987 | ❌ Failed |
-| scikit-learn__scikit-learn-10949 | ❌ Failed |
-| scikit-learn__scikit-learn-25638 | ✅ Resolved |
-| sphinx-doc__sphinx-7686 | ❌ Failed |
-| django__django-11848 | ✅ Resolved |
+|---|---|
+| `django__django-11019` | Unresolved |
+| `django__django-11848` | Resolved |
+| `django__django-14155` | Unresolved |
+| `django__django-14667` | Unresolved |
+| `matplotlib__matplotlib-23987` | Unresolved |
+| `scikit-learn__scikit-learn-10949` | Unresolved |
+| `scikit-learn__scikit-learn-25638` | Resolved |
+| `sphinx-doc__sphinx-7686` | Unresolved |
 
+**Score:** 2/8 resolved (25%)
 **Patches:** [runs/claude_haiku_45/preds.json](runs/claude_haiku_45/preds.json)
-
-**Evaluation Results:** [logs/run_evaluation/claude_haiku_45_8instances_official/anthropic__claude-haiku-4.5/](logs/run_evaluation/claude_haiku_45_8instances_official/anthropic__claude-haiku-4.5/)
-- Per-instance evaluation: 40 files (patch, eval.sh, report.json, test_output.txt, run_instance.log for each instance)
-
-**Score:** **2/8 resolved (25%)** ⚠️
+**Official evaluation:** [Haiku Phase 0 evaluator reports](logs/run_evaluation/claude_haiku_45_8instances_official/anthropic__claude-haiku-4.5/)
 
 ---
 
-## RUN2 (Retest on 4 Informative Instances - Aug 9-10, 2026)
+## RUN2: Focused Retests
 
 ### GLM-5.2
 
 | Instance | Result |
-|----------|--------|
-| django__django-11019 | ✅ Resolved (2/2) |
-| django__django-14155 | ✅ Resolved |
+|---|---|
+| `django__django-11019` | Resolved |
+| `django__django-14155` | Resolved |
 
+**Score:** 2/2 resolved
 **Patches:** [runs/glm_5_2_retest/preds.json](runs/glm_5_2_retest/preds.json)
-
-**Evaluation:** [logs/run_evaluation/run2_glm_retest/z-ai__glm-5.2/](logs/run_evaluation/run2_glm_retest/z-ai__glm-5.2/)
-
-**Score:** **2/2 resolved (100%)** ✅
-
----
+**Official evaluation:** [GLM RUN2 evaluator report](logs/run_evaluation/run2_glm_retest/z-ai__glm-5.2/report.json)
 
 ### Claude Opus-5
 
-| Instance | RUN1 Result | RUN2 Result | Pattern |
-|----------|------------|------------|---------|
-| django__django-11019 | ❌ Failed | ❌ Failed | Consistent failure |
-| django__django-14155 | ❌ Failed | ✅ Resolved | STOCHASTIC ✨ |
+| Instance | RUN1 | RUN2 |
+|---|---|---|
+| `django__django-11019` | Unresolved | Unresolved |
+| `django__django-14155` | Unresolved | Resolved |
 
+**Score:** 1/2 resolved
 **Patches:** [runs/claude_opus_5_retest/preds.json](runs/claude_opus_5_retest/preds.json)
-
-**Evaluation:** [logs/run_evaluation/run2_opus_retest/anthropic__claude-opus-5/](logs/run_evaluation/run2_opus_retest/anthropic__claude-opus-5/)
-
-**Score:** **1/2 resolved (50%)** ⚠️
-
----
+**Official evaluation:** [Opus RUN2 evaluator report](logs/run_evaluation/run2_opus_retest/anthropic__claude-opus-5/report.json)
 
 ### Claude Haiku-4.5
 
-| Instance | Phase 0 | RUN2 | RUN3 | Overall |
-|----------|---------|------|------|---------|
-| django__django-11848 | ✅ Resolved | ✅ Resolved | - (not tested) | 2/2 ✅ |
-| scikit-learn__scikit-learn-25638 | ✅ Resolved | ❌ Failed | ❌ Failed | 1/3 STOCHASTIC ✨ |
+| Instance | Phase 0 | RUN2 |
+|---|---|---|
+| `django__django-11848` | Resolved | Resolved |
+| `scikit-learn__scikit-learn-25638` | Resolved | Unresolved |
 
-**Phase 0 Patches:** [runs/claude_haiku_45/preds.json](runs/claude_haiku_45/preds.json)
-**RUN2 Patches:** [runs/claude_haiku_45_retest/preds.json](runs/claude_haiku_45_retest/preds.json)
-
-**RUN2 Evaluation:** [logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/](logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/)
-
-**RUN2 Score:** **1/2 resolved (50%)** ⚠️
+**Score:** 1/2 resolved
+**Patches:** [runs/claude_haiku_45_retest/preds.json](runs/claude_haiku_45_retest/preds.json)
+**Official evaluation:** [Haiku RUN2 evaluator report](logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/report.json)
 
 ---
 
-## RUN3 (Priority 1 - Fresh Focused Runs - Aug 10, 2026)
+## RUN3: Focused Follow-up
 
-### GLM-5.2
+| Model | Instance | Result | Evaluation |
+|---|---|---|---|
+| GLM-5.2 | `django__django-11848` | Unresolved | [report](logs/run_evaluation/run3_glm_priority1_11848/z-ai__glm-5.2/report.json) |
+| GLM-5.2 | `scikit-learn__scikit-learn-25638` | Unresolved | [report](logs/run_evaluation/run3_glm_priority1_25638/z-ai__glm-5.2/report.json) |
+| Claude Opus-5 | `django__django-11019` | Unresolved | [report](logs/run_evaluation/run3_opus_priority1/anthropic__claude-opus-5/report.json) |
+| Claude Haiku-4.5 | `scikit-learn__scikit-learn-25638` | Unresolved | [report](logs/run_evaluation/run3_haiku_priority1/anthropic__claude-haiku-4.5/report.json) |
 
-**Instance django__django-11848:**
-
-**Patches:** [runs/glm_5_2_priority1_11848/preds.json](runs/glm_5_2_priority1_11848/preds.json)
-
-**Evaluation:** [logs/run_evaluation/run3_glm_priority1_11848/z-ai__glm-5.2/](logs/run_evaluation/run3_glm_priority1_11848/z-ai__glm-5.2/)
-
-**Score:** **0/1 resolved (0%)** ❌
-
----
-
-**Instance scikit-learn__scikit-learn-25638:**
-
-**Patches:** [runs/glm_5_2_priority1_25638/preds.json](runs/glm_5_2_priority1_25638/preds.json)
-
-**Evaluation:** [logs/run_evaluation/run3_glm_priority1_25638/z-ai__glm-5.2/](logs/run_evaluation/run3_glm_priority1_25638/z-ai__glm-5.2/)
-
-**Score:** **0/1 resolved (0%)** ❌
+All four RUN3 model-task runs were unresolved.
 
 ---
 
-### Claude Opus-5
+## Observed Histories for the Four Follow-up Tasks
 
-| Instance | RUN1 | RUN2 | RUN3 | Pattern |
-|----------|------|------|------|---------|
-| django__django-11019 | ❌ Failed | ❌ Failed | ❌ Failed | Consistent Failure |
+| Instance | Observed result history |
+|---|---|
+| `django__django-11019` | Opus: unresolved in RUN1, RUN2, and RUN3; GLM: resolved in RUN1 and RUN2; Haiku: unresolved in Phase 0. |
+| `django__django-14155` | Opus: unresolved in RUN1, resolved in RUN2; GLM: resolved in RUN1 and RUN2; Haiku: unresolved in Phase 0. |
+| `django__django-11848` | Opus: resolved in RUN1; GLM: unresolved in RUN1 and RUN3; Haiku: resolved in Phase 0 and RUN2. |
+| `scikit-learn__scikit-learn-25638` | Opus: resolved in RUN1; GLM: unresolved in RUN1 and RUN3; Haiku: resolved in Phase 0, then unresolved in RUN2 and RUN3. |
 
-**Patches:** [runs/claude_opus_5_priority1/preds.json](runs/claude_opus_5_priority1/preds.json)
-
-**Evaluation:** [logs/run_evaluation/run3_opus_priority1/anthropic__claude-opus-5/](logs/run_evaluation/run3_opus_priority1/anthropic__claude-opus-5/)
-
-**Score:** **0/1 resolved (0%)** ❌
-
----
-
-### Claude Haiku-4.5
-
-| Instance | RUN2 | RUN3 | Pattern |
-|----------|------|------|---------|
-| scikit-learn__scikit-learn-25638 | ✅ Resolved | ❌ Failed | STOCHASTIC ✨ |
-
-**Patches:** [runs/claude_haiku_45_priority1/preds.json](runs/claude_haiku_45_priority1/preds.json)
-
-**Evaluation:** [logs/run_evaluation/run3_haiku_priority1/anthropic__claude-haiku-4.5/](logs/run_evaluation/run3_haiku_priority1/anthropic__claude-haiku-4.5/)
-
-**Score:** **0/1 resolved (0%)** ❌
-
----
-
-## Summary Statistics
-
-### Model Pass Rates Across All Runs
-
-| Model | RUN1 (38 paired) | Phase 0 (8 inst.) | RUN2 (4 inst.) | RUN3 (4 inst.) |
-|-------|-----------------|-----------------|-----------------|-----------------|
-| GLM-5.2 | 28/38 (73.7%) ✅ | - | **2/2 (100%)** ✅ | **0/2 (0%)** ❌ |
-| Opus-5 | 32/38 (84.2%) ✅ | - | **1/2 (50%)** ⚠️ | **0/1 (0%)** ❌ |
-| Haiku-4.5 | - | **2/8 (25%)** ✅ | **1/2 (50%)** ⚠️ | **0/1 (0%)** ❌ |
-
-**Key Findings:**
-- RUN1: Opus outperformed GLM on 38 paired instances (84.2% vs 73.7%) ✅
-- Phase 0: Haiku's initial evaluation on 8 disagreement instances (2/8 resolved) ✅
-- RUN2: GLM achieved perfect 100% on retry; Opus showed stochasticity ✅
-- RUN3: All models failed on priority instances, indicating task difficulty ✅
-
-### Stochastic Instances Identified
-
-- **django__django-14155**: Opus (RUN1 FAIL → RUN2 PASS) - Shows recovery
-- **scikit-learn__scikit-learn-25638**: Haiku (Phase 0 PASS → RUN2 PASS → RUN3 FAIL) - Inconsistent performance
+The changed results for Opus on `django__django-14155` and Haiku on `scikit-learn__scikit-learn-25638` show run-to-run variability. These limited reruns do not establish general reliability or a task-complexity label.

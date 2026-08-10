@@ -1,172 +1,89 @@
 # SWE-Bench Router Challenge - Experiment Results
 
-## What is This?
+## What Is This?
 
-This folder contains the complete results of running three language models (GLM-5.2, Claude Opus-5, Claude Haiku-4.5) on the SWE-bench Lite benchmark. The goal was to test how well each model can fix real GitHub issues across 50 software engineering tasks.
+This folder contains the results of running GLM-5.2, Claude Opus-5, and Claude Haiku-4.5 with mini-SWE-agent on a fixed 50-task subset of the SWE-bench Lite test split.
 
 ---
 
 ## Folder Structure
 
 ### `input/`
-- **selected_instance_ids.txt** - List of 50 fixed task IDs used for the benchmark
+
+- [selected_instance_ids.txt](input/selected_instance_ids.txt) — the fixed 50 task IDs.
 
 ### `config/`
-- **glm_5_2.yaml** - Configuration for GLM-5.2 model
-- **claude_opus_5.yaml** - Configuration for Claude Opus-5 model
-- **claude_haiku_45.yaml** - Configuration for Claude Haiku-4.5 model
-- **priority1_*.yaml** - Configs for focused retest runs
+
+- [glm_5_2.yaml](config/glm_5_2.yaml) — GLM-5.2 base configuration.
+- [claude_opus_5.yaml](config/claude_opus_5.yaml) — Claude Opus-5 base configuration.
+- [claude_haiku_45.yaml](config/claude_haiku_45.yaml) — Claude Haiku-4.5 base configuration.
+- [priority1_*.yaml](config/) — focused-run configuration files.
 
 ### `runs/`
-Output from all model runs:
-- **glm_5_2/** - GLM full run (50 instances)
-- **claude_opus_5/** - Opus full run (43 instances completed)
-- **claude_haiku_45_retest/** - Haiku's first evaluation (2 instances)
-- **claude_opus_5_retest/** - Opus retest (2 instances)
-- **glm_5_2_retest/** - GLM retest (2 instances)
-- **claude_opus_5_priority1/** - Opus focused run (1 instance)
-- **glm_5_2_priority1_*/** - GLM focused runs (2 instances)
-- **claude_haiku_45_priority1/** - Haiku focused run (1 instance)
 
-Each directory contains:
-- `preds.json` - Model patches for each instance
-- `{instance_id}/` subdirectories with `{instance_id}.traj.json` (execution trace)
+Model patches and trajectories:
+
+- [glm_5_2/](runs/glm_5_2/) — GLM baseline run (50 attempted; 49 non-empty patches).
+- [claude_opus_5/](runs/claude_opus_5/) — Opus baseline run (43 completed; 38 non-empty patches).
+- [claude_haiku_45/](runs/claude_haiku_45/) — Haiku Phase 0 run on the eight baseline disagreement instances.
+- [glm_5_2_retest/](runs/glm_5_2_retest/), [claude_opus_5_retest/](runs/claude_opus_5_retest/), and [claude_haiku_45_retest/](runs/claude_haiku_45_retest/) — RUN2 retests.
+- [claude_opus_5_priority1/](runs/claude_opus_5_priority1/), [glm_5_2_priority1_11848/](runs/glm_5_2_priority1_11848/), [glm_5_2_priority1_25638/](runs/glm_5_2_priority1_25638/), and [claude_haiku_45_priority1/](runs/claude_haiku_45_priority1/) — RUN3 focused runs.
+
+Each run directory contains `preds.json` and, where present, per-instance `.traj.json` execution traces.
 
 ### `logs/run_evaluation/`
-Official SWE-bench evaluation results:
-- **claude_vs_glm_38_official/** - GLM evaluation on 38 paired instances
-- **claude_opus_5_38_official/** - Opus evaluation on 38 paired instances
-- **claude_haiku_45_retest/** - Haiku retest evaluation
-- **claude_retest_official/** - Opus retest evaluation
-- **glm_retest_official/** - GLM retest evaluation
-- **priority1_*_official/** - Priority 1 evaluation results
 
-Each contains instance-specific `report.json` files showing pass/fail results.
+Official SWE-bench evaluation artifacts:
 
----
+- [GLM baseline evaluation](logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/) — 49 non-empty GLM baseline patches. The paired analysis uses the 38 IDs shared with Opus.
+- [Opus baseline evaluation](logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/) — the 38 paired baseline patches.
+- [Haiku Phase 0 evaluation](logs/run_evaluation/claude_haiku_45_8instances_official/anthropic__claude-haiku-4.5/) — eight baseline disagreement instances.
+- RUN2: [GLM](logs/run_evaluation/run2_glm_retest/z-ai__glm-5.2/), [Opus](logs/run_evaluation/run2_opus_retest/anthropic__claude-opus-5/), and [Haiku](logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/).
+- RUN3: [GLM on django-11848](logs/run_evaluation/run3_glm_priority1_11848/z-ai__glm-5.2/), [GLM on scikit-learn-25638](logs/run_evaluation/run3_glm_priority1_25638/z-ai__glm-5.2/), [Opus](logs/run_evaluation/run3_opus_priority1/anthropic__claude-opus-5/), and [Haiku](logs/run_evaluation/run3_haiku_priority1/anthropic__claude-haiku-4.5/).
 
-## The Three Runs
-
-### RUN1: Full Benchmark (Aug 7, 2026)
-**What:** Run models on 50 fixed instances
-- GLM-5.2: 50/50 completed (49 valid patches)
-- Opus-5: 43/50 completed (38 valid patches)
-
-**Evaluation:** Used same 38 paired instances for fair comparison
-- Opus: **32/38 resolved (84.2%)**
-- GLM: **28/38 resolved (73.7%)**
-
-**Files:** 
-- See [PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md)
-- See [PHASE_RESULTS_SUMMARY.md](PHASE_RESULTS_SUMMARY.md)
+The per-instance `report.json` files are the source of the resolved/unresolved results reported below.
 
 ---
 
-### RUN2: Retest (Aug 9-10, 2026)
-**What:** Rerun 4 most informative instances to check for stochasticity
+## Runs and Results
 
-**Instances tested:**
-- Group 1: django__django-11019, django__django-14155 (Opus failed, GLM passed)
-- Group 2: django__django-11848, scikit-learn__scikit-learn-25638 (Haiku test)
+### RUN1: Baseline
 
-**Key Finding:** 
-- **django__django-14155**: Opus FAILED → PASSED (stochastic!)
-- **scikit-learn__scikit-learn-25638**: Haiku PASSED → FAILED (stochastic!)
+The fixed 50-task set was selected before model execution. GLM produced 49 non-empty patches; Opus produced 38. The paired comparison is the 38-task intersection with non-empty patches from both models.
 
-**Files:** 
-- See [PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md)
-- See [PHASE_RESULTS_SUMMARY.md](PHASE_RESULTS_SUMMARY.md)
+| Model | Official evaluator result | Paired 38-task result |
+|---|---:|---:|
+| GLM-5.2 | 37/49 resolved | 28/38 resolved (73.7%) |
+| Claude Opus-5 | 32/38 resolved | 32/38 resolved (84.2%) |
 
----
+### Phase 0: Haiku on the Eight Baseline Disagreements
 
-### RUN3: Priority 1 (Aug 10, 2026)
-**What:** Fresh runs on 3 unique instances (4 model-task runs) to verify stochasticity patterns
+Haiku resolved 2/8 disagreement instances. The runs and evaluations are linked above; this was not a 38- or 50-task Haiku baseline.
 
-**Instances tested:** 3 unique instances, 4 model-task runs
-- Opus on django__django-11019 (check consistent failure)
-- GLM on django__django-11848, scikit-learn__scikit-learn-25638
-- Haiku on scikit-learn__scikit-learn-25638
+### RUN2: Focused Retests
 
-**Result:** 0 resolved across all 4 runs
+RUN2 re-ran four informative instances:
 
-**Files:** 
-- See [PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md)
-- See [PHASE_RESULTS_SUMMARY.md](PHASE_RESULTS_SUMMARY.md)
+- GLM and Opus: `django__django-11019`, `django__django-14155`
+- Haiku: `django__django-11848`, `scikit-learn__scikit-learn-25638`
+
+`django__django-14155` changed from an Opus baseline failure to an Opus retest success. `scikit-learn__scikit-learn-25638` changed from a Haiku Phase 0 success to a Haiku RUN2 failure. These are observations of run-to-run variability.
+
+### RUN3: Focused Follow-up
+
+RUN3 made four model-task runs on three instances: Opus on `django__django-11019`; GLM on `django__django-11848` and `scikit-learn__scikit-learn-25638`; and Haiku on `scikit-learn__scikit-learn-25638`. None resolved.
 
 ---
 
-## Key Files to Read
+## Key Documents
 
-1. **[PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md)**
-   - Which instances were run in each phase
-   - Links to patches and evaluation results
+1. [PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md) — instances, run membership, and direct artifact links.
+2. [PHASE_RESULTS_SUMMARY.md](PHASE_RESULTS_SUMMARY.md) — evaluator-derived results and follow-up histories.
+3. [MINI_SWE_AGENT_RUNS.md](MINI_SWE_AGENT_RUNS.md) — recorded mini-SWE-agent configuration and command details.
 
-2. **[PHASE_RESULTS_SUMMARY.md](PHASE_RESULTS_SUMMARY.md)**
-   - Pass/fail numbers for each model
-   - Stochastic instances identified
-   - Summary statistics
+## Repository Notes
 
-3. **[MINI_SWE_AGENT_RUNS.md](MINI_SWE_AGENT_RUNS.md)**
-   - How each run was executed
-   - Configurations used (all identical across phases)
-   - Command format and parameters
-
----
-
-## Quick Summary
-
-| Model | RUN1 Score | Best Instance | Worst Instance |
-|-------|-----------|----------------|-----------------|
-| **Opus** | 32/38 (84.2%) | Strong across diverse tasks | django__django-11019 (consistent failure) |
-| **GLM** | 28/38 (73.7%) | Good at specific problem types | Multiple sympy instances |
-| **Haiku** | - | django__django-11848 | scikit-learn__scikit-learn-25638 (stochastic) |
-
-## Stochastic Behavior Found
-
-Some models produce inconsistent results on specific instances:
-- **django__django-14155**: Opus sometimes solves it, sometimes doesn't
-- **scikit-learn__scikit-learn-25638**: Haiku passed once, failed twice
-
-This suggests model performance on certain tasks is probabilistic, not deterministic.
-
----
-
-## How to Use This Data
-
-- **To understand which instances we tested:** Read PHASE_INSTANCE_TRACKING.md
-- **To see final pass/fail numbers:** Read PHASE_RESULTS_SUMMARY.md
-- **To see model patches:** Check `runs/*/preds.json` files
-- **To see execution details:** Check `runs/*/*/traj.json` trajectory files
-- **To see official test results:** Check `logs/run_evaluation/*/report.json` files
-
----
-
-## Repository Contents & Coverage
-
-**Committed to this branch (complete):**
-- ✅ RUN1 baseline results: GLM (28/38), Opus (32/38) on 38 paired instances
-- ✅ RUN1 Haiku Phase 0: 2/8 on 8 disagreement instances
-  - 8 trajectory files, preds.json, logs in runs/claude_haiku_45/
-  - Complete official SWE-bench evaluation (40 files with per-instance results)
-- ✅ RUN2 retest results: All model patches, trajectories, and evaluation logs
-- ✅ RUN3 priority1 results: All model patches, trajectories, and evaluation logs
-- ✅ All model configurations (base configs + priority1 configs)
-- ✅ Complete evaluation harness and benchmark configs
-
-**Files in git:**
-- 670+ total files tracked in remote repository
-- All RUN1, Phase 0, RUN2, RUN3 artifacts with complete evaluations
-
-**Model coverage:**
-- **Opus/GLM:** Full 50-instance run (38 paired instances used for comparison)
-- **Haiku:** Selected tasks only (8 disagreement tasks initially, then 4 retest/priority tasks)
-
----
-
-## Contact/Notes
-
-- All models accessed via OpenRouter API
-- Docker used for isolated test environments (SWE-bench official harness)
-- Total cost: ~$50 for all runs
-- Benchmark version: SWE-bench Lite (50-instance subset)
-- Mini-SWE-Agent version: 2.4.6
+- Models were accessed through OpenRouter.
+- Docker provided isolated SWE-bench evaluation environments.
+- mini-SWE-agent version recorded in trajectories: 2.4.6.
+- The benchmark input is a fixed 50-task subset of SWE-bench Lite, not the complete Lite test split.

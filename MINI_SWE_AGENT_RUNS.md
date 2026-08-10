@@ -1,70 +1,34 @@
 # Mini-SWE-Agent Runs Documentation
 
-## Configuration Files Used
+## Recorded Execution Setup
 
-### RUN1, RUN2, RUN3 - Same Base Configs (No Changes)
+The trajectories record mini-SWE-agent version **2.4.6**. All runs used `mini-extra swebench`, OpenRouter, one worker, and the same SWE-bench benchmark configuration supplied by the installed mini-SWE-agent. That benchmark YAML is installed at run time; it is not copied into this repository.
 
-All phases used identical base configuration files:
+The effective settings were consistent within each model across its baseline and follow-up runs. They were not identical across all three models.
 
-#### GLM-5.2 Configuration
-**File:** `config/glm_5_2.yaml`
-```yaml
-model:
-  model_name: "z-ai/glm-5.2"
-environment:
-  pull_timeout: 900
-```
+| Model | Base configuration | Step limit | Cost ceiling per task | Command timeout | Recorded pull timeout |
+|---|---|---:|---:|---:|---:|
+| GLM-5.2 | [glm_5_2.yaml](config/glm_5_2.yaml) | 250 | $3 | 60 s | 900 s |
+| Claude Opus-5 | [claude_opus_5.yaml](config/claude_opus_5.yaml) | 250 | $3 | 60 s | 900 s |
+| Claude Haiku-4.5 | [claude_haiku_45.yaml](config/claude_haiku_45.yaml) | 250 | $1 | 60 s | 120 s |
 
-**Used in:** RUN1 (50 instances), RUN2 (2 instances), RUN3 (2 instances)
+`parallel_tool_calls` was enabled in the recorded configurations. The cost values above are ceilings, not measured API cost.
 
----
+## Configuration Files
 
-#### Claude Opus-5 Configuration
-**File:** `config/claude_opus_5.yaml`
-```yaml
-model:
-  model_name: "anthropic/claude-opus-5"
-environment:
-  pull_timeout: 900
-```
+### Baseline Configurations
 
-**Used in:** RUN1 (43 instances), RUN2 (2 instances), RUN3 (1 instance)
+- [glm_5_2.yaml](config/glm_5_2.yaml) selects `z-ai/glm-5.2` and a 900-second image-pull timeout.
+- [claude_opus_5.yaml](config/claude_opus_5.yaml) selects `anthropic/claude-opus-5` and a 900-second image-pull timeout.
+- [claude_haiku_45.yaml](config/claude_haiku_45.yaml) selects `anthropic/claude-haiku-4.5`, enables `parallel_tool_calls`, sets cache control, and explicitly sets the 250-step/$1 agent limits.
 
----
+### Focused-Run Configurations
 
-#### Claude Haiku-4.5 Configuration
-**File:** `config/claude_haiku_45.yaml`
-```yaml
-model:
-  model_name: anthropic/claude-haiku-4.5
-  model_kwargs:
-    drop_params: true
-    parallel_tool_calls: true
-  set_cache_control: default_end
-  cost_tracking: default
-agent:
-  step_limit: 250
-  cost_limit: 1.0
-  wall_time_limit_seconds: 0
-```
+- [priority1_glm_11848.yaml](config/priority1_glm_11848.yaml), [priority1_glm_25638.yaml](config/priority1_glm_25638.yaml), and [priority1_opus_11019.yaml](config/priority1_opus_11019.yaml) duplicate their respective base model and pull-timeout fields, then add only an `instance_filter`.
+- [priority1_haiku_25638.yaml](config/priority1_haiku_25638.yaml) is not a full duplicate of [claude_haiku_45.yaml](config/claude_haiku_45.yaml): it specifies the model, pull timeout, and filter but does not repeat the Haiku-only agent/model options. The recorded trajectory is the source for the effective setting values above.
 
-**Used in:** RUN2 (2 instances), RUN3 (1 instance)
+## Command Format
 
----
-
-### Benchmark Configuration
-**File:** `vendor/mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml`
-
-- Universal benchmark config used for all runs
-- Defines agent behavior, environment (Docker), model templates
-- Version: 2.4.6
-
----
-
-## RUN Summary
-
-### RUN1 (Aug 7, 2026)
-**Command Format:**
 ```bash
 mini-extra swebench \
   --subset data/SWE-bench_Lite \
@@ -73,105 +37,39 @@ mini-extra swebench \
   --output runs/{model_name} \
   --workers 1 \
   --model-class openrouter \
-  --config vendor/mini-swe-agent/src/minisweagent/config/benchmarks/swebench.yaml \
+  --config <mini-SWE-agent swebench benchmark config> \
   --config config/{model}.yaml
 ```
 
-**Runs Executed:**
-- GLM-5.2: 50 instances → `runs/glm_5_2/`
-- Claude Opus-5: 43 instances (50 attempted) → `runs/claude_opus_5/`
+- `--workers 1` ran tasks sequentially.
+- `--filter` selected the fixed 50-task list for baseline execution or the named focused instances for follow-up execution.
+- Each run wrote predictions and trajectories to its own [runs/](runs/) directory.
 
-**Config Changes:** None
+## Run Coverage
 
----
+### RUN1: Baseline
 
-### RUN2 (Aug 9-10, 2026)
-**Retest on 4 Most Informative Instances**
+- GLM-5.2: 50 attempted → [runs/glm_5_2/](runs/glm_5_2/)
+- Claude Opus-5: 43 completed from 50 attempted → [runs/claude_opus_5/](runs/claude_opus_5/)
 
-**Runs Executed:**
-- GLM-5.2: django__django-11019, django__django-14155 → `runs/glm_5_2_retest/`
-- Claude Opus-5: django__django-11019, django__django-14155 → `runs/claude_opus_5_retest/`
-- Claude Haiku-4.5: django__django-11848, scikit-learn__scikit-learn-25638 → `runs/claude_haiku_45_retest/`
+### Phase 0: Haiku Disagreement Check
 
-**Config Changes:** None (Haiku config added but same across all Haiku runs)
+- Claude Haiku-4.5: eight RUN1 disagreement instances → [runs/claude_haiku_45/](runs/claude_haiku_45/)
 
----
+### RUN2: Retests
 
-### RUN3 (Aug 10, 2026)
-**Priority 1 - Fresh Focused Runs**
+- GLM-5.2: two instances → [runs/glm_5_2_retest/](runs/glm_5_2_retest/)
+- Claude Opus-5: two instances → [runs/claude_opus_5_retest/](runs/claude_opus_5_retest/)
+- Claude Haiku-4.5: two instances → [runs/claude_haiku_45_retest/](runs/claude_haiku_45_retest/)
 
-**Runs Executed:**
-- GLM-5.2: django__django-11848, scikit-learn__scikit-learn-25638
-  - Output: `runs/glm_5_2_priority1_11848/`, `runs/glm_5_2_priority1_25638/`
-- Claude Opus-5: django__django-11019
-  - Output: `runs/claude_opus_5_priority1/`
-- Claude Haiku-4.5: scikit-learn__scikit-learn-25638
-  - Output: `runs/claude_haiku_45_priority1/`
+### RUN3: Focused Follow-up
 
-**Priority1 Config Files (Created but identical to base configs):**
-- `config/priority1_opus_11019.yaml` - Same as `claude_opus_5.yaml`
-- `config/priority1_glm_11848.yaml` - Same as `glm_5_2.yaml`
-- `config/priority1_glm_25638.yaml` - Same as `glm_5_2.yaml`
-- `config/priority1_haiku_25638.yaml` - Same as `claude_haiku_45.yaml`
+- GLM-5.2: two instances → [runs/glm_5_2_priority1_11848/](runs/glm_5_2_priority1_11848/) and [runs/glm_5_2_priority1_25638/](runs/glm_5_2_priority1_25638/)
+- Claude Opus-5: one instance → [runs/claude_opus_5_priority1/](runs/claude_opus_5_priority1/)
+- Claude Haiku-4.5: one instance → [runs/claude_haiku_45_priority1/](runs/claude_haiku_45_priority1/)
 
-**Config Changes:** None (Only added instance filter in config files)
+## Reproducibility Notes
 
----
-
-## Configuration Analysis
-
-### Key Points
-
-✅ **Base Configurations Remained Identical Across All Phases**
-- GLM config: Unchanged (2 lines)
-- Opus config: Unchanged (2 lines)
-- Haiku config: Unchanged (13 lines)
-
-✅ **Benchmark Configuration**
-- Used same `swebench.yaml` for all runs
-- Mini-SWE-Agent version: 2.4.6
-
-✅ **Model Parameters**
-- GLM: Model name only + environment timeout
-- Opus: Model name only + environment timeout
-- Haiku: Extended with model_kwargs, agent limits, cost limits
-
-⚠️ **Environment Settings**
-- All models: `pull_timeout: 900` seconds (15 minutes for Docker image pull)
-- Haiku: `step_limit: 250`, `cost_limit: 1.0`
-
-✅ **Instance Filtering**
-- Implemented via regex filter in command line
-- Not changed in config files across phases
-- Priority1 configs used same filtering approach
-
----
-
-## Execution Details
-
-### Mini-SWE-Agent Command Invocation
-
-**Used:** `mini-extra swebench` (not `mini-swe-agent run`)
-
-**Reason:** Official SWE-bench evaluation harness entry point for batch evaluation
-
-**Components:**
-- Model Selection: via `-config` flag (claude_opus_5.yaml, glm_5_2.yaml, etc.)
-- Instance Selection: via `--filter` flag with regex pattern
-- Output: via `--output` flag to separate directories per run
-- Workers: `--workers 1` (sequential execution)
-- Model Class: `openrouter` (via OpenRouter API)
-
----
-
-## Summary
-
-| Aspect | Status |
-|--------|--------|
-| Config Changes Across Phases | ✅ None |
-| Base Configs Consistent | ✅ Yes |
-| Benchmark Config | ✅ Same (swebench.yaml) |
-| Mini-SWE-Agent Version | ✅ 2.4.6 (all runs) |
-| API Provider | ✅ OpenRouter (all runs) |
-
-**Conclusion:** All three runs used identical configurations with only instance IDs varying per run. Config stability ensures reproducibility and fair comparison.
+- The fixed 50 IDs are in [input/selected_instance_ids.txt](input/selected_instance_ids.txt).
+- Evaluation outcomes are recorded in [logs/run_evaluation/](logs/run_evaluation/).
+- The fixed limits are safeguards, not actual token or cost measurements. The available run artifacts do not provide a complete directly recorded input-token, output-token, or dollar-cost total for every call.
