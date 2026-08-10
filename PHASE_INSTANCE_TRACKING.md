@@ -20,7 +20,7 @@ astropy__astropy-6938, django__django-11019, django__django-11179, django__djang
 
 **Evaluation Results:** [logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/)
 
-**Summary:** 49 valid patches (1 empty: sympy__sympy-15345) | 37/38 resolved on common instances
+**Summary:** 49 valid patches (1 empty: sympy__sympy-15345) | 28/38 resolved on common instances
 
 ---
 
