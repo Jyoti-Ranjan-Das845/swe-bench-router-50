@@ -1,0 +1,6 @@
+model:
+  model_name: "z-ai/glm-5.2"
+environment:
+  pull_timeout: 900
+dataset:
+  instance_filter: "scikit-learn__scikit-learn-25638"

@@ -1,0 +1,6 @@
+model:
+  model_name: "anthropic/claude-haiku-4.5"
+environment:
+  pull_timeout: 900
+dataset:
+  instance_filter: "scikit-learn__scikit-learn-25638"
