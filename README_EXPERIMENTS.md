@@ -80,14 +80,14 @@ Each contains instance-specific `report.json` files showing pass/fail results.
 ---
 
 ### RUN3: Priority 1 (Aug 10, 2026)
-**What:** Fresh runs on 4 instances to verify stochasticity patterns
+**What:** Fresh runs on 3 unique instances (4 model-task runs) to verify stochasticity patterns
 
-**Instances tested:**
+**Instances tested:** 3 unique instances, 4 model-task runs
 - Opus on django__django-11019 (check consistent failure)
 - GLM on django__django-11848, scikit-learn__scikit-learn-25638
 - Haiku on scikit-learn__scikit-learn-25638
 
-**Result:** All 4 instances failed (0/4 resolved)
+**Result:** 0 resolved across all 4 runs
 
 **Files:** 
 - See [PHASE_INSTANCE_TRACKING.md](PHASE_INSTANCE_TRACKING.md)
@@ -141,10 +141,28 @@ This suggests model performance on certain tasks is probabilistic, not determini
 
 ---
 
+## Repository Contents & Coverage
+
+**Committed to this branch (complete):**
+- ✅ RUN1 baseline results: GLM (28/38), Opus (32/38) on 38 paired instances
+- ✅ RUN1 Haiku Phase 0: 2/8 on 8 disagreement instances
+- ✅ All model configurations and evaluation harness
+- ✅ Priority1 config files
+
+**Not committed to this branch (documented for reference):**
+- RUN2/RUN3 model patch artifacts and evaluation results (available locally)
+- Base Haiku config file (available locally)
+
+**Model coverage:**
+- **Opus/GLM:** Full 50-instance run (38 paired instances used for comparison)
+- **Haiku:** Selected tasks only (8 disagreement tasks initially, then 4 retest/priority tasks)
+
+---
+
 ## Contact/Notes
 
 - All models accessed via OpenRouter API
 - Docker used for isolated test environments (SWE-bench official harness)
 - Total cost: ~$50 for all runs
-- Benchmark version: SWE-bench Lite (50 instances)
+- Benchmark version: SWE-bench Lite (50-instance subset)
 - Mini-SWE-Agent version: 2.4.6

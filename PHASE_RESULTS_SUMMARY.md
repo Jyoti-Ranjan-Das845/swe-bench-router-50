@@ -39,6 +39,29 @@
 
 ---
 
+### Claude Haiku-4.5 (Phase 0 - Exploratory on 8 Disagreement Tasks)
+
+**Instances:** 8 disagreement tasks (instances where Opus and GLM differed)
+
+| Instance | Result |
+|----------|--------|
+| django__django-11019 | ❌ Failed |
+| django__django-14155 | ❌ Failed |
+| django__django-14667 | ❌ Failed |
+| matplotlib__matplotlib-23987 | ❌ Failed |
+| scikit-learn__scikit-learn-10949 | ❌ Failed |
+| scikit-learn__scikit-learn-25638 | ✅ Resolved |
+| sphinx-doc__sphinx-7686 | ❌ Failed |
+| django__django-11848 | ✅ Resolved |
+
+**Patches:** [runs/claude_haiku_45/preds.json](runs/claude_haiku_45/preds.json)
+
+**Evaluation:** [anthropic__claude-haiku-4.5.claude_haiku_45_8instances_official.json](anthropic__claude-haiku-4.5.claude_haiku_45_8instances_official.json) (local evaluation file)
+
+**Score:** **2/8 resolved (25%)** ⚠️
+
+---
+
 ## RUN2 (Retest on 4 Informative Instances - Aug 9-10, 2026)
 
 ### GLM-5.2
@@ -73,16 +96,17 @@
 
 ### Claude Haiku-4.5
 
-| Instance | RUN2 Result | RUN3 Result | Pattern |
-|----------|------------|------------|---------|
-| django__django-11848 | ✅ Resolved | ❌ Failed | Stochastic |
-| scikit-learn__scikit-learn-25638 | ✅ Resolved | ❌ Failed | STOCHASTIC ✨ |
+| Instance | Phase 0 | RUN2 | RUN3 | Overall |
+|----------|---------|------|------|---------|
+| django__django-11848 | ✅ Resolved | ✅ Resolved | - (not tested) | 2/2 ✅ |
+| scikit-learn__scikit-learn-25638 | ✅ Resolved | ❌ Failed | ❌ Failed | 1/3 STOCHASTIC ✨ |
 
-**Patches:** [runs/claude_haiku_45_retest/preds.json](runs/claude_haiku_45_retest/preds.json)
+**Phase 0 Patches:** [runs/claude_haiku_45/preds.json](runs/claude_haiku_45/preds.json)
+**RUN2 Patches:** [runs/claude_haiku_45_retest/preds.json](runs/claude_haiku_45_retest/preds.json)
 
-**Evaluation:** [logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/](logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/)
+**RUN2 Evaluation:** [logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/](logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/)
 
-**Score:** **1/2 resolved (50%)** ⚠️
+**RUN2 Score:** **1/2 resolved (50%)** ⚠️
 
 ---
 
