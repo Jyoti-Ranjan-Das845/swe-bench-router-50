@@ -12,12 +12,12 @@
 | Full Run: Valid Patches Generated | 49 |
 | Full Run: Empty Patches | 1 (sympy__sympy-15345) |
 | **Evaluation: 38 Paired Instances** | **38** |
-| **Evaluation: Resolved** | **37/38** ✅ |
-| **Evaluation: Unresolved** | **1/38** ❌ |
+| **Evaluation: Resolved** | **28/38** ✅ |
+| **Evaluation: Unresolved** | **10/38** ❌ |
 
-**Patches:** [runs/glm_5_2/preds.json](runs/glm_5_2/preds.json)
+**Patches:** [runs/glm_5_2/preds.json](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2/preds.json)
 
-**Evaluation (38 paired):** [logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/](logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/)
+**Evaluation (38 paired):** [logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/claude_vs_glm_38_official/z-ai__glm-5.2/)
 
 ---
 
@@ -33,9 +33,9 @@
 | **Evaluation: Resolved** | **32/38** ✅ |
 | **Evaluation: Unresolved** | **6/38** ❌ |
 
-**Patches:** [runs/claude_opus_5/preds.json](runs/claude_opus_5/preds.json)
+**Patches:** [runs/claude_opus_5/preds.json](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/claude_opus_5/preds.json)
 
-**Evaluation (38 paired):** [logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/](logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/)
+**Evaluation (38 paired):** [logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/claude_opus_5_38_official/anthropic__claude-opus-5/)
 
 ---
 
@@ -48,9 +48,9 @@
 | django__django-11019 | ✅ Resolved (2/2) |
 | django__django-14155 | ✅ Resolved |
 
-**Patches:** [runs/glm_5_2_retest/preds.json](runs/glm_5_2_retest/preds.json)
+**Patches:** [runs/glm_5_2_retest/preds.json](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2_retest/preds.json)
 
-**Evaluation:** [logs/run_evaluation/run2_glm_retest/z-ai__glm-5.2/](logs/run_evaluation/run2_glm_retest/z-ai__glm-5.2/)
+**Evaluation:** [logs/run_evaluation/run2_glm_retest/z-ai__glm-5.2/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/run2_glm_retest/z-ai__glm-5.2/)
 
 **Score:** **2/2 resolved (100%)** ✅
 
@@ -63,9 +63,9 @@
 | django__django-11019 | ❌ Failed | ❌ Failed | Consistent failure |
 | django__django-14155 | ❌ Failed | ✅ Resolved | STOCHASTIC ✨ |
 
-**Patches:** [runs/claude_opus_5_retest/preds.json](runs/claude_opus_5_retest/preds.json)
+**Patches:** [runs/claude_opus_5_retest/preds.json](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/claude_opus_5_retest/preds.json)
 
-**Evaluation:** [logs/run_evaluation/run2_opus_retest/anthropic__claude-opus-5/](logs/run_evaluation/run2_opus_retest/anthropic__claude-opus-5/)
+**Evaluation:** [logs/run_evaluation/run2_opus_retest/anthropic__claude-opus-5/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/run2_opus_retest/anthropic__claude-opus-5/)
 
 **Score:** **1/2 resolved (50%)** ⚠️
 
@@ -73,14 +73,14 @@
 
 ### Claude Haiku-4.5
 
-| Instance | RUN2 Result | RUN3 Result | Pattern |
-|----------|------------|------------|---------|
-| django__django-11848 | ✅ Resolved | ❌ Failed | Stochastic |
-| scikit-learn__scikit-learn-25638 | ✅ Resolved | ❌ Failed | STOCHASTIC ✨ |
+| Instance | RUN2 Result | Pattern |
+|----------|------------|---------|
+| django__django-11848 | ✅ Resolved | Consistent |
+| scikit-learn__scikit-learn-25638 | ❌ Failed | STOCHASTIC ✨ |
 
-**Patches:** [runs/claude_haiku_45_retest/preds.json](runs/claude_haiku_45_retest/preds.json)
+**Patches:** [runs/claude_haiku_45_retest/preds.json](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/claude_haiku_45_retest/preds.json)
 
-**Evaluation:** [logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/](logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/)
+**Evaluation:** [logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/run2_haiku_retest/anthropic__claude-haiku-4.5/)
 
 **Score:** **1/2 resolved (50%)** ⚠️
 
@@ -92,9 +92,9 @@
 
 **Instance django__django-11848:**
 
-**Patches:** [runs/glm_5_2_priority1_11848/preds.json](runs/glm_5_2_priority1_11848/preds.json)
+**Patches:** [runs/glm_5_2_priority1_11848/preds.json](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2_priority1_11848/preds.json)
 
-**Evaluation:** [logs/run_evaluation/run3_glm_priority1_11848/z-ai__glm-5.2/](logs/run_evaluation/run3_glm_priority1_11848/z-ai__glm-5.2/)
+**Evaluation:** [logs/run_evaluation/run3_glm_priority1_11848/z-ai__glm-5.2/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/run3_glm_priority1_11848/z-ai__glm-5.2/)
 
 **Score:** **0/1 resolved (0%)** ❌
 
@@ -102,9 +102,9 @@
 
 **Instance scikit-learn__scikit-learn-25638:**
 
-**Patches:** [runs/glm_5_2_priority1_25638/preds.json](runs/glm_5_2_priority1_25638/preds.json)
+**Patches:** [runs/glm_5_2_priority1_25638/preds.json](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/glm_5_2_priority1_25638/preds.json)
 
-**Evaluation:** [logs/run_evaluation/run3_glm_priority1_25638/z-ai__glm-5.2/](logs/run_evaluation/run3_glm_priority1_25638/z-ai__glm-5.2/)
+**Evaluation:** [logs/run_evaluation/run3_glm_priority1_25638/z-ai__glm-5.2/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/run3_glm_priority1_25638/z-ai__glm-5.2/)
 
 **Score:** **0/1 resolved (0%)** ❌
 
@@ -116,9 +116,9 @@
 |----------|------|------|------|---------|
 | django__django-11019 | ❌ Failed | ❌ Failed | ❌ Failed | Consistent Failure |
 
-**Patches:** [runs/claude_opus_5_priority1/preds.json](runs/claude_opus_5_priority1/preds.json)
+**Patches:** [runs/claude_opus_5_priority1/preds.json](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/claude_opus_5_priority1/preds.json)
 
-**Evaluation:** [logs/run_evaluation/run3_opus_priority1/anthropic__claude-opus-5/](logs/run_evaluation/run3_opus_priority1/anthropic__claude-opus-5/)
+**Evaluation:** [logs/run_evaluation/run3_opus_priority1/anthropic__claude-opus-5/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/run3_opus_priority1/anthropic__claude-opus-5/)
 
 **Score:** **0/1 resolved (0%)** ❌
 
@@ -130,9 +130,9 @@
 |----------|------|------|---------|
 | scikit-learn__scikit-learn-25638 | ✅ Resolved | ❌ Failed | STOCHASTIC ✨ |
 
-**Patches:** [runs/claude_haiku_45_priority1/preds.json](runs/claude_haiku_45_priority1/preds.json)
+**Patches:** [runs/claude_haiku_45_priority1/preds.json](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/runs/claude_haiku_45_priority1/preds.json)
 
-**Evaluation:** [logs/run_evaluation/run3_haiku_priority1/anthropic__claude-haiku-4.5/](logs/run_evaluation/run3_haiku_priority1/anthropic__claude-haiku-4.5/)
+**Evaluation:** [logs/run_evaluation/run3_haiku_priority1/anthropic__claude-haiku-4.5/](/Users/dzen/Spaces/exps/swebenchtest/swe-bench-repo/logs/run_evaluation/run3_haiku_priority1/anthropic__claude-haiku-4.5/)
 
 **Score:** **0/1 resolved (0%)** ❌
 
